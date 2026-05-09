@@ -1,55 +1,35 @@
-# Prerequisites
-*.d
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+# Build output
+[Bb]in/
+[Oo]bj/
+out/
+publish/
 
-# Linker output
-*.ilk
-*.map
-*.exp
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+*.nuget.props
+*.nuget.targets
 
-# Precompiled Headers
-*.gch
-*.pch
+# User-specific files
+*.rsuser
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+# Rider
+.idea/
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+# OS
+.DS_Store
+Thumbs.db
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+# Logs
+*.log
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-# debug information files
-*.dwo
+# Local settings (Claude Code)
+.claude/settings.local.json
