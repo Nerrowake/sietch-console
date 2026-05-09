@@ -57,8 +57,14 @@ jobs:
           path: Installer/sietch-console.iss
           options: /DAppVersion=${{ steps.version.outputs.VERSION }}
 
-      # Draft release — promote to published manually after QA
-      - name: Create GitHub Release (draft)
+      # Delete any existing release for this tag to avoid "already_exists" conflicts
+      # from repeated tag pushes. Ignore errors if no release exists yet.
+      - name: Delete existing release (if any)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release delete "v${{ steps.version.outputs.VERSION }}" --repo ${{ github.repository }} --yes 2>$null || true
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: Sietch Console ${{ steps.version.outputs.VERSION }}
