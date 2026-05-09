@@ -1,6 +1,7 @@
 <UserControl x:Class="Sietch_Console.Views.LogsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:SietchConsole.Core.Models;assembly=SietchConsole.Core"
              Background="{StaticResource AppBackground}">
 
     <Grid>
@@ -8,21 +9,19 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="*"    />
         </Grid.RowDefinitions>
 
-        <!-- Page Header -->
+        <!-- ── Page Header ── -->
         <StackPanel Grid.Row="0" Margin="28,24,28,16">
             <TextBlock Style="{StaticResource PageTitleStyle}"
                        Text="Logs"
                        Margin="0,0,0,4" />
             <TextBlock Style="{StaticResource PageSubtitleStyle}"
-                       Text="View and search live battlegroup log output. Detected issues appear above the log stream." />
+                       Text="Live battlegroup log stream. Detected issues appear above the log output." />
         </StackPanel>
 
-        <!-- ═══════════════════════════════════════ -->
-        <!-- Toolbar                                 -->
-        <!-- ═══════════════════════════════════════ -->
+        <!-- ── Toolbar ── -->
         <Border Grid.Row="1"
                 Background="{StaticResource PanelBackground}"
                 BorderBrush="{StaticResource BorderDefault}"
@@ -30,164 +29,425 @@
                 Padding="28,10">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*"    />
+                    <ColumnDefinition Width="12"   />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="12"   />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="12"   />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Search box -->
+                <!-- Search box (#70) -->
                 <Border Grid.Column="0"
                         Background="{StaticResource FieldBackground}"
                         BorderBrush="{StaticResource BorderDefault}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource CornerMedium}"
                         Height="34">
-                    <Grid Margin="10,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                   Text="🔍"
-                                   Foreground="{StaticResource TextDisabled}"
-                                   FontSize="12"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,8,0" />
-                        <TextBlock Grid.Column="1"
-                                   Text="Search logs..."
-                                   Foreground="{StaticResource TextDisabled}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   VerticalAlignment="Center" />
-                    </Grid>
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Foreground="{StaticResource TextPrimary}"
+                             FontFamily="{StaticResource FontUI}"
+                             FontSize="{StaticResource FontSizeBody}"
+                             VerticalAlignment="Center"
+                             Margin="10,0"
+                             CaretBrush="{StaticResource AccentPrimary}">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Style.Resources>
+                                    <VisualBrush x:Key="Hint" TileMode="None" Stretch="None" AlignmentX="Left" AlignmentY="Center">
+                                        <VisualBrush.Visual>
+                                            <TextBlock Text="Search logs..."
+                                                       Foreground="{StaticResource TextDisabled}"
+                                                       FontFamily="Segoe UI Variable"
+                                                       FontSize="13" />
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Style.Resources>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TextBox">
+                                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                                <Grid>
+                                                    <TextBlock Text="Search logs..."
+                                                               Foreground="{StaticResource TextDisabled}"
+                                                               FontFamily="{StaticResource FontUI}"
+                                                               FontSize="{StaticResource FontSizeBody}"
+                                                               VerticalAlignment="Center"
+                                                               IsHitTestVisible="False">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
                 </Border>
 
-                <!-- Severity filters -->
+                <!-- Severity filter buttons (#70) -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Border Background="#2A1E12"
-                            BorderBrush="{StaticResource AccentPrimary}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerMedium}"
-                            Padding="14,0" Height="34" Margin="0,0,4,0">
-                        <TextBlock Text="All"
-                                   Foreground="{StaticResource AccentPrimary}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12" FontWeight="SemiBold"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <Border Background="{StaticResource FieldBackground}"
-                            BorderBrush="{StaticResource BorderDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerMedium}"
-                            Padding="14,0" Height="34" Margin="0,0,4,0">
-                        <TextBlock Text="Error"
-                                   Foreground="{StaticResource StatusError}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <Border Background="{StaticResource FieldBackground}"
-                            BorderBrush="{StaticResource BorderDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerMedium}"
-                            Padding="14,0" Height="34" Margin="0,0,4,0">
-                        <TextBlock Text="Warning"
-                                   Foreground="{StaticResource StatusWarning}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <Border Background="{StaticResource FieldBackground}"
-                            BorderBrush="{StaticResource BorderDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerMedium}"
-                            Padding="14,0" Height="34">
-                        <TextBlock Text="Info"
-                                   Foreground="{StaticResource StatusInfo}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12"
-                                   VerticalAlignment="Center" />
-                    </Border>
+                    <Button Command="{Binding FilterAllCommand}"
+                            Margin="0,0,4,0" Padding="14,0" Height="34" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
+                                <Setter Property="FontSize"       Value="12" />
+                                <Setter Property="FontWeight"     Value="SemiBold" />
+                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
+                                <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
+                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bd"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="{StaticResource CornerMedium}"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SeverityFilter}" Value="{x:Null}">
+                                        <Setter Property="Background" Value="#2A1E12" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource AccentPrimary}" />
+                                        <Setter Property="Foreground" Value="{StaticResource AccentPrimary}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="All" />
+                    </Button>
+
+                    <Button Command="{Binding FilterErrorsCommand}"
+                            Margin="0,0,4,0" Padding="14,0" Height="34" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
+                                <Setter Property="FontSize"       Value="12" />
+                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
+                                <Setter Property="Foreground"     Value="{StaticResource StatusError}" />
+                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="{StaticResource CornerMedium}"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SeverityFilter}" Value="{x:Static models:LogSeverity.Error}">
+                                        <Setter Property="Background" Value="{StaticResource StatusErrorBg}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource StatusErrorBorder}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="Error" />
+                    </Button>
+
+                    <Button Command="{Binding FilterWarningsCommand}"
+                            Margin="0,0,4,0" Padding="14,0" Height="34" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
+                                <Setter Property="FontSize"       Value="12" />
+                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
+                                <Setter Property="Foreground"     Value="{StaticResource StatusWarning}" />
+                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="{StaticResource CornerMedium}"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SeverityFilter}" Value="{x:Static models:LogSeverity.Warning}">
+                                        <Setter Property="Background" Value="{StaticResource StatusWarningBg}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource StatusWarningBorder}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="Warning" />
+                    </Button>
+
+                    <Button Command="{Binding FilterInfoCommand}"
+                            Padding="14,0" Height="34" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
+                                <Setter Property="FontSize"       Value="12" />
+                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
+                                <Setter Property="Foreground"     Value="{StaticResource StatusInfo}" />
+                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="{StaticResource CornerMedium}"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SeverityFilter}" Value="{x:Static models:LogSeverity.Info}">
+                                        <Setter Property="Background" Value="{StaticResource StatusInfoBg}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource StatusInfoBorder}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="Info" />
+                    </Button>
                 </StackPanel>
 
-                <!-- Action buttons -->
-                <StackPanel Grid.Column="4" Orientation="Horizontal">
-                    <Border Background="{StaticResource FieldBackground}"
-                            BorderBrush="{StaticResource BorderDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerMedium}"
-                            Padding="14,0" Height="34"
-                            Margin="0,0,8,0" Opacity="0.5">
-                        <TextBlock Text="Copy"
-                                   Foreground="{StaticResource TextSecondary}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <Border Background="{StaticResource FieldBackground}"
-                            BorderBrush="{StaticResource BorderDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerMedium}"
-                            Padding="14,0" Height="34" Opacity="0.5">
-                        <TextBlock Text="Export"
-                                   Foreground="{StaticResource TextSecondary}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12"
-                                   VerticalAlignment="Center" />
-                    </Border>
+                <!-- File selector -->
+                <ComboBox Grid.Column="4"
+                          ItemsSource="{Binding AvailableLogFiles}"
+                          SelectedItem="{Binding ActiveLogFile}"
+                          MinWidth="160" Height="34"
+                          Background="{StaticResource FieldBackground}"
+                          Foreground="{StaticResource TextSecondary}"
+                          BorderBrush="{StaticResource BorderDefault}"
+                          FontFamily="{StaticResource FontMono}"
+                          FontSize="11"
+                          Padding="8,5">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource PathToFileNameConverter}}"
+                                       FontFamily="{StaticResource FontMono}"
+                                       FontSize="11" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <!-- Action buttons (#74, #75) -->
+                <StackPanel Grid.Column="6" Orientation="Horizontal">
+                    <Button Command="{Binding CopyReportCommand}"
+                            Margin="0,0,6,0" Padding="14,0" Height="34" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
+                                <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
+                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
+                                <Setter Property="FontSize"       Value="12" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="{StaticResource CornerMedium}"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="Copy Report" />
+                    </Button>
+
+                    <Button Command="{Binding ExportLogsCommand}"
+                            Padding="14,0" Height="34" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
+                                <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
+                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
+                                <Setter Property="FontSize"       Value="12" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="{StaticResource CornerMedium}"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="Export" />
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- ═══════════════════════════════════════ -->
-        <!-- Detected Issues Bar                     -->
-        <!-- ═══════════════════════════════════════ -->
+        <!-- ── Detected Issues Panel (#71, #72, #73) ── -->
         <Border Grid.Row="2"
+                Margin="28,12,28,0"
                 Style="{StaticResource CardStyle}"
-                Margin="28,16,28,0"
-                Padding="20,14">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+                Padding="16,12">
+            <StackPanel>
+                <!-- Header row -->
+                <Grid Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*"    />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Ellipse Width="8" Height="8"
-                             Fill="{StaticResource StatusOffline}"
-                             VerticalAlignment="Center"
-                             Margin="0,0,10,0" />
-                    <TextBlock Text="Detected Issues"
-                               Foreground="{StaticResource TextPrimary}"
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Width="8" Height="8" VerticalAlignment="Center" Margin="0,0,8,0">
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Setter Property="Fill" Value="{StaticResource StatusOffline}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasDetectedIssues}" Value="True">
+                                            <Setter Property="Fill" Value="{StaticResource StatusError}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
+                        <TextBlock Text="Detected Issues"
+                                   Foreground="{StaticResource TextPrimary}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding IssueCountLabel}"
+                               Foreground="{StaticResource TextMuted}"
                                FontFamily="{StaticResource FontUI}"
-                               FontSize="{StaticResource FontSizeBody}"
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center" />
-                </StackPanel>
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Margin="12,0,0,0" />
+                </Grid>
 
-                <TextBlock Grid.Column="1"
-                           Text="No issues detected. Start your battlegroup to begin streaming logs."
-                           Foreground="{StaticResource TextMuted}"
-                           FontFamily="{StaticResource FontUI}"
-                           FontSize="12"
-                           VerticalAlignment="Center"
-                           Margin="16,0,0,0" />
+                <!-- Issue cards (#73) -->
+                <ItemsControl ItemsSource="{Binding DetectedIssues}"
+                              Margin="0,10,0,0"
+                              Visibility="{Binding HasDetectedIssues, Converter={StaticResource BoolToVisibleConverter}}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type models:DetectedIssue}">
+                            <Border Margin="0,0,0,8"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource CornerMedium}"
+                                    Padding="14,10">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background"  Value="{StaticResource StatusErrorBg}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource StatusErrorBorder}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Severity}" Value="{x:Static models:LogSeverity.Warning}">
+                                                <Setter Property="Background"  Value="{StaticResource StatusWarningBg}" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource StatusWarningBorder}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <StackPanel>
+                                    <!-- Title -->
+                                    <TextBlock Text="{Binding Title}"
+                                               FontFamily="{StaticResource FontUI}"
+                                               FontSize="{StaticResource FontSizeBody}"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,4">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{StaticResource StatusError}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Severity}" Value="{x:Static models:LogSeverity.Warning}">
+                                                        <Setter Property="Foreground" Value="{StaticResource StatusWarning}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
 
-                <TextBlock Grid.Column="2"
-                           Text="0 issues"
-                           Foreground="{StaticResource TextDisabled}"
-                           FontFamily="{StaticResource FontUI}"
-                           FontSize="12"
-                           VerticalAlignment="Center" />
-            </Grid>
+                                    <!-- Explanation (#72) -->
+                                    <TextBlock Text="{Binding Explanation}"
+                                               Foreground="{StaticResource TextSecondary}"
+                                               FontFamily="{StaticResource FontUI}"
+                                               FontSize="12"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,6" />
+
+                                    <!-- Recommendations -->
+                                    <ItemsControl ItemsSource="{Binding Recommendations}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Foreground="{StaticResource TextMuted}"
+                                                           FontFamily="{StaticResource FontUI}"
+                                                           FontSize="12"
+                                                           Margin="0,1"
+                                                           TextWrapping="Wrap">
+                                                    <Run Text="•  " /><Run Text="{Binding}" />
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </Border>
 
-        <!-- ═══════════════════════════════════════ -->
-        <!-- Log Stream                              -->
-        <!-- ═══════════════════════════════════════ -->
+        <!-- ── Log Stream (#69) ── -->
         <Border Grid.Row="3"
                 Margin="28,12,28,20"
                 Background="{StaticResource DeepBackground}"
@@ -197,7 +457,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*"    />
                 </Grid.RowDefinitions>
 
                 <!-- Stream header -->
@@ -209,73 +469,164 @@
                         Padding="16,8">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*"    />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="12"   />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
+
                         <TextBlock Grid.Column="0"
                                    Style="{StaticResource SectionLabelStyle}"
                                    Text="LOG OUTPUT"
                                    VerticalAlignment="Center" />
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Ellipse Width="7" Height="7"
-                                     Fill="{StaticResource StatusOffline}"
-                                     VerticalAlignment="Center"
-                                     Margin="0,0,6,0" />
-                            <TextBlock Text="Not streaming"
-                                       Foreground="{StaticResource TextDisabled}"
+
+                        <!-- Auto-scroll toggle -->
+                        <CheckBox Grid.Column="1"
+                                  IsChecked="{Binding AutoScroll}"
+                                  Foreground="{StaticResource TextMuted}"
+                                  FontFamily="{StaticResource FontUI}"
+                                  FontSize="{StaticResource FontSizeSmall}"
+                                  VerticalAlignment="Center"
+                                  Content="Auto-scroll" />
+
+                        <!-- Streaming indicator -->
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="7" Height="7" VerticalAlignment="Center" Margin="0,0,6,0">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Fill" Value="{StaticResource StatusOffline}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsStreaming}" Value="True">
+                                                <Setter Property="Fill" Value="{StaticResource StatusSuccess}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                            <TextBlock Foreground="{StaticResource TextDisabled}"
                                        FontFamily="{StaticResource FontUI}"
                                        FontSize="{StaticResource FontSizeSmall}"
-                                       VerticalAlignment="Center" />
+                                       VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Not streaming" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsStreaming}" Value="True">
+                                                <Setter Property="Text" Value="Live" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </StackPanel>
                     </Grid>
                 </Border>
 
-                <!-- Log content -->
-                <ScrollViewer Grid.Row="1"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Auto"
-                              Padding="16">
-                    <StackPanel>
-                        <StackPanel HorizontalAlignment="Center"
-                                    Margin="0,60">
-                            <TextBlock Text="No log output available."
-                                       Foreground="{StaticResource TextDisabled}"
-                                       FontFamily="{StaticResource FontMono}"
-                                       FontSize="{StaticResource FontSizeBody}"
-                                       HorizontalAlignment="Center"
-                                       Margin="0,0,0,8" />
-                            <TextBlock Text="Start your battlegroup to begin streaming live log data."
-                                       Foreground="{StaticResource TextDisabled}"
-                                       FontFamily="{StaticResource FontUI}"
+                <!-- Log entries -->
+                <ListBox x:Name="LogListBox"
+                         Grid.Row="1"
+                         ItemsSource="{Binding FilteredEntries}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Padding="12,8"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         VirtualizingPanel.IsVirtualizing="True"
+                         VirtualizingPanel.VirtualizationMode="Recycling">
+                    <ListBox.Style>
+                        <Style TargetType="ListBox">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBox">
+                                        <Grid>
+                                            <ScrollViewer Padding="{TemplateBinding Padding}"
+                                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                                                <ItemsPresenter />
+                                            </ScrollViewer>
+                                            <StackPanel HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Margin="0,60"
+                                                        Visibility="{Binding HasEntries, Converter={StaticResource BoolToCollapsedConverter}}">
+                                                <TextBlock Text="No log output available."
+                                                           Foreground="{StaticResource TextDisabled}"
+                                                           FontFamily="{StaticResource FontMono}"
+                                                           FontSize="{StaticResource FontSizeBody}"
+                                                           HorizontalAlignment="Center"
+                                                           Margin="0,0,0,8" />
+                                                <TextBlock Foreground="{StaticResource TextDisabled}"
+                                                           FontFamily="{StaticResource FontUI}"
+                                                           FontSize="12"
+                                                           HorizontalAlignment="Center"
+                                                           Opacity="0.6">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="Start your battlegroup to begin streaming live log data." />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsStreaming}" Value="True">
+                                                                    <Setter Property="Text" Value="No entries match the current filter." />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.Style>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin"  Value="0,1" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <ContentPresenter />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type models:LogEntry}">
+                            <TextBlock FontFamily="{StaticResource FontMono}"
                                        FontSize="12"
-                                       HorizontalAlignment="Center"
-                                       Opacity="0.6" />
-                        </StackPanel>
-
-                        <!-- Sample format preview -->
-                        <StackPanel Opacity="0.3">
-                            <TextBlock FontFamily="{StaticResource FontMono}"
-                                       FontSize="12" Margin="0,0,0,3">
-                                <Run Foreground="{StaticResource TextDisabled}" Text="[00:00:00] " />
-                                <Run Foreground="{StaticResource StatusInfo}"    Text="INFO  " />
-                                <Run Foreground="{StaticResource TextMuted}"     Text="Server initializing..." />
+                                       TextWrapping="NoWrap">
+                                <Run Foreground="{StaticResource TextDisabled}"
+                                     Text="{Binding TimestampLabel, Mode=OneTime}" /><Run Text=" " /><Run Text="{Binding SeverityLabel, Mode=OneTime}">
+                                    <Run.Style>
+                                        <Style TargetType="Run">
+                                            <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Severity}" Value="{x:Static models:LogSeverity.Error}">
+                                                    <Setter Property="Foreground" Value="{StaticResource StatusError}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Severity}" Value="{x:Static models:LogSeverity.Warning}">
+                                                    <Setter Property="Foreground" Value="{StaticResource StatusWarning}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Severity}" Value="{x:Static models:LogSeverity.Info}">
+                                                    <Setter Property="Foreground" Value="{StaticResource StatusInfo}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Severity}" Value="{x:Static models:LogSeverity.Debug}">
+                                                    <Setter Property="Foreground" Value="{StaticResource TextDisabled}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Run.Style>
+                                </Run><Run Text="  " /><Run Foreground="{StaticResource TextSecondary}"
+                                     Text="{Binding Message, Mode=OneTime}" />
                             </TextBlock>
-                            <TextBlock FontFamily="{StaticResource FontMono}"
-                                       FontSize="12" Margin="0,0,0,3">
-                                <Run Foreground="{StaticResource TextDisabled}" Text="[00:00:01] " />
-                                <Run Foreground="{StaticResource StatusWarning}" Text="WARN  " />
-                                <Run Foreground="{StaticResource TextMuted}"     Text="Waiting for cluster readiness..." />
-                            </TextBlock>
-                            <TextBlock FontFamily="{StaticResource FontMono}"
-                                       FontSize="12">
-                                <Run Foreground="{StaticResource TextDisabled}" Text="[00:00:02] " />
-                                <Run Foreground="{StaticResource StatusError}"  Text="ERROR " />
-                                <Run Foreground="{StaticResource TextMuted}"    Text="Connection refused on port 7777" />
-                            </TextBlock>
-                        </StackPanel>
-                    </StackPanel>
-                </ScrollViewer>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Grid>
         </Border>
+
     </Grid>
 </UserControl>

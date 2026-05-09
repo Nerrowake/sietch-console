@@ -7,10 +7,11 @@
     <!-- VALUE CONVERTERS                            -->
     <!-- ═══════════════════════════════════════════ -->
 
-    <converters:NullToCollapsedConverter x:Key="NullToCollapsedConverter" />
-    <converters:BoolToVisibleConverter   x:Key="BoolToVisibleConverter" />
-    <converters:BoolToCollapsedConverter x:Key="BoolToCollapsedConverter" />
-    <converters:BoolInverseConverter     x:Key="BoolInverseConverter" />
+    <converters:NullToCollapsedConverter  x:Key="NullToCollapsedConverter" />
+    <converters:BoolToVisibleConverter    x:Key="BoolToVisibleConverter" />
+    <converters:BoolToCollapsedConverter  x:Key="BoolToCollapsedConverter" />
+    <converters:BoolInverseConverter      x:Key="BoolInverseConverter" />
+    <converters:PathToFileNameConverter   x:Key="PathToFileNameConverter" />
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- BACKGROUND BRUSHES                          -->
