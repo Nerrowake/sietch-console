@@ -9,7 +9,8 @@ namespace Sietch_Console.ViewModels;
 public partial class SettingsViewModel : ObservableObject
 {
     private readonly IConfigurationService _configService;
-    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IBackupService        _backupService;
+    private readonly IServiceScopeFactory  _scopeFactory;
 
     private BattlegroupProfile? _profile;
     private bool _loaded;
@@ -60,9 +61,10 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string  _rawContent = string.Empty;
     [ObservableProperty] private bool    _rawHasUnsavedChanges;
 
-    public SettingsViewModel(IConfigurationService configService, IServiceScopeFactory scopeFactory)
+    public SettingsViewModel(IConfigurationService configService, IBackupService backupService, IServiceScopeFactory scopeFactory)
     {
         _configService = configService;
+        _backupService = backupService;
         _scopeFactory  = scopeFactory;
     }
 
@@ -185,6 +187,7 @@ public partial class SettingsViewModel : ObservableObject
         StatusMessage = string.Empty;
         try
         {
+            await _backupService.CreateConfigBackupAsync(_profile, notes: "Auto-backup before save");
             var ok = await _configService.SaveAsync(_profile, BuildConfig());
             if (ok)
             {
