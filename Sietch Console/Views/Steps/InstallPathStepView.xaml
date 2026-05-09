@@ -1,0 +1,195 @@
+<UserControl x:Class="Sietch_Console.Views.Steps.InstallPathStepView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="600" HorizontalAlignment="Center" Margin="40,28">
+
+            <TextBlock Text="Installation Locations"
+                       Style="{StaticResource CardTitleStyle}"
+                       Margin="0,0,0,6" />
+            <TextBlock Text="Choose where Sietch Console will store server files, backups, and logs."
+                       Style="{StaticResource MutedTextStyle}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,24" />
+
+            <!-- Server install path -->
+            <Border Style="{StaticResource CardStyle}" Padding="20,16" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Server Files"
+                               Style="{StaticResource SectionLabelStyle}"
+                               Margin="0,0,0,4" />
+                    <TextBlock Text="Where the Dune: Awakening dedicated server will be installed."
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,10" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                Background="{StaticResource FieldBackground}"
+                                BorderBrush="{StaticResource BorderDefault}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource CornerSmall}"
+                                Padding="10,8">
+                            <TextBlock Text="{Binding InstallPath}"
+                                       Style="{StaticResource BodyTextStyle}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Border>
+                        <Button Grid.Column="2"
+                                Command="{Binding BrowseInstallPathCommand}"
+                                Padding="14,8"
+                                Background="{StaticResource OverlayBackground}"
+                                BorderBrush="{StaticResource BorderDefault}"
+                                BorderThickness="1"
+                                Foreground="{StaticResource TextSecondary}"
+                                Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="{StaticResource CornerSmall}"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource HoverBackground}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <TextBlock Text="Browse…" Style="{StaticResource BodyTextStyle}" Foreground="{StaticResource TextSecondary}" />
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Backup path -->
+            <Border Style="{StaticResource CardStyle}" Padding="20,16" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Backups"
+                               Style="{StaticResource SectionLabelStyle}"
+                               Margin="0,0,0,4" />
+                    <TextBlock Text="Where automatic and manual backups will be saved."
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,10" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                Background="{StaticResource FieldBackground}"
+                                BorderBrush="{StaticResource BorderDefault}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource CornerSmall}"
+                                Padding="10,8">
+                            <TextBlock Text="{Binding BackupPath}"
+                                       Style="{StaticResource BodyTextStyle}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Border>
+                        <Button Grid.Column="2"
+                                Command="{Binding BrowseBackupPathCommand}"
+                                Padding="14,8"
+                                Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{StaticResource OverlayBackground}"
+                                                        BorderBrush="{StaticResource BorderDefault}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="{StaticResource CornerSmall}"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource HoverBackground}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <TextBlock Text="Browse…" Style="{StaticResource BodyTextStyle}" Foreground="{StaticResource TextSecondary}" />
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Logs path -->
+            <Border Style="{StaticResource CardStyle}" Padding="20,16">
+                <StackPanel>
+                    <TextBlock Text="Logs"
+                               Style="{StaticResource SectionLabelStyle}"
+                               Margin="0,0,0,4" />
+                    <TextBlock Text="Where server logs and diagnostic reports will be stored."
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,10" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                Background="{StaticResource FieldBackground}"
+                                BorderBrush="{StaticResource BorderDefault}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource CornerSmall}"
+                                Padding="10,8">
+                            <TextBlock Text="{Binding LogsPath}"
+                                       Style="{StaticResource BodyTextStyle}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Border>
+                        <Button Grid.Column="2"
+                                Command="{Binding BrowseLogsPathCommand}"
+                                Padding="14,8"
+                                Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{StaticResource OverlayBackground}"
+                                                        BorderBrush="{StaticResource BorderDefault}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="{StaticResource CornerSmall}"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource HoverBackground}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <TextBlock Text="Browse…" Style="{StaticResource BodyTextStyle}" Foreground="{StaticResource TextSecondary}" />
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
