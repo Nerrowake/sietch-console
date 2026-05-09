@@ -7,12 +7,13 @@
     <!-- VALUE CONVERTERS                            -->
     <!-- ═══════════════════════════════════════════ -->
 
-    <converters:NullToCollapsedConverter  x:Key="NullToCollapsedConverter" />
-    <converters:BoolToVisibleConverter    x:Key="BoolToVisibleConverter" />
-    <converters:BoolToCollapsedConverter  x:Key="BoolToCollapsedConverter" />
-    <converters:BoolInverseConverter      x:Key="BoolInverseConverter" />
-    <converters:PathToFileNameConverter   x:Key="PathToFileNameConverter" />
-    <converters:FileSizeConverter         x:Key="FileSizeConverter" />
+    <converters:NullToCollapsedConverter       x:Key="NullToCollapsedConverter" />
+    <converters:BoolToVisibleConverter         x:Key="BoolToVisibleConverter" />
+    <converters:BoolToCollapsedConverter       x:Key="BoolToCollapsedConverter" />
+    <converters:BoolInverseConverter           x:Key="BoolInverseConverter" />
+    <converters:PathToFileNameConverter        x:Key="PathToFileNameConverter" />
+    <converters:FileSizeConverter              x:Key="FileSizeConverter" />
+    <converters:ResourceKeyToGeometryConverter x:Key="ResourceKeyToGeometryConverter" />
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- BRAND COLOR TOKENS  (raw Color resources)   -->
@@ -286,15 +287,19 @@
                             CornerRadius="{StaticResource CornerSmall}"
                             Background="Transparent">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock x:Name="ItemIcon"
-                                       Text="{Binding Icon}"
-                                       FontFamily="Segoe MDL2 Assets"
-                                       FontSize="14"
-                                       Foreground="{StaticResource TextMuted}"
-                                       Width="20"
-                                       TextAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Margin="12,0,8,0" />
+                            <Path x:Name="ItemIcon"
+                                  Data="{Binding Icon, Converter={StaticResource ResourceKeyToGeometryConverter}}"
+                                  Stroke="{StaticResource TextMuted}"
+                                  StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  StrokeLineJoin="Round"
+                                  Width="20" Height="20"
+                                  Stretch="Uniform"
+                                  SnapsToDevicePixels="True"
+                                  UseLayoutRounding="True"
+                                  VerticalAlignment="Center"
+                                  Margin="12,0,10,0" />
                             <TextBlock x:Name="ItemLabel"
                                        Text="{Binding Label}"
                                        Foreground="{StaticResource TextSecondary}"
@@ -307,7 +312,7 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource SelectionBackground}" />
                             <Setter TargetName="ItemLabel"  Property="Foreground" Value="{StaticResource TextPrimary}" />
-                            <Setter TargetName="ItemIcon"   Property="Foreground" Value="{StaticResource AccentPrimary}" />
+                            <Setter TargetName="ItemIcon"   Property="Stroke"     Value="{StaticResource AccentPrimary}" />
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
