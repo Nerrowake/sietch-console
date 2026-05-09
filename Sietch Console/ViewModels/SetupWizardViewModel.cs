@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
+using Sietch_Console.Services.Installation;
 using Sietch_Console.ViewModels.Steps;
 using SietchConsole.Core.Interfaces;
 using SietchConsole.Core.Models;
@@ -12,8 +13,10 @@ public record WizardStepIndicator(string Title, bool IsActive, bool IsCompleted)
 public partial class SetupWizardViewModel : ObservableObject
 {
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly InstallationOrchestrator _orchestrator;
     private readonly List<ObservableObject> _steps;
     private SetupWizardState _state = new();
+    private CancellationTokenSource? _installCts;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentStep))]
@@ -56,9 +59,11 @@ public partial class SetupWizardViewModel : ObservableObject
 
     public SetupWizardViewModel(
         IServiceScopeFactory scopeFactory,
+        InstallationOrchestrator orchestrator,
         RequirementsStepViewModel requirementsStep)
     {
         _scopeFactory = scopeFactory;
+        _orchestrator = orchestrator;
 
         _steps =
         [
@@ -128,6 +133,13 @@ public partial class SetupWizardViewModel : ObservableObject
 
         CurrentStepIndex++;
         OnPropertyChanged(nameof(CurrentStepCanProceed));
+
+        // Fire off installation when entering the Progress step
+        if (IsOnProgressStep && _steps[^1] is ProgressStepViewModel progressVm)
+        {
+            _installCts = new CancellationTokenSource();
+            _ = _orchestrator.RunAsync(_state, progressVm, _installCts.Token);
+        }
     }
 
     private void SyncStateFromCurrentStep()
