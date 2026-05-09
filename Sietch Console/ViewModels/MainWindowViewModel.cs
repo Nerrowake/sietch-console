@@ -27,16 +27,15 @@ public partial class MainWindowViewModel : ObservableObject
     {
         Dashboard = dashboard;
 
-        // Segoe MDL2 Assets glyphs (#97)
         NavigationItems = new ObservableCollection<NavigationItem>
         {
-            new("Dashboard",    dashboard,   ""),  // Home
-            new("Setup Wizard", setupWizard, ""),  // PageList
-            new("Logs",         logs,        ""),  // EventLog
-            new("Diagnostics",  diagnostics, ""),  // HealthSolid
-            new("Backups",      backups,     ""),  // BackupDrive
-            new("Networking",   networking,  ""),  // NetworkTower
-            new("Settings",     settings,    ""),  // Settings gear
+            new("Dashboard",    dashboard,   "IconDashboard"),
+            new("Setup Wizard", setupWizard, "IconSetupWizard"),
+            new("Logs",         logs,        "IconLogs"),
+            new("Diagnostics",  diagnostics, "IconDiagnostics"),
+            new("Backups",      backups,     "IconBackups"),
+            new("Networking",   networking,  "IconNetworking"),
+            new("Settings",     settings,    "IconSettings"),
         };
 
         SelectedNavigationItem = NavigationItems[0];
