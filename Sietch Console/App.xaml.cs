@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sietch_Console.Services.Diagnostics;
+using Sietch_Console.Services.Installation;
 using Sietch_Console.ViewModels;
 using Sietch_Console.ViewModels.Steps;
 using SietchConsole.Core.Interfaces;
@@ -32,6 +33,10 @@ public partial class App : Application
 
         // Infrastructure services
         services.AddSingleton<ISystemReadinessService, SystemReadinessService>();
+        services.AddSingleton<ISteamDetectionService, SteamDetectionService>();
+        services.AddSingleton<IServerPackageService, ServerPackageService>();
+        services.AddSingleton<ISetupScriptService, SetupScriptService>();
+        services.AddSingleton<InstallationOrchestrator>();
 
         // Repositories
         services.AddScoped<IApplicationSettingsRepository, ApplicationSettingsRepository>();
