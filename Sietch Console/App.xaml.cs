@@ -5,6 +5,7 @@ using Sietch_Console.Services.Configuration;
 using Sietch_Console.Services.Control;
 using Sietch_Console.Services.Diagnostics;
 using Sietch_Console.Services.Installation;
+using Sietch_Console.Services.Logs;
 using Sietch_Console.ViewModels;
 using Sietch_Console.ViewModels.Steps;
 using SietchConsole.Core.Interfaces;
@@ -42,6 +43,8 @@ public partial class App : Application
         services.AddSingleton<IBattlegroupControlService, BattlegroupControlService>();
         services.AddSingleton<IIniParserService, IniParserService>();
         services.AddSingleton<IConfigurationService, ConfigurationService>();
+        services.AddSingleton<ILogFileService, LogFileService>();
+        services.AddSingleton<ILogAnalysisService, LogAnalysisService>();
 
         // Repositories
         services.AddScoped<IApplicationSettingsRepository, ApplicationSettingsRepository>();
@@ -77,6 +80,9 @@ public partial class App : Application
 
         var dashboardVm = _host.Services.GetRequiredService<DashboardViewModel>();
         await dashboardVm.InitializeAsync();
+
+        var logsVm = _host.Services.GetRequiredService<LogsViewModel>();
+        await logsVm.InitializeAsync();
 
         var settingsVm = _host.Services.GetRequiredService<SettingsViewModel>();
         await settingsVm.InitializeAsync();
