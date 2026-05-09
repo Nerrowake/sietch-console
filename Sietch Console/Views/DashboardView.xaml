@@ -1,25 +1,18 @@
 <UserControl x:Class="Sietch_Console.Views.DashboardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="#0B0F14">
+             Background="{StaticResource AppBackground}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="28,24,28,28">
 
-            <!-- ═══════════════════════════════════════ -->
-            <!-- Page Header                             -->
-            <!-- ═══════════════════════════════════════ -->
-            <TextBlock Text="Dashboard"
-                       Foreground="#F3EBDD"
-                       FontFamily="Segoe UI Variable"
-                       FontSize="22"
-                       FontWeight="SemiBold"
+            <!-- Page Header -->
+            <TextBlock Style="{StaticResource PageTitleStyle}"
+                       Text="Dashboard"
                        Margin="0,0,0,4" />
-            <TextBlock Text="Overview of your battlegroup, system health, and recent activity."
-                       Foreground="#7B6F5D"
-                       FontFamily="Segoe UI Variable"
-                       FontSize="13"
+            <TextBlock Style="{StaticResource PageSubtitleStyle}"
+                       Text="Overview of your battlegroup, system health, and recent activity."
                        Margin="0,0,0,24" />
 
             <!-- ═══════════════════════════════════════ -->
@@ -28,101 +21,77 @@
             <UniformGrid Rows="1" Columns="3" Margin="0,0,0,16">
 
                 <!-- Battlegroup Status -->
-                <Border Margin="0,0,8,0"
-                        Background="#141A22"
-                        BorderBrush="#232B35"
-                        BorderThickness="1"
-                        CornerRadius="8"
+                <Border Style="{StaticResource CardStyle}"
+                        Margin="0,0,8,0"
                         Padding="20,16">
                     <StackPanel>
-                        <TextBlock Text="BATTLEGROUP"
-                                   Foreground="#7B6F5D"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="10"
-                                   FontWeight="SemiBold"
+                        <TextBlock Style="{StaticResource SectionLabelStyle}"
+                                   Text="BATTLEGROUP"
                                    Margin="0,0,0,12" />
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                             <Ellipse Width="10" Height="10"
-                                     Fill="#6E747C"
+                                     Fill="{StaticResource StatusOffline}"
                                      VerticalAlignment="Center"
                                      Margin="0,0,8,0" />
                             <TextBlock Text="Offline"
-                                       Foreground="#F3EBDD"
-                                       FontFamily="Segoe UI Variable"
-                                       FontSize="18"
+                                       Foreground="{StaticResource TextPrimary}"
+                                       FontFamily="{StaticResource FontUI}"
+                                       FontSize="{StaticResource FontSizeHeading}"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center" />
                         </StackPanel>
-                        <TextBlock Text="No active battlegroup detected."
-                                   Foreground="#7B6F5D"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="12" />
+                        <TextBlock Style="{StaticResource MutedTextStyle}"
+                                   Text="No active battlegroup detected." />
                     </StackPanel>
                 </Border>
 
                 <!-- VM Status -->
-                <Border Margin="4,0"
-                        Background="#141A22"
-                        BorderBrush="#232B35"
-                        BorderThickness="1"
-                        CornerRadius="8"
+                <Border Style="{StaticResource CardStyle}"
+                        Margin="4,0"
                         Padding="20,16">
                     <StackPanel>
-                        <TextBlock Text="VIRTUAL MACHINE"
-                                   Foreground="#7B6F5D"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="10"
-                                   FontWeight="SemiBold"
+                        <TextBlock Style="{StaticResource SectionLabelStyle}"
+                                   Text="VIRTUAL MACHINE"
                                    Margin="0,0,0,12" />
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                             <Ellipse Width="10" Height="10"
-                                     Fill="#6E747C"
+                                     Fill="{StaticResource StatusOffline}"
                                      VerticalAlignment="Center"
                                      Margin="0,0,8,0" />
                             <TextBlock Text="Not Running"
-                                       Foreground="#F3EBDD"
-                                       FontFamily="Segoe UI Variable"
-                                       FontSize="18"
+                                       Foreground="{StaticResource TextPrimary}"
+                                       FontFamily="{StaticResource FontUI}"
+                                       FontSize="{StaticResource FontSizeHeading}"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center" />
                         </StackPanel>
-                        <TextBlock Text="Hyper-V VM is stopped."
-                                   Foreground="#7B6F5D"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="12" />
+                        <TextBlock Style="{StaticResource MutedTextStyle}"
+                                   Text="Hyper-V VM is stopped." />
                     </StackPanel>
                 </Border>
 
                 <!-- System Health -->
-                <Border Margin="8,0,0,0"
-                        Background="#141A22"
-                        BorderBrush="#232B35"
-                        BorderThickness="1"
-                        CornerRadius="8"
+                <Border Style="{StaticResource CardStyle}"
+                        Margin="8,0,0,0"
                         Padding="20,16">
                     <StackPanel>
-                        <TextBlock Text="SYSTEM HEALTH"
-                                   Foreground="#7B6F5D"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="10"
-                                   FontWeight="SemiBold"
+                        <TextBlock Style="{StaticResource SectionLabelStyle}"
+                                   Text="SYSTEM HEALTH"
                                    Margin="0,0,0,12" />
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                             <Ellipse Width="10" Height="10"
-                                     Fill="#6E747C"
+                                     Fill="{StaticResource StatusOffline}"
                                      VerticalAlignment="Center"
                                      Margin="0,0,8,0" />
                             <TextBlock Text="Not Checked"
-                                       Foreground="#F3EBDD"
-                                       FontFamily="Segoe UI Variable"
-                                       FontSize="18"
+                                       Foreground="{StaticResource TextPrimary}"
+                                       FontFamily="{StaticResource FontUI}"
+                                       FontSize="{StaticResource FontSizeHeading}"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center" />
                         </StackPanel>
-                        <TextBlock Text="Run diagnostics to verify readiness."
-                                   Foreground="#7B6F5D"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="12" />
+                        <TextBlock Style="{StaticResource MutedTextStyle}"
+                                   Text="Run diagnostics to verify readiness." />
                     </StackPanel>
                 </Border>
 
@@ -140,105 +109,85 @@
 
                 <!-- Quick Actions -->
                 <Border Grid.Column="0"
-                        Background="#141A22"
-                        BorderBrush="#232B35"
-                        BorderThickness="1"
-                        CornerRadius="8"
+                        Style="{StaticResource CardStyle}"
                         Padding="20,16">
                     <StackPanel>
-                        <TextBlock Text="Quick Actions"
-                                   Foreground="#F3EBDD"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="14"
-                                   FontWeight="SemiBold"
+                        <TextBlock Style="{StaticResource CardTitleStyle}"
+                                   Text="Quick Actions"
                                    Margin="0,0,0,16" />
 
-                        <!-- Action buttons row 1 -->
                         <Grid Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="8" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-
                             <Border Grid.Column="0"
-                                    Background="#1A2A1A"
-                                    BorderBrush="#2A3D2A"
+                                    Background="{StaticResource StatusSuccessBg}"
+                                    BorderBrush="{StaticResource StatusSuccessBorder}"
                                     BorderThickness="1"
-                                    CornerRadius="6"
-                                    Height="40"
-                                    Opacity="0.5">
+                                    CornerRadius="{StaticResource CornerMedium}"
+                                    Height="40" Opacity="0.5">
                                 <TextBlock Text="Start Battlegroup"
-                                           Foreground="#58B878"
-                                           FontFamily="Segoe UI Variable"
-                                           FontSize="12"
+                                           Foreground="{StaticResource StatusSuccess}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
                                            FontWeight="SemiBold"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center" />
                             </Border>
-
                             <Border Grid.Column="2"
-                                    Background="#2A1A1A"
-                                    BorderBrush="#3D2A2A"
+                                    Background="{StaticResource StatusErrorBg}"
+                                    BorderBrush="{StaticResource StatusErrorBorder}"
                                     BorderThickness="1"
-                                    CornerRadius="6"
-                                    Height="40"
-                                    Opacity="0.5">
+                                    CornerRadius="{StaticResource CornerMedium}"
+                                    Height="40" Opacity="0.5">
                                 <TextBlock Text="Stop Battlegroup"
-                                           Foreground="#D9534F"
-                                           FontFamily="Segoe UI Variable"
-                                           FontSize="12"
+                                           Foreground="{StaticResource StatusError}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
                                            FontWeight="SemiBold"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center" />
                             </Border>
                         </Grid>
 
-                        <!-- Action buttons row 2 -->
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="8" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-
                             <Border Grid.Column="0"
-                                    Background="#1A1F2A"
-                                    BorderBrush="#2A3040"
+                                    Background="{StaticResource StatusInfoBg}"
+                                    BorderBrush="{StaticResource StatusInfoBorder}"
                                     BorderThickness="1"
-                                    CornerRadius="6"
-                                    Height="40"
-                                    Opacity="0.5">
+                                    CornerRadius="{StaticResource CornerMedium}"
+                                    Height="40" Opacity="0.5">
                                 <TextBlock Text="Restart"
-                                           Foreground="#4FB3B8"
-                                           FontFamily="Segoe UI Variable"
-                                           FontSize="12"
+                                           Foreground="{StaticResource AccentCyan}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
                                            FontWeight="SemiBold"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center" />
                             </Border>
-
                             <Border Grid.Column="2"
-                                    Background="#141A22"
-                                    BorderBrush="#232B35"
-                                    BorderThickness="1"
-                                    CornerRadius="6"
-                                    Height="40"
-                                    Opacity="0.5">
+                                    Style="{StaticResource CardStyle}"
+                                    CornerRadius="{StaticResource CornerMedium}"
+                                    Height="40" Opacity="0.5">
                                 <TextBlock Text="Open Logs"
-                                           Foreground="#B8AA92"
-                                           FontFamily="Segoe UI Variable"
-                                           FontSize="12"
+                                           Foreground="{StaticResource TextSecondary}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
                                            FontWeight="SemiBold"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center" />
                             </Border>
                         </Grid>
 
-                        <TextBlock Text="Actions are unavailable until a battlegroup is configured."
-                                   Foreground="#7B6F5D"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="11"
+                        <TextBlock Style="{StaticResource MutedTextStyle}"
+                                   Text="Actions are unavailable until a battlegroup is configured."
                                    TextWrapping="Wrap"
                                    Margin="0,12,0,0" />
                     </StackPanel>
@@ -246,35 +195,28 @@
 
                 <!-- Recent Diagnostics -->
                 <Border Grid.Column="2"
-                        Background="#141A22"
-                        BorderBrush="#232B35"
-                        BorderThickness="1"
-                        CornerRadius="8"
+                        Style="{StaticResource CardStyle}"
                         Padding="20,16">
                     <StackPanel>
-                        <TextBlock Text="Recent Diagnostics"
-                                   Foreground="#F3EBDD"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="14"
-                                   FontWeight="SemiBold"
+                        <TextBlock Style="{StaticResource CardTitleStyle}"
+                                   Text="Recent Diagnostics"
                                    Margin="0,0,0,16" />
-
-                        <Border Background="#0F151C"
-                                BorderBrush="#232B35"
+                        <Border Background="{StaticResource FieldBackground}"
+                                BorderBrush="{StaticResource BorderDefault}"
                                 BorderThickness="1"
-                                CornerRadius="6"
+                                CornerRadius="{StaticResource CornerMedium}"
                                 Padding="16">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="No diagnostics have been run."
-                                           Foreground="#7B6F5D"
-                                           FontFamily="Segoe UI Variable"
-                                           FontSize="13"
+                                           Foreground="{StaticResource TextMuted}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
                                            HorizontalAlignment="Center"
                                            Margin="0,0,0,6" />
                                 <TextBlock Text="Use the Diagnostics section to check system readiness."
-                                           Foreground="#4A4035"
-                                           FontFamily="Segoe UI Variable"
-                                           FontSize="11"
+                                           Foreground="{StaticResource TextDisabled}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeSmall}"
                                            HorizontalAlignment="Center"
                                            TextWrapping="Wrap"
                                            TextAlignment="Center" />
@@ -296,53 +238,37 @@
 
                 <!-- Last Backup -->
                 <Border Grid.Column="0"
-                        Background="#141A22"
-                        BorderBrush="#232B35"
-                        BorderThickness="1"
-                        CornerRadius="8"
+                        Style="{StaticResource CardStyle}"
                         Padding="20,16">
                     <StackPanel>
-                        <TextBlock Text="Last Backup"
-                                   Foreground="#F3EBDD"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="14"
-                                   FontWeight="SemiBold"
+                        <TextBlock Style="{StaticResource CardTitleStyle}"
+                                   Text="Last Backup"
                                    Margin="0,0,0,16" />
-
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                             <Ellipse Width="8" Height="8"
-                                     Fill="#6E747C"
+                                     Fill="{StaticResource StatusOffline}"
                                      VerticalAlignment="Center"
                                      Margin="0,0,8,0" />
                             <TextBlock Text="No backups found"
-                                       Foreground="#B8AA92"
-                                       FontFamily="Segoe UI Variable"
-                                       FontSize="13" />
+                                       Foreground="{StaticResource TextSecondary}"
+                                       FontFamily="{StaticResource FontUI}"
+                                       FontSize="{StaticResource FontSizeBody}" />
                         </StackPanel>
-                        <TextBlock Text="Create a backup from the Backups section before making configuration changes."
-                                   Foreground="#7B6F5D"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="11"
+                        <TextBlock Style="{StaticResource MutedTextStyle}"
+                                   Text="Create a backup from the Backups section before making configuration changes."
                                    TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
 
                 <!-- Networking -->
                 <Border Grid.Column="2"
-                        Background="#141A22"
-                        BorderBrush="#232B35"
-                        BorderThickness="1"
-                        CornerRadius="8"
+                        Style="{StaticResource CardStyle}"
                         Padding="20,16">
                     <StackPanel>
-                        <TextBlock Text="Networking"
-                                   Foreground="#F3EBDD"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="14"
-                                   FontWeight="SemiBold"
+                        <TextBlock Style="{StaticResource CardTitleStyle}"
+                                   Text="Networking"
                                    Margin="0,0,0,16" />
 
-                        <!-- Networking info rows -->
                         <Grid Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -350,17 +276,16 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
                                        Text="Host LAN IP"
-                                       Foreground="#7B6F5D"
-                                       FontFamily="Segoe UI Variable"
+                                       Foreground="{StaticResource TextMuted}"
+                                       FontFamily="{StaticResource FontUI}"
                                        FontSize="12"
                                        Margin="0,0,16,0" />
                             <TextBlock Grid.Column="1"
                                        Text="—"
-                                       Foreground="#B8AA92"
-                                       FontFamily="Segoe UI Variable"
+                                       Foreground="{StaticResource TextSecondary}"
+                                       FontFamily="{StaticResource FontUI}"
                                        FontSize="12" />
                         </Grid>
-
                         <Grid Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -368,17 +293,16 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
                                        Text="VM IP"
-                                       Foreground="#7B6F5D"
-                                       FontFamily="Segoe UI Variable"
+                                       Foreground="{StaticResource TextMuted}"
+                                       FontFamily="{StaticResource FontUI}"
                                        FontSize="12"
                                        Margin="0,0,16,0" />
                             <TextBlock Grid.Column="1"
                                        Text="—"
-                                       Foreground="#B8AA92"
-                                       FontFamily="Segoe UI Variable"
+                                       Foreground="{StaticResource TextSecondary}"
+                                       FontFamily="{StaticResource FontUI}"
                                        FontSize="12" />
                         </Grid>
-
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -386,14 +310,14 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
                                        Text="Required Ports"
-                                       Foreground="#7B6F5D"
-                                       FontFamily="Segoe UI Variable"
+                                       Foreground="{StaticResource TextMuted}"
+                                       FontFamily="{StaticResource FontUI}"
                                        FontSize="12"
                                        Margin="0,0,16,0" />
                             <TextBlock Grid.Column="1"
                                        Text="7777–7810 UDP, 31982 TCP"
-                                       Foreground="#B8AA92"
-                                       FontFamily="Segoe UI Variable"
+                                       Foreground="{StaticResource TextSecondary}"
+                                       FontFamily="{StaticResource FontUI}"
                                        FontSize="12" />
                         </Grid>
                     </StackPanel>

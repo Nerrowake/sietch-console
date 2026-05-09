@@ -4,34 +4,33 @@
              xmlns:vm="clr-namespace:Sietch_Console.ViewModels"
              xmlns:views="clr-namespace:Sietch_Console.Views">
     <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/SietchTheme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
 
-        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
-            <views:DashboardView />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type vm:SetupWizardViewModel}">
-            <views:SetupWizardView />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type vm:LogsViewModel}">
-            <views:LogsView />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type vm:DiagnosticsViewModel}">
-            <views:DiagnosticsView />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type vm:BackupsViewModel}">
-            <views:BackupsView />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type vm:NetworkingViewModel}">
-            <views:NetworkingView />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
-            <views:SettingsView />
-        </DataTemplate>
-
+            <!-- ViewModel → View DataTemplate routing -->
+            <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+                <views:DashboardView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SetupWizardViewModel}">
+                <views:SetupWizardView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:LogsViewModel}">
+                <views:LogsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:DiagnosticsViewModel}">
+                <views:DiagnosticsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:BackupsViewModel}">
+                <views:BackupsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:NetworkingViewModel}">
+                <views:NetworkingView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                <views:SettingsView />
+            </DataTemplate>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

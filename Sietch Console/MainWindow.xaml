@@ -10,66 +10,12 @@
         Height="720" Width="1100"
         MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen"
-        Background="#0B0F14">
-
-    <Window.Resources>
-
-        <!-- Sidebar ListBox style: transparent, no border -->
-        <Style x:Key="NavListBoxStyle" TargetType="ListBox">
-            <Setter Property="Background"       Value="Transparent" />
-            <Setter Property="BorderThickness"  Value="0" />
-            <Setter Property="Padding"          Value="0" />
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility"   Value="Auto" />
-        </Style>
-
-        <!-- Sidebar ListBoxItem style: custom hit area, selection highlight -->
-        <Style x:Key="NavItemStyle" TargetType="ListBoxItem">
-            <Setter Property="Padding"  Value="0" />
-            <Setter Property="Margin"   Value="8,2" />
-            <Setter Property="Cursor"   Value="Hand" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="ItemBorder"
-                                Height="36"
-                                CornerRadius="4"
-                                Background="Transparent">
-                            <TextBlock x:Name="ItemLabel"
-                                       Text="{Binding Label}"
-                                       Foreground="#B8AA92"
-                                       FontFamily="Segoe UI Variable"
-                                       FontSize="13"
-                                       VerticalAlignment="Center"
-                                       Margin="12,0" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="ItemBorder" Property="Background" Value="#1F2A36" />
-                                <Setter TargetName="ItemLabel"  Property="Foreground" Value="#F3EBDD" />
-                            </Trigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="IsMouseOver" Value="True" />
-                                    <Condition Property="IsSelected"  Value="False" />
-                                </MultiTrigger.Conditions>
-                                <Setter TargetName="ItemBorder" Property="Background" Value="#191F29" />
-                            </MultiTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-    </Window.Resources>
+        Background="{StaticResource AppBackground}">
 
     <Grid>
         <Grid.RowDefinitions>
-            <!-- Header -->
             <RowDefinition Height="48" />
-            <!-- Main area: sidebar + content -->
             <RowDefinition Height="*" />
-            <!-- Status bar -->
             <RowDefinition Height="28" />
         </Grid.RowDefinitions>
 
@@ -77,8 +23,8 @@
         <!-- Header                                  -->
         <!-- ═══════════════════════════════════════ -->
         <Border Grid.Row="0"
-                Background="#141A22"
-                BorderBrush="#232B35"
+                Background="{StaticResource PanelBackground}"
+                BorderBrush="{StaticResource BorderDefault}"
                 BorderThickness="0,0,0,1">
             <Grid Margin="16,0">
                 <Grid.ColumnDefinitions>
@@ -87,28 +33,26 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Branding -->
                 <StackPanel Grid.Column="0"
                             Orientation="Horizontal"
                             VerticalAlignment="Center">
                     <Border Width="24" Height="24"
-                            Background="#C46A2B"
-                            CornerRadius="4"
+                            Background="{StaticResource AccentPrimary}"
+                            CornerRadius="{StaticResource CornerSmall}"
                             Margin="0,0,10,0" />
                     <TextBlock Text="Sietch Console"
-                               Foreground="#F3EBDD"
-                               FontFamily="Segoe UI Variable"
+                               Foreground="{StaticResource TextPrimary}"
+                               FontFamily="{StaticResource FontUI}"
                                FontSize="15"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center" />
                 </StackPanel>
 
-                <!-- Version label -->
                 <TextBlock Grid.Column="2"
                            Text="v0.1.0-alpha"
-                           Foreground="#7B6F5D"
-                           FontFamily="Segoe UI Variable"
-                           FontSize="11"
+                           Foreground="{StaticResource TextMuted}"
+                           FontFamily="{StaticResource FontUI}"
+                           FontSize="{StaticResource FontSizeSmall}"
                            VerticalAlignment="Center" />
             </Grid>
         </Border>
@@ -122,17 +66,14 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- Sidebar: data-bound navigation list -->
+            <!-- Sidebar -->
             <Border Grid.Column="0"
-                    Background="#141A22"
-                    BorderBrush="#232B35"
+                    Background="{StaticResource PanelBackground}"
+                    BorderBrush="{StaticResource BorderDefault}"
                     BorderThickness="0,0,1,0">
                 <StackPanel>
-                    <TextBlock Text="NAVIGATION"
-                               Foreground="#7B6F5D"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="10"
-                               FontWeight="SemiBold"
+                    <TextBlock Style="{StaticResource SectionLabelStyle}"
+                               Text="NAVIGATION"
                                Margin="16,12,0,8" />
 
                     <ListBox ItemsSource="{Binding NavigationItems}"
@@ -142,7 +83,7 @@
                 </StackPanel>
             </Border>
 
-            <!-- Content region: DataTemplate-driven view switching -->
+            <!-- Content region -->
             <ContentControl Grid.Column="1"
                             Content="{Binding CurrentViewModel}" />
         </Grid>
@@ -151,8 +92,8 @@
         <!-- Status bar                              -->
         <!-- ═══════════════════════════════════════ -->
         <Border Grid.Row="2"
-                Background="#141A22"
-                BorderBrush="#232B35"
+                Background="{StaticResource PanelBackground}"
+                BorderBrush="{StaticResource BorderDefault}"
                 BorderThickness="0,1,0,0">
             <Grid Margin="16,0">
                 <Grid.ColumnDefinitions>
@@ -162,21 +103,21 @@
 
                 <TextBlock Grid.Column="0"
                            Text="Ready"
-                           Foreground="#7B6F5D"
-                           FontFamily="Segoe UI Variable"
-                           FontSize="11"
+                           Foreground="{StaticResource TextMuted}"
+                           FontFamily="{StaticResource FontUI}"
+                           FontSize="{StaticResource FontSizeSmall}"
                            VerticalAlignment="Center" />
 
                 <StackPanel Grid.Column="1"
                             Orientation="Horizontal"
                             VerticalAlignment="Center">
                     <Ellipse Width="8" Height="8"
-                             Fill="#6E747C"
+                             Fill="{StaticResource StatusOffline}"
                              Margin="0,0,6,0" />
                     <TextBlock Text="Battlegroup Offline"
-                               Foreground="#7B6F5D"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="11" />
+                               Foreground="{StaticResource TextMuted}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeSmall}" />
                 </StackPanel>
             </Grid>
         </Border>
