@@ -1,0 +1,92 @@
+<UserControl x:Class="Sietch_Console.Views.Steps.BattlegroupConfigStepView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="600" HorizontalAlignment="Center" Margin="40,28">
+
+            <TextBlock Text="Battlegroup Configuration"
+                       Style="{StaticResource CardTitleStyle}"
+                       Margin="0,0,0,6" />
+            <TextBlock Text="Set the name, size, and access credentials for your battlegroup."
+                       Style="{StaticResource MutedTextStyle}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,24" />
+
+            <!-- Battlegroup name -->
+            <Border Style="{StaticResource CardStyle}" Padding="20,16" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Battlegroup Name"
+                               Style="{StaticResource SectionLabelStyle}"
+                               Margin="0,0,0,4" />
+                    <TextBlock Text="The name players will see when browsing servers."
+                               Style="{StaticResource MutedTextStyle}"
+                               Margin="0,0,0,10" />
+                    <Border Background="{StaticResource FieldBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource CornerSmall}"
+                            Padding="12,8">
+                        <TextBox Text="{Binding BattlegroupName, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="{StaticResource TextPrimary}"
+                                 CaretBrush="{StaticResource AccentPrimary}" />
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Server count -->
+            <Border Style="{StaticResource CardStyle}" Padding="20,16" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="Server Count"
+                                   Style="{StaticResource SectionLabelStyle}" />
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding ServerCount}"
+                                   Foreground="{StaticResource AccentPrimary}"
+                                   FontWeight="SemiBold" />
+                    </Grid>
+                    <TextBlock Text="Number of server instances to run (1–10). Start with 1 unless you know you need more."
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,12" />
+                    <Slider Minimum="1" Maximum="10"
+                            Value="{Binding ServerCount}"
+                            TickFrequency="1"
+                            IsSnapToTickEnabled="True"
+                            Foreground="{StaticResource AccentPrimary}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Admin password -->
+            <Border Style="{StaticResource CardStyle}" Padding="20,16">
+                <StackPanel>
+                    <TextBlock Text="Admin Password"
+                               Style="{StaticResource SectionLabelStyle}"
+                               Margin="0,0,0,4" />
+                    <TextBlock Text="Password for server administration and RCON access."
+                               Style="{StaticResource MutedTextStyle}"
+                               Margin="0,0,0,10" />
+                    <Border Background="{StaticResource FieldBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource CornerSmall}"
+                            Padding="12,8">
+                        <PasswordBox x:Name="AdminPasswordBox"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Foreground="{StaticResource TextPrimary}"
+                                     CaretBrush="{StaticResource AccentPrimary}"
+                                     PasswordChar="●" />
+                    </Border>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
