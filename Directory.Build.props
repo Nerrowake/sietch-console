@@ -1,0 +1,37 @@
+<Project>
+
+  <!--
+    Version strategy: SemVer MAJOR.MINOR.PATCH[-prerelease.N]
+      0.x.y-alpha.N  — internal / early-access builds
+      0.x.y-beta.N   — wider testing builds
+      x.y.z          — public releases (x ≥ 1)
+    Bump this file to cut a new release; the tag pushed to GitHub triggers the release workflow.
+  -->
+  <PropertyGroup>
+    <Version>0.1.0-alpha.1</Version>
+    <AssemblyVersion>0.1.0.1</AssemblyVersion>
+    <FileVersion>0.1.0.1</FileVersion>
+    <InformationalVersion>0.1.0-alpha.1</InformationalVersion>
+  </PropertyGroup>
+
+  <!-- Shared assembly identity -->
+  <PropertyGroup>
+    <Company>Sietch Console</Company>
+    <Product>Sietch Console</Product>
+    <Authors>Michael Stoffer</Authors>
+    <Copyright>Copyright © 2025 Michael Stoffer</Copyright>
+    <Description>Windows-native server manager for Dune: Awakening battlegroups.</Description>
+    <PackageProjectUrl>https://github.com/michaelstoffer/sietch-console</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/michaelstoffer/sietch-console</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <!-- Shared build defaults -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <EmbedAllSources>true</EmbedAllSources>
+  </PropertyGroup>
+
+</Project>
