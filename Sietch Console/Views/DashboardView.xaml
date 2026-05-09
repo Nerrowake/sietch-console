@@ -19,7 +19,12 @@
                            Margin="0,0,0,4" />
                 <TextBlock Style="{StaticResource PageSubtitleStyle}"
                            Text="Overview of your battlegroup, system health, and recent activity."
-                           Margin="0,0,0,24" />
+                           Margin="0,0,0,16" />
+
+                <!-- #94 — Loading bar while transitioning -->
+                <ProgressBar Style="{StaticResource LoadingBarStyle}"
+                             Visibility="{Binding IsTransitioning, Converter={StaticResource BoolToVisibleConverter}}"
+                             Margin="0,0,0,16" />
 
                 <!-- ══════════════════════════════════════════ -->
                 <!-- Battlegroup Status + Controls Card         -->
@@ -39,7 +44,6 @@
                                        Text="BATTLEGROUP"
                                        Margin="0,0,0,8" />
 
-                            <!-- Profile name / no-profile placeholder -->
                             <TextBlock Foreground="{StaticResource TextPrimary}"
                                        FontFamily="{StaticResource FontUI}"
                                        FontSize="{StaticResource FontSizeHeading}"
@@ -47,7 +51,6 @@
                                        Text="{Binding ProfileName}"
                                        Margin="0,0,0,6" />
 
-                            <!-- VM name row -->
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <TextBlock Style="{StaticResource MutedTextStyle}"
                                            Text="VM: "
@@ -89,131 +92,35 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <!-- Right: Action buttons -->
+                        <!-- #92 — Action buttons using theme styles -->
                         <StackPanel Grid.Column="1"
                                     Orientation="Horizontal"
                                     VerticalAlignment="Center"
                                     Margin="16,0,0,0">
 
-                            <!-- Start -->
                             <Button Command="{Binding StartCommand}"
-                                    Margin="0,0,8,0"
+                                    Style="{StaticResource SuccessButtonStyle}"
                                     Padding="16,8"
-                                    Cursor="Hand">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background"   Value="{StaticResource StatusSuccessBg}" />
-                                        <Setter Property="Foreground"   Value="{StaticResource StatusSuccess}" />
-                                        <Setter Property="BorderBrush"  Value="{StaticResource StatusSuccessBorder}" />
-                                        <Setter Property="BorderThickness" Value="1" />
-                                        <Setter Property="FontFamily"   Value="{StaticResource FontUI}" />
-                                        <Setter Property="FontSize"     Value="{StaticResource FontSizeBody}" />
-                                        <Setter Property="FontWeight"   Value="SemiBold" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="{StaticResource CornerMedium}"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Center"
-                                                                          VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsEnabled" Value="False">
-                                                            <Setter Property="Opacity" Value="0.35" />
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Opacity" Value="0.85" />
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
+                                    Margin="0,0,8,0"
+                                    ToolTip="Start the battlegroup server"
+                                    AutomationProperties.Name="Start battlegroup">
                                 <TextBlock Text="Start" />
                             </Button>
 
-                            <!-- Stop -->
                             <Button Command="{Binding RequestStopCommand}"
-                                    Margin="0,0,8,0"
+                                    Style="{StaticResource DangerButtonStyle}"
                                     Padding="16,8"
-                                    Cursor="Hand">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background"   Value="{StaticResource StatusErrorBg}" />
-                                        <Setter Property="Foreground"   Value="{StaticResource StatusError}" />
-                                        <Setter Property="BorderBrush"  Value="{StaticResource StatusErrorBorder}" />
-                                        <Setter Property="BorderThickness" Value="1" />
-                                        <Setter Property="FontFamily"   Value="{StaticResource FontUI}" />
-                                        <Setter Property="FontSize"     Value="{StaticResource FontSizeBody}" />
-                                        <Setter Property="FontWeight"   Value="SemiBold" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="{StaticResource CornerMedium}"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Center"
-                                                                          VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsEnabled" Value="False">
-                                                            <Setter Property="Opacity" Value="0.35" />
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Opacity" Value="0.85" />
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
+                                    Margin="0,0,8,0"
+                                    ToolTip="Stop the battlegroup server and disconnect all players"
+                                    AutomationProperties.Name="Stop battlegroup">
                                 <TextBlock Text="Stop" />
                             </Button>
 
-                            <!-- Restart -->
                             <Button Command="{Binding RequestRestartCommand}"
+                                    Style="{StaticResource InfoButtonStyle}"
                                     Padding="16,8"
-                                    Cursor="Hand">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background"   Value="{StaticResource StatusInfoBg}" />
-                                        <Setter Property="Foreground"   Value="{StaticResource AccentCyan}" />
-                                        <Setter Property="BorderBrush"  Value="{StaticResource StatusInfoBorder}" />
-                                        <Setter Property="BorderThickness" Value="1" />
-                                        <Setter Property="FontFamily"   Value="{StaticResource FontUI}" />
-                                        <Setter Property="FontSize"     Value="{StaticResource FontSizeBody}" />
-                                        <Setter Property="FontWeight"   Value="SemiBold" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="{StaticResource CornerMedium}"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Center"
-                                                                          VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsEnabled" Value="False">
-                                                            <Setter Property="Opacity" Value="0.35" />
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Opacity" Value="0.85" />
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
+                                    ToolTip="Restart the battlegroup — briefly disconnects all players"
+                                    AutomationProperties.Name="Restart battlegroup">
                                 <TextBlock Text="Restart" />
                             </Button>
 
@@ -231,7 +138,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Access Shortcuts -->
+                    <!-- #92, #96 — Access Shortcuts with tooltips -->
                     <Border Grid.Column="0"
                             Style="{StaticResource CardStyle}"
                             Padding="20,16">
@@ -240,44 +147,13 @@
                                        Text="Access Shortcuts"
                                        Margin="0,0,0,16" />
 
-                            <!-- Control Interface -->
                             <Button Command="{Binding OpenControlInterfaceCommand}"
+                                    Style="{StaticResource GhostButtonStyle}"
                                     Margin="0,0,0,8"
                                     HorizontalAlignment="Stretch"
                                     Padding="12,9"
-                                    Cursor="Hand">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                        <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
-                                        <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                        <Setter Property="BorderThickness" Value="1" />
-                                        <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                        <Setter Property="FontSize"       Value="{StaticResource FontSizeBody}" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="{StaticResource CornerMedium}"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left"
-                                                                          VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsEnabled" Value="False">
-                                                            <Setter Property="Opacity" Value="0.35" />
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
+                                    ToolTip="Open the Hyper-V VM web admin panel in your browser"
+                                    AutomationProperties.Name="Open control interface">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Control Interface"
                                                Foreground="{StaticResource AccentPrimary}"
@@ -288,44 +164,13 @@
                                 </StackPanel>
                             </Button>
 
-                            <!-- File Browser -->
                             <Button Command="{Binding OpenFileBrowserCommand}"
+                                    Style="{StaticResource GhostButtonStyle}"
                                     Margin="0,0,0,8"
                                     HorizontalAlignment="Stretch"
                                     Padding="12,9"
-                                    Cursor="Hand">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                        <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
-                                        <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                        <Setter Property="BorderThickness" Value="1" />
-                                        <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                        <Setter Property="FontSize"       Value="{StaticResource FontSizeBody}" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="{StaticResource CornerMedium}"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left"
-                                                                          VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsEnabled" Value="False">
-                                                            <Setter Property="Opacity" Value="0.35" />
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
+                                    ToolTip="Open the battlegroup install directory in Windows Explorer"
+                                    AutomationProperties.Name="Open file browser">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="File Browser"
                                                Foreground="{StaticResource AccentCyan}"
@@ -336,43 +181,12 @@
                                 </StackPanel>
                             </Button>
 
-                            <!-- VM Shell -->
                             <Button Command="{Binding OpenVmShellCommand}"
+                                    Style="{StaticResource GhostButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     Padding="12,9"
-                                    Cursor="Hand">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                        <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
-                                        <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                        <Setter Property="BorderThickness" Value="1" />
-                                        <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                        <Setter Property="FontSize"       Value="{StaticResource FontSizeBody}" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="{StaticResource CornerMedium}"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left"
-                                                                          VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsEnabled" Value="False">
-                                                            <Setter Property="Opacity" Value="0.35" />
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
+                                    ToolTip="Open a shell session in the Hyper-V virtual machine"
+                                    AutomationProperties.Name="Open VM shell">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="VM Shell"
                                                Foreground="{StaticResource AccentViolet}"
@@ -386,7 +200,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Recent Diagnostics -->
+                    <!-- Recent Diagnostics — #93 standardised empty state -->
                     <Border Grid.Column="2"
                             Style="{StaticResource CardStyle}"
                             Padding="20,16">
@@ -394,25 +208,13 @@
                             <TextBlock Style="{StaticResource CardTitleStyle}"
                                        Text="Recent Diagnostics"
                                        Margin="0,0,0,16" />
-                            <Border Background="{StaticResource FieldBackground}"
-                                    BorderBrush="{StaticResource BorderDefault}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource CornerMedium}"
-                                    Padding="16">
+                            <Border Style="{StaticResource EmptyStateBorderStyle}">
                                 <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="No diagnostics have been run."
-                                               Foreground="{StaticResource TextMuted}"
-                                               FontFamily="{StaticResource FontUI}"
-                                               FontSize="{StaticResource FontSizeBody}"
-                                               HorizontalAlignment="Center"
+                                    <TextBlock Style="{StaticResource EmptyStateHeadingStyle}"
+                                               Text="No diagnostics have been run."
                                                Margin="0,0,0,6" />
-                                    <TextBlock Text="Use the Diagnostics section to check system readiness."
-                                               Foreground="{StaticResource TextDisabled}"
-                                               FontFamily="{StaticResource FontUI}"
-                                               FontSize="{StaticResource FontSizeSmall}"
-                                               HorizontalAlignment="Center"
-                                               TextWrapping="Wrap"
-                                               TextAlignment="Center" />
+                                    <TextBlock Style="{StaticResource EmptyStateSubtextStyle}"
+                                               Text="Use the Diagnostics section to check system readiness." />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -429,7 +231,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Last Backup -->
+                    <!-- Last Backup — #93 standardised empty state -->
                     <Border Grid.Column="0"
                             Style="{StaticResource CardStyle}"
                             Padding="20,16">
@@ -453,7 +255,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Networking -->
+                    <!-- Networking summary -->
                     <Border Grid.Column="2"
                             Style="{StaticResource CardStyle}"
                             Padding="20,16">
@@ -508,7 +310,7 @@
                                            FontSize="12"
                                            Margin="0,0,16,0" />
                                 <TextBlock Grid.Column="1"
-                                           Text="7777–7810 UDP, 31982 TCP"
+                                           Text="7777–7778 UDP, 27015–27016 UDP"
                                            Foreground="{StaticResource TextSecondary}"
                                            FontFamily="{StaticResource FontUI}"
                                            FontSize="12" />
@@ -521,7 +323,7 @@
         </ScrollViewer>
 
         <!-- ═══════════════════════════════════════════════ -->
-        <!-- Confirmation overlay (#57)                      -->
+        <!-- Confirmation overlay — #92, #95 refined styling -->
         <!-- ═══════════════════════════════════════════════ -->
         <Grid Background="#BB0B0F14"
               Visibility="{Binding ShowConfirmation, Converter={StaticResource BoolToVisibleConverter}}">
@@ -530,7 +332,7 @@
                     BorderThickness="1"
                     CornerRadius="{StaticResource CornerLarge}"
                     Padding="28,24"
-                    MaxWidth="400"
+                    MaxWidth="420"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
                 <StackPanel>
@@ -547,77 +349,19 @@
                                TextWrapping="Wrap"
                                Margin="0,0,0,20" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <!-- Cancel -->
                         <Button Command="{Binding CancelActionCommand}"
-                                Margin="0,0,8,0"
+                                Style="{StaticResource CancelButtonStyle}"
                                 Padding="16,8"
-                                Cursor="Hand">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                    <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
-                                    <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                    <Setter Property="BorderThickness" Value="1" />
-                                    <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                    <Setter Property="FontSize"       Value="{StaticResource FontSizeBody}" />
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}"
-                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                                        CornerRadius="{StaticResource CornerMedium}"
-                                                        Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter HorizontalAlignment="Center"
-                                                                      VerticalAlignment="Center" />
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </Button.Style>
+                                Margin="0,0,8,0"
+                                ToolTip="Cancel and return to Dashboard"
+                                AutomationProperties.Name="Cancel action">
                             <TextBlock Text="Cancel" />
                         </Button>
-
-                        <!-- Confirm -->
                         <Button Command="{Binding ConfirmActionCommand}"
+                                Style="{StaticResource DangerButtonStyle}"
                                 Padding="16,8"
-                                Cursor="Hand">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background"   Value="{StaticResource StatusErrorBg}" />
-                                    <Setter Property="Foreground"   Value="{StaticResource StatusError}" />
-                                    <Setter Property="BorderBrush"  Value="{StaticResource StatusErrorBorder}" />
-                                    <Setter Property="BorderThickness" Value="1" />
-                                    <Setter Property="FontFamily"   Value="{StaticResource FontUI}" />
-                                    <Setter Property="FontSize"     Value="{StaticResource FontSizeBody}" />
-                                    <Setter Property="FontWeight"   Value="SemiBold" />
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}"
-                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                                        CornerRadius="{StaticResource CornerMedium}"
-                                                        Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter HorizontalAlignment="Center"
-                                                                      VerticalAlignment="Center" />
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Opacity" Value="0.85" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </Button.Style>
+                                ToolTip="Confirm this action"
+                                AutomationProperties.Name="Confirm action">
                             <TextBlock Text="Confirm" />
                         </Button>
                     </StackPanel>
