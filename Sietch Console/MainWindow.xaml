@@ -4,13 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Sietch_Console.ViewModels"
+        xmlns:models="clr-namespace:SietchConsole.Core.Models;assembly=SietchConsole.Core"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
         Title="Sietch Console"
         Height="720" Width="1100"
-        MinHeight="600" MinWidth="900"
+        MinHeight="600" MinWidth="920"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource AppBackground}">
+        Background="{StaticResource AppBackground}"
+        AutomationProperties.Name="Sietch Console — Dune Awakening Battlegroup Manager">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -33,19 +35,34 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
+                <!-- #91 — Brand mark: "S" monogram in AccentPrimary -->
                 <StackPanel Grid.Column="0"
                             Orientation="Horizontal"
                             VerticalAlignment="Center">
-                    <Border Width="24" Height="24"
+                    <Border Width="28" Height="28"
                             Background="{StaticResource AccentPrimary}"
-                            CornerRadius="{StaticResource CornerSmall}"
-                            Margin="0,0,10,0" />
-                    <TextBlock Text="Sietch Console"
-                               Foreground="{StaticResource TextPrimary}"
-                               FontFamily="{StaticResource FontUI}"
-                               FontSize="15"
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center" />
+                            CornerRadius="{StaticResource CornerMedium}"
+                            Margin="0,0,10,0">
+                        <TextBlock Text="S"
+                                   Foreground="White"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontWeight="Bold"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   AutomationProperties.Name="Sietch Console logo" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Sietch Console"
+                                   Foreground="{StaticResource TextPrimary}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="15"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="Dune: Awakening Battlegroup Manager"
+                                   Foreground="{StaticResource TextMuted}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="10" />
+                    </StackPanel>
                 </StackPanel>
 
                 <TextBlock Grid.Column="2"
@@ -79,7 +96,9 @@
                     <ListBox ItemsSource="{Binding NavigationItems}"
                              SelectedItem="{Binding SelectedNavigationItem, Mode=TwoWay}"
                              Style="{StaticResource NavListBoxStyle}"
-                             ItemContainerStyle="{StaticResource NavItemStyle}" />
+                             ItemContainerStyle="{StaticResource NavItemStyle}"
+                             AutomationProperties.Name="Main navigation"
+                             KeyboardNavigation.TabNavigation="Once" />
                 </StackPanel>
             </Border>
 
@@ -101,20 +120,48 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
+                <!-- #98 — Profile name on the left -->
                 <TextBlock Grid.Column="0"
-                           Text="Ready"
                            Foreground="{StaticResource TextMuted}"
                            FontFamily="{StaticResource FontUI}"
                            FontSize="{StaticResource FontSizeSmall}"
-                           VerticalAlignment="Center" />
+                           VerticalAlignment="Center">
+                    <TextBlock.Text>
+                        <Binding Path="Dashboard.ProfileName"
+                                 StringFormat="Active battlegroup: {0}" />
+                    </TextBlock.Text>
+                </TextBlock>
 
+                <!-- #98 — Live battlegroup status on the right -->
                 <StackPanel Grid.Column="1"
                             Orientation="Horizontal"
                             VerticalAlignment="Center">
-                    <Ellipse Width="8" Height="8"
-                             Fill="{StaticResource StatusOffline}"
-                             Margin="0,0,6,0" />
-                    <TextBlock Text="Battlegroup Offline"
+                    <Ellipse Width="8" Height="8" Margin="0,0,6,0">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="{StaticResource StatusOffline}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Dashboard.Status}"
+                                                 Value="{x:Static models:BattlegroupRuntimeStatus.Running}">
+                                        <Setter Property="Fill" Value="{StaticResource StatusSuccess}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Dashboard.Status}"
+                                                 Value="{x:Static models:BattlegroupRuntimeStatus.Starting}">
+                                        <Setter Property="Fill" Value="{StaticResource StatusRunning}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Dashboard.Status}"
+                                                 Value="{x:Static models:BattlegroupRuntimeStatus.Stopping}">
+                                        <Setter Property="Fill" Value="{StaticResource StatusWarning}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Dashboard.Status}"
+                                                 Value="{x:Static models:BattlegroupRuntimeStatus.Error}">
+                                        <Setter Property="Fill" Value="{StaticResource StatusError}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock Text="{Binding Dashboard.StatusText}"
                                Foreground="{StaticResource TextMuted}"
                                FontFamily="{StaticResource FontUI}"
                                FontSize="{StaticResource FontSizeSmall}" />
