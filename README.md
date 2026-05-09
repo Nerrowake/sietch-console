@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/michaelstoffer/sietch-console/actions/workflows/build.yml/badge.svg)](https://github.com/michaelstoffer/sietch-console/actions/workflows/build.yml)
 [![Release](https://github.com/michaelstoffer/sietch-console/actions/workflows/release.yml/badge.svg)](https://github.com/michaelstoffer/sietch-console/actions/workflows/release.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/michaelstoffer/sietch-console?include_prereleases&label=version)](https://github.com/michaelstoffer/sietch-console/releases/latest)
+[![version](https://img.shields.io/badge/version-0.1.0--alpha.1-orange)](https://github.com/michaelstoffer/sietch-console/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D4?logo=windows)](https://github.com/michaelstoffer/sietch-console/blob/main/INSTALL.md)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/8.0)
