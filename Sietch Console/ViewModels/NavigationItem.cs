@@ -1,3 +1,3 @@
 namespace Sietch_Console.ViewModels;
 
-public record NavigationItem(string Label, object ViewModel);
+public record NavigationItem(string Label, object ViewModel, string Icon = "");

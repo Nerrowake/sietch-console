@@ -13,6 +13,9 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private object? _currentViewModel;
 
+    // Exposed for status-bar binding in MainWindow.xaml (#91, #98)
+    public DashboardViewModel Dashboard { get; }
+
     public MainWindowViewModel(
         DashboardViewModel dashboard,
         SetupWizardViewModel setupWizard,
@@ -22,15 +25,18 @@ public partial class MainWindowViewModel : ObservableObject
         NetworkingViewModel networking,
         SettingsViewModel settings)
     {
+        Dashboard = dashboard;
+
+        // Segoe MDL2 Assets glyphs (#97)
         NavigationItems = new ObservableCollection<NavigationItem>
         {
-            new("Dashboard",     dashboard),
-            new("Setup Wizard",  setupWizard),
-            new("Logs",          logs),
-            new("Diagnostics",   diagnostics),
-            new("Backups",       backups),
-            new("Networking",    networking),
-            new("Settings",      settings),
+            new("Dashboard",    dashboard,   ""),  // Home
+            new("Setup Wizard", setupWizard, ""),  // PageList
+            new("Logs",         logs,        ""),  // EventLog
+            new("Diagnostics",  diagnostics, ""),  // HealthSolid
+            new("Backups",      backups,     ""),  // BackupDrive
+            new("Networking",   networking,  ""),  // NetworkTower
+            new("Settings",     settings,    ""),  // Settings gear
         };
 
         SelectedNavigationItem = NavigationItems[0];
