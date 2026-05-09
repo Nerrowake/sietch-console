@@ -2,14 +2,16 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Sietch_Console.ViewModels"
-             xmlns:views="clr-namespace:Sietch_Console.Views">
+             xmlns:steps="clr-namespace:Sietch_Console.ViewModels.Steps"
+             xmlns:views="clr-namespace:Sietch_Console.Views"
+             xmlns:stepViews="clr-namespace:Sietch_Console.Views.Steps">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Themes/SietchTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- ViewModel → View DataTemplate routing -->
+            <!-- Main section ViewModel → View routing -->
             <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
                 <views:DashboardView />
             </DataTemplate>
@@ -30,6 +32,32 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
                 <views:SettingsView />
+            </DataTemplate>
+
+            <!-- Wizard step ViewModel → View routing -->
+            <DataTemplate DataType="{x:Type steps:WelcomeStepViewModel}">
+                <stepViews:WelcomeStepView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type steps:RequirementsStepViewModel}">
+                <stepViews:RequirementsStepView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type steps:InstallPathStepViewModel}">
+                <stepViews:InstallPathStepView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type steps:TokenStepViewModel}">
+                <stepViews:TokenStepView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type steps:VmConfigStepViewModel}">
+                <stepViews:VmConfigStepView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type steps:BattlegroupConfigStepViewModel}">
+                <stepViews:BattlegroupConfigStepView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type steps:ReviewStepViewModel}">
+                <stepViews:ReviewStepView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type steps:ProgressStepViewModel}">
+                <stepViews:ProgressStepView />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
