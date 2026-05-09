@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="Sietch Console/Sietch Console.csproj" />
+  <Project Path="SietchConsole.Core/SietchConsole.Core.csproj" />
+  <Project Path="SietchConsole.Data/SietchConsole.Data.csproj" />
 </Solution>
