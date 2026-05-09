@@ -50,6 +50,10 @@ jobs:
           -Path publish/*
           -DestinationPath "SietchConsole-${{ steps.version.outputs.VERSION }}-win-x64-portable.zip"
 
+      # Stage icon next to the .iss file — avoids path traversal over a folder name with spaces
+      - name: Copy installer icon
+        run: Copy-Item "Sietch Console/Resources/AppIcon.ico" "Installer/AppIcon.ico"
+
       # Windows installer via Inno Setup
       - name: Compile installer (Inno Setup)
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
