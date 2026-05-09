@@ -43,7 +43,7 @@
                                 AutomationProperties.Name="Sietch Console" />
 
                 <TextBlock Grid.Column="2"
-                           Text="v0.1.0-alpha"
+                           Text="v0.1.0-alpha.2"
                            Foreground="{StaticResource TextMuted}"
                            FontFamily="{StaticResource FontUI}"
                            FontSize="{StaticResource FontSizeSmall}"
