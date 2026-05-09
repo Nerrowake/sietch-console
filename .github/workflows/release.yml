@@ -62,7 +62,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: Sietch Console ${{ steps.version.outputs.VERSION }}
-          draft: true
+          draft: false
+          prerelease: true
           generate_release_notes: true
           files: |
             SietchConsole-${{ steps.version.outputs.VERSION }}-win-x64-portable.zip
