@@ -1,6 +1,303 @@
 <UserControl x:Class="Sietch_Console.Views.DiagnosticsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:SietchConsole.Core.Models;assembly=SietchConsole.Core"
              Background="{StaticResource AppBackground}">
-    <Grid />
+
+    <UserControl.Resources>
+
+        <!-- Severity indicator stripe color -->
+        <Style x:Key="SeverityStripeStyle" TargetType="Border">
+            <Setter Property="Width" Value="4" />
+            <Setter Property="Background" Value="{StaticResource StatusOffline}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Severity}" Value="Pass">
+                    <Setter Property="Background" Value="{StaticResource StatusSuccess}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Severity}" Value="Warning">
+                    <Setter Property="Background" Value="{StaticResource StatusWarning}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Severity}" Value="Failure">
+                    <Setter Property="Background" Value="{StaticResource StatusError}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Card background by severity -->
+        <Style x:Key="ResultCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource PanelBackground}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderDefault}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{StaticResource CornerMedium}" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+            <Setter Property="ClipToBounds" Value="True" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Severity}" Value="Pass">
+                    <Setter Property="Background" Value="{StaticResource StatusSuccessBg}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource StatusSuccessBorder}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Severity}" Value="Warning">
+                    <Setter Property="Background" Value="{StaticResource StatusWarningBg}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource StatusWarningBorder}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Severity}" Value="Failure">
+                    <Setter Property="Background" Value="{StaticResource StatusErrorBg}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource StatusErrorBorder}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Severity label text color -->
+        <Style x:Key="SeverityLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource StatusOffline}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Severity}" Value="Pass">
+                    <Setter Property="Foreground" Value="{StaticResource StatusSuccess}" />
+                    <Setter Property="Text" Value="PASS" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Severity}" Value="Warning">
+                    <Setter Property="Foreground" Value="{StaticResource StatusWarning}" />
+                    <Setter Property="Text" Value="WARNING" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Severity}" Value="Failure">
+                    <Setter Property="Foreground" Value="{StaticResource StatusError}" />
+                    <Setter Property="Text" Value="FAILURE" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- DiagnosticsResult item template -->
+        <DataTemplate DataType="{x:Type models:DiagnosticsResult}">
+            <Border Style="{StaticResource ResultCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Severity stripe -->
+                    <Border Grid.Column="0" Style="{StaticResource SeverityStripeStyle}" />
+
+                    <!-- Content -->
+                    <StackPanel Grid.Column="1" Margin="16,12,16,12">
+
+                        <!-- Check name + severity badge -->
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding CheckName}"
+                                       Style="{StaticResource MutedTextStyle}"
+                                       FontSize="{StaticResource FontSizeSmall}" />
+                            <TextBlock Grid.Column="1"
+                                       Style="{StaticResource SeverityLabelStyle}" />
+                        </Grid>
+
+                        <!-- Title -->
+                        <TextBlock Text="{Binding Title}"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,6"
+                                   TextWrapping="Wrap" />
+
+                        <!-- Friendly message -->
+                        <TextBlock Text="{Binding FriendlyMessage}"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,4" />
+
+                        <!-- Recommended action (only when present) -->
+                        <Border Margin="0,6,0,0"
+                                Padding="10,8"
+                                Background="{StaticResource OverlayBackground}"
+                                CornerRadius="{StaticResource CornerSmall}"
+                                Visibility="{Binding RecommendedAction, Converter={StaticResource NullToCollapsedConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="→  "
+                                           Foreground="{StaticResource AccentAmber}"
+                                           FontWeight="Bold"
+                                           FontSize="{StaticResource FontSizeSmall}" />
+                                <TextBlock Text="{Binding RecommendedAction}"
+                                           Style="{StaticResource BodyTextStyle}"
+                                           Foreground="{StaticResource AccentSandstone}"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Technical detail (collapsed by default) -->
+                        <Expander Margin="0,8,0,0"
+                                  Background="Transparent"
+                                  BorderThickness="0">
+                            <Expander.Header>
+                                <TextBlock Text="Technical detail"
+                                           Style="{StaticResource MutedTextStyle}"
+                                           FontSize="{StaticResource FontSizeSmall}" />
+                            </Expander.Header>
+                            <TextBlock Text="{Binding TechnicalMessage}"
+                                       FontFamily="{StaticResource FontMono}"
+                                       FontSize="{StaticResource FontSizeSmall}"
+                                       Foreground="{StaticResource TextMuted}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,4,0,0" />
+                        </Expander>
+
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Page header -->
+        <Border Grid.Row="0"
+                Padding="28,24,28,16"
+                BorderBrush="{StaticResource BorderSubtle}"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="System Diagnostics"
+                               Style="{StaticResource PageTitleStyle}" />
+                    <TextBlock Text="Check whether your system meets the requirements to host a Dune: Awakening battlegroup."
+                               Style="{StaticResource MutedTextStyle}"
+                               Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Run button -->
+                <Button Grid.Column="1"
+                        Command="{Binding RunChecksCommand}"
+                        IsEnabled="{Binding IsRunning, Converter={StaticResource BoolInverseConverter}}"
+                        Padding="20,10"
+                        Background="{StaticResource AccentPrimary}"
+                        Foreground="{StaticResource TextPrimary}"
+                        BorderThickness="0"
+                        FontWeight="SemiBold"
+                        Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="{StaticResource CornerMedium}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource AccentAmber}" />
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Background" Value="{StaticResource BorderDefault}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="Run Diagnostics" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                        <Setter Property="Text" Value="Running…" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Body -->
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="28,20,28,20">
+            <StackPanel>
+
+                <!-- Summary bar (visible when results exist) -->
+                <Border Margin="0,0,0,20"
+                        Padding="16,12"
+                        Style="{StaticResource CardStyle}"
+                        Visibility="{Binding HasResults, Converter={StaticResource BoolToVisibleConverter}}">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,24,0">
+                            <TextBlock Text="{Binding PassCount}"
+                                       Foreground="{StaticResource StatusSuccess}"
+                                       FontWeight="Bold"
+                                       FontSize="{StaticResource FontSizeHeading}"
+                                       Margin="0,0,6,0" />
+                            <TextBlock Text="Passed"
+                                       Foreground="{StaticResource StatusSuccess}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="0,0,0,2" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,24,0">
+                            <TextBlock Text="{Binding WarningCount}"
+                                       Foreground="{StaticResource StatusWarning}"
+                                       FontWeight="Bold"
+                                       FontSize="{StaticResource FontSizeHeading}"
+                                       Margin="0,0,6,0" />
+                            <TextBlock Text="Warnings"
+                                       Foreground="{StaticResource StatusWarning}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="0,0,0,2" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding FailureCount}"
+                                       Foreground="{StaticResource StatusError}"
+                                       FontWeight="Bold"
+                                       FontSize="{StaticResource FontSizeHeading}"
+                                       Margin="0,0,6,0" />
+                            <TextBlock Text="Failures"
+                                       Foreground="{StaticResource StatusError}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="0,0,0,2" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Empty state -->
+                <Border Padding="40"
+                        Style="{StaticResource CardStyle}"
+                        Visibility="{Binding HasResults, Converter={StaticResource BoolToCollapsedConverter}}">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="No diagnostics run yet"
+                                   Style="{StaticResource CardTitleStyle}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,6" />
+                        <TextBlock Text="Click 'Run Diagnostics' to check whether your system is ready to host a battlegroup."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   MaxWidth="400" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Results list -->
+                <ItemsControl ItemsSource="{Binding Results}" />
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </UserControl>
