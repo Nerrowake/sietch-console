@@ -9,6 +9,7 @@ public class SietchConsoleDbContext : DbContext
     public DbSet<BattlegroupProfile>  BattlegroupProfiles  { get; set; }
     public DbSet<DiagnosticsResult>   DiagnosticsResults   { get; set; }
     public DbSet<BackupRecord>        BackupRecords         { get; set; }
+    public DbSet<SetupWizardState>    SetupWizardStates    { get; set; }
 
     public SietchConsoleDbContext(DbContextOptions<SietchConsoleDbContext> options)
         : base(options) { }
@@ -19,6 +20,7 @@ public class SietchConsoleDbContext : DbContext
         modelBuilder.Entity<BattlegroupProfile>().HasKey(e => e.Id);
         modelBuilder.Entity<DiagnosticsResult>().HasKey(e => e.Id);
         modelBuilder.Entity<BackupRecord>().HasKey(e => e.Id);
+        modelBuilder.Entity<SetupWizardState>().HasKey(e => e.Id);
 
         base.OnModelCreating(modelBuilder);
     }

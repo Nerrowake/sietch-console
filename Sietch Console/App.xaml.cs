@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sietch_Console.Services.Diagnostics;
 using Sietch_Console.ViewModels;
+using Sietch_Console.ViewModels.Steps;
 using SietchConsole.Core.Interfaces;
 using SietchConsole.Data.Database;
 using SietchConsole.Data.Repositories;
@@ -37,10 +38,12 @@ public partial class App : Application
         services.AddScoped<IBattlegroupProfileRepository, BattlegroupProfileRepository>();
         services.AddScoped<IDiagnosticsResultRepository, DiagnosticsResultRepository>();
         services.AddScoped<IBackupRecordRepository, BackupRecordRepository>();
+        services.AddScoped<ISetupWizardStateRepository, SetupWizardStateRepository>();
 
         // ViewModels
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<DashboardViewModel>();
+        services.AddSingleton<RequirementsStepViewModel>();
         services.AddSingleton<SetupWizardViewModel>();
         services.AddSingleton<LogsViewModel>();
         services.AddSingleton<DiagnosticsViewModel>();
@@ -61,6 +64,9 @@ public partial class App : Application
             var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializerService>();
             await initializer.InitializeAsync();
         }
+
+        var wizardVm = _host.Services.GetRequiredService<SetupWizardViewModel>();
+        await wizardVm.InitializeAsync();
 
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
