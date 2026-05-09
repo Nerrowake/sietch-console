@@ -235,6 +235,11 @@
                       Padding="28,20,28,20">
             <StackPanel>
 
+                <!-- Loading bar while diagnostics run -->
+                <ProgressBar Style="{StaticResource LoadingBarStyle}"
+                             Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibleConverter}}"
+                             Margin="0,0,0,16" />
+
                 <!-- Summary bar (visible when results exist) -->
                 <Border Margin="0,0,0,20"
                         Padding="16,12"
@@ -278,20 +283,19 @@
                 </Border>
 
                 <!-- Empty state -->
-                <Border Padding="40"
-                        Style="{StaticResource CardStyle}"
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="20,16"
                         Visibility="{Binding HasResults, Converter={StaticResource BoolToCollapsedConverter}}">
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="No diagnostics run yet"
-                                   Style="{StaticResource CardTitleStyle}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,0,0,6" />
-                        <TextBlock Text="Click 'Run Diagnostics' to check whether your system is ready to host a battlegroup."
-                                   Style="{StaticResource MutedTextStyle}"
-                                   TextAlignment="Center"
-                                   TextWrapping="Wrap"
-                                   MaxWidth="400" />
-                    </StackPanel>
+                    <Border Style="{StaticResource EmptyStateBorderStyle}">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Style="{StaticResource EmptyStateHeadingStyle}"
+                                       Text="No diagnostics have been run yet."
+                                       Margin="0,0,0,6" />
+                            <TextBlock Style="{StaticResource EmptyStateSubtextStyle}"
+                                       Text="Click 'Run Diagnostics' above to check whether your system is ready to host a battlegroup."
+                                       MaxWidth="420" />
+                        </StackPanel>
+                    </Border>
                 </Border>
 
                 <!-- Results list -->

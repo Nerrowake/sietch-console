@@ -35,34 +35,127 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- #91 — Brand mark: "S" monogram in AccentPrimary -->
+                <!-- #91 — Geometric sietch doorway mark + wordmark -->
                 <StackPanel Grid.Column="0"
                             Orientation="Horizontal"
-                            VerticalAlignment="Center">
-                    <Border Width="28" Height="28"
-                            Background="{StaticResource AccentPrimary}"
-                            CornerRadius="{StaticResource CornerMedium}"
-                            Margin="0,0,10,0">
-                        <TextBlock Text="S"
-                                   Foreground="White"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontWeight="Bold"
-                                   FontSize="16"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   AutomationProperties.Name="Sietch Console logo" />
-                    </Border>
+                            VerticalAlignment="Center"
+                            AutomationProperties.Name="Sietch Console">
+
+                    <!-- Arch logo mark (100×110 native → scaled to 30×34) -->
+                    <Viewbox Width="30" Height="34" Margin="0,0,10,0" VerticalAlignment="Center">
+                        <Grid Width="100" Height="110">
+
+                            <!-- Arch frame: outer pillar+arch shape, inner doorway cutout (EvenOdd) -->
+                            <Path>
+                                <Path.Fill>
+                                    <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                        <GradientStop Color="#F2C840" Offset="0"   />
+                                        <GradientStop Color="#D08820" Offset="0.5" />
+                                        <GradientStop Color="#A84C10" Offset="1"   />
+                                    </LinearGradientBrush>
+                                </Path.Fill>
+                                <Path.Data>
+                                    <GeometryGroup FillRule="EvenOdd">
+                                        <!-- Outer boundary: pillars + arched top -->
+                                        <PathGeometry>
+                                            <PathFigure StartPoint="0,95" IsClosed="True">
+                                                <LineSegment Point="0,42"/>
+                                                <QuadraticBezierSegment Point1="50,-20" Point2="100,42"/>
+                                                <LineSegment Point="100,95"/>
+                                            </PathFigure>
+                                        </PathGeometry>
+                                        <!-- Inner boundary: arch opening (EvenOdd punch-out) -->
+                                        <PathGeometry>
+                                            <PathFigure StartPoint="22,95" IsClosed="True">
+                                                <LineSegment Point="22,48"/>
+                                                <QuadraticBezierSegment Point1="50,-8" Point2="78,48"/>
+                                                <LineSegment Point="78,95"/>
+                                            </PathFigure>
+                                        </PathGeometry>
+                                    </GeometryGroup>
+                                </Path.Data>
+                            </Path>
+
+                            <!-- Door panels: two triangular wings inside the arch opening -->
+                            <Path>
+                                <Path.Fill>
+                                    <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                        <GradientStop Color="#E8B030" Offset="0"   />
+                                        <GradientStop Color="#B86018" Offset="0.6" />
+                                        <GradientStop Color="#8C3C10" Offset="1"   />
+                                    </LinearGradientBrush>
+                                </Path.Fill>
+                                <Path.Data>
+                                    <GeometryGroup>
+                                        <PathGeometry>
+                                            <PathFigure StartPoint="22,50" IsClosed="True">
+                                                <LineSegment Point="50,86"/>
+                                                <LineSegment Point="22,95"/>
+                                            </PathFigure>
+                                        </PathGeometry>
+                                        <PathGeometry>
+                                            <PathFigure StartPoint="78,50" IsClosed="True">
+                                                <LineSegment Point="50,86"/>
+                                                <LineSegment Point="78,95"/>
+                                            </PathFigure>
+                                        </PathGeometry>
+                                    </GeometryGroup>
+                                </Path.Data>
+                            </Path>
+
+                            <!-- Dune accents at pillar bases -->
+                            <Path>
+                                <Path.Fill>
+                                    <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                        <GradientStop Color="#C07018" Offset="0"/>
+                                        <GradientStop Color="#8C3C10" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Path.Fill>
+                                <Path.Data>
+                                    <GeometryGroup>
+                                        <PathGeometry>
+                                            <PathFigure StartPoint="0,95" IsClosed="True">
+                                                <LineSegment Point="11,84"/>
+                                                <LineSegment Point="22,95"/>
+                                            </PathFigure>
+                                        </PathGeometry>
+                                        <PathGeometry>
+                                            <PathFigure StartPoint="78,95" IsClosed="True">
+                                                <LineSegment Point="89,84"/>
+                                                <LineSegment Point="100,95"/>
+                                            </PathFigure>
+                                        </PathGeometry>
+                                    </GeometryGroup>
+                                </Path.Data>
+                            </Path>
+
+                        </Grid>
+                    </Viewbox>
+
+                    <!-- Wordmark: "Sietch" + "— CONSOLE —" -->
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Sietch Console"
+                        <TextBlock Text="Sietch"
                                    Foreground="{StaticResource TextPrimary}"
                                    FontFamily="{StaticResource FontUI}"
-                                   FontSize="15"
+                                   FontSize="16"
                                    FontWeight="SemiBold" />
-                        <TextBlock Text="Dune: Awakening Battlegroup Manager"
-                                   Foreground="{StaticResource TextMuted}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="10" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="— "
+                                       Foreground="{StaticResource AccentSandstone}"
+                                       FontFamily="{StaticResource FontUI}"
+                                       FontSize="9" />
+                            <TextBlock Text="CONSOLE"
+                                       Foreground="{StaticResource AccentSandstone}"
+                                       FontFamily="{StaticResource FontUI}"
+                                       FontSize="9"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text=" —"
+                                       Foreground="{StaticResource AccentSandstone}"
+                                       FontFamily="{StaticResource FontUI}"
+                                       FontSize="9" />
+                        </StackPanel>
                     </StackPanel>
+
                 </StackPanel>
 
                 <TextBlock Grid.Column="2"

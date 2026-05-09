@@ -34,6 +34,8 @@
     <SolidColorBrush x:Key="SelectionBackground" Color="#1F2A36" />
     <!-- Nav item hover -->
     <SolidColorBrush x:Key="HoverBackground"   Color="#191F29" />
+    <!-- Card surface — elevated above AppBackground, below PanelBackground -->
+    <SolidColorBrush x:Key="CardBackground"    Color="#1A212B" />
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- BORDER BRUSHES                              -->
@@ -178,8 +180,8 @@
     <!-- ═══════════════════════════════════════════ -->
 
     <Style x:Key="CardStyle" TargetType="Border">
-        <Setter Property="Background"      Value="{StaticResource PanelBackground}" />
-        <Setter Property="BorderBrush"     Value="{StaticResource BorderDefault}" />
+        <Setter Property="Background"      Value="{StaticResource CardBackground}" />
+        <Setter Property="BorderBrush"     Value="{StaticResource BorderSubtle}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius"    Value="{StaticResource CornerLarge}" />
     </Style>
