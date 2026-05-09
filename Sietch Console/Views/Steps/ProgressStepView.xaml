@@ -1,0 +1,105 @@
+<UserControl x:Class="Sietch_Console.Views.Steps.ProgressStepView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="40,28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="Setting Up Your Battlegroup"
+                       Style="{StaticResource CardTitleStyle}"
+                       Margin="0,0,0,6" />
+            <TextBlock Text="{Binding CurrentOperation}"
+                       Style="{StaticResource MutedTextStyle}" />
+        </StackPanel>
+
+        <!-- Progress bar -->
+        <Border Grid.Row="1"
+                Style="{StaticResource CardStyle}"
+                Padding="20,16"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="Overall Progress"
+                               Style="{StaticResource SectionLabelStyle}" />
+                    <TextBlock Grid.Column="1"
+                               Foreground="{StaticResource AccentPrimary}"
+                               FontWeight="SemiBold">
+                        <TextBlock.Text>
+                            <Binding Path="ProgressPercent" StringFormat="{}{0:F0}%" />
+                        </TextBlock.Text>
+                    </TextBlock>
+                </Grid>
+                <Border Background="{StaticResource DeepBackground}"
+                        CornerRadius="{StaticResource CornerSmall}"
+                        Height="8">
+                    <Border Background="{StaticResource AccentPrimary}"
+                            CornerRadius="{StaticResource CornerSmall}"
+                            HorizontalAlignment="Left">
+                        <Border.Width>
+                            <Binding Path="ProgressPercent"
+                                     Converter="{StaticResource BoolToVisibleConverter}" />
+                        </Border.Width>
+                    </Border>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Completion / failure state -->
+        <Border Grid.Row="2"
+                Padding="16,12"
+                Margin="0,0,0,16"
+                Background="{StaticResource StatusSuccessBg}"
+                BorderBrush="{StaticResource StatusSuccessBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource CornerMedium}"
+                Visibility="{Binding IsComplete, Converter={StaticResource BoolToVisibleConverter}}">
+            <TextBlock Text="Setup complete! Your battlegroup is ready."
+                       Foreground="{StaticResource StatusSuccess}"
+                       FontWeight="SemiBold" />
+        </Border>
+
+        <!-- Log output -->
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}" ClipToBounds="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0"
+                        Background="{StaticResource SurfaceBackground}"
+                        Padding="14,8">
+                    <TextBlock Text="Installation Log"
+                               Style="{StaticResource SectionLabelStyle}" />
+                </Border>
+                <ScrollViewer Grid.Row="1"
+                              VerticalScrollBarVisibility="Auto"
+                              Background="{StaticResource DeepBackground}"
+                              Padding="14,10">
+                    <ItemsControl ItemsSource="{Binding LogLines}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           FontFamily="{StaticResource FontMono}"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           Foreground="{StaticResource TextSecondary}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,1" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
