@@ -18,7 +18,17 @@ public partial class App : Application
 
     private static void ConfigureServices(IServiceCollection services)
     {
+        // ViewModels
         services.AddSingleton<MainWindowViewModel>();
+        services.AddSingleton<DashboardViewModel>();
+        services.AddSingleton<SetupWizardViewModel>();
+        services.AddSingleton<LogsViewModel>();
+        services.AddSingleton<DiagnosticsViewModel>();
+        services.AddSingleton<BackupsViewModel>();
+        services.AddSingleton<NetworkingViewModel>();
+        services.AddSingleton<SettingsViewModel>();
+
+        // Views
         services.AddSingleton<MainWindow>();
     }
 
