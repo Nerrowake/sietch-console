@@ -1,0 +1,101 @@
+<UserControl x:Class="Sietch_Console.Views.Steps.VmConfigStepView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="600" HorizontalAlignment="Center" Margin="40,28">
+
+            <TextBlock Text="Virtual Machine Configuration"
+                       Style="{StaticResource CardTitleStyle}"
+                       Margin="0,0,0,6" />
+            <TextBlock Text="Configure the Hyper-V virtual machine that will host your battlegroup."
+                       Style="{StaticResource MutedTextStyle}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,24" />
+
+            <!-- VM Name -->
+            <Border Style="{StaticResource CardStyle}" Padding="20,16" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Virtual Machine Name"
+                               Style="{StaticResource SectionLabelStyle}"
+                               Margin="0,0,0,4" />
+                    <TextBlock Text="The name that will appear in Hyper-V Manager."
+                               Style="{StaticResource MutedTextStyle}"
+                               Margin="0,0,0,10" />
+                    <Border Background="{StaticResource FieldBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource CornerSmall}"
+                            Padding="12,8">
+                        <TextBox Text="{Binding VmName, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="{StaticResource TextPrimary}"
+                                 CaretBrush="{StaticResource AccentPrimary}" />
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Memory -->
+            <Border Style="{StaticResource CardStyle}" Padding="20,16" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="VM Memory Allocation"
+                                   Style="{StaticResource SectionLabelStyle}" />
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding VmMemoryDisplay}"
+                                   Foreground="{StaticResource AccentPrimary}"
+                                   FontWeight="SemiBold" />
+                    </Grid>
+                    <TextBlock Text="Recommended: 4 GB minimum, 8 GB for best performance."
+                               Style="{StaticResource MutedTextStyle}"
+                               Margin="0,0,0,12" />
+                    <Slider Minimum="2048" Maximum="32768"
+                            Value="{Binding VmMemoryMb}"
+                            TickFrequency="2048"
+                            IsSnapToTickEnabled="True"
+                            Foreground="{StaticResource AccentPrimary}" />
+                    <Grid Margin="0,4,0,0">
+                        <TextBlock Text="2 GB"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontSize="{StaticResource FontSizeSmall}"
+                                   HorizontalAlignment="Left" />
+                        <TextBlock Text="32 GB"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontSize="{StaticResource FontSizeSmall}"
+                                   HorizontalAlignment="Right" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Network adapter -->
+            <Border Style="{StaticResource CardStyle}" Padding="20,16">
+                <StackPanel>
+                    <TextBlock Text="Network Adapter"
+                               Style="{StaticResource SectionLabelStyle}"
+                               Margin="0,0,0,4" />
+                    <TextBlock Text="The physical adapter to use for the Hyper-V external virtual switch. Ethernet is recommended."
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,10" />
+                    <Border Background="{StaticResource FieldBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource CornerSmall}">
+                        <ComboBox ItemsSource="{Binding NetworkAdapters}"
+                                  SelectedItem="{Binding SelectedAdapterName}"
+                                  Background="Transparent"
+                                  Foreground="{StaticResource TextPrimary}"
+                                  BorderThickness="0"
+                                  Padding="10,8" />
+                    </Border>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
