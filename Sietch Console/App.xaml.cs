@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Sietch_Console.Services.Control;
 using Sietch_Console.Services.Diagnostics;
 using Sietch_Console.Services.Installation;
 using Sietch_Console.ViewModels;
@@ -37,6 +38,7 @@ public partial class App : Application
         services.AddSingleton<IServerPackageService, ServerPackageService>();
         services.AddSingleton<ISetupScriptService, SetupScriptService>();
         services.AddSingleton<InstallationOrchestrator>();
+        services.AddSingleton<IBattlegroupControlService, BattlegroupControlService>();
 
         // Repositories
         services.AddScoped<IApplicationSettingsRepository, ApplicationSettingsRepository>();
@@ -69,6 +71,9 @@ public partial class App : Application
             var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializerService>();
             await initializer.InitializeAsync();
         }
+
+        var dashboardVm = _host.Services.GetRequiredService<DashboardViewModel>();
+        await dashboardVm.InitializeAsync();
 
         var wizardVm = _host.Services.GetRequiredService<SetupWizardViewModel>();
         await wizardVm.InitializeAsync();
