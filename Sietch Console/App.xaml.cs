@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Sietch_Console.Services.Diagnostics;
 using Sietch_Console.ViewModels;
 using SietchConsole.Core.Interfaces;
 using SietchConsole.Data.Database;
@@ -27,6 +28,9 @@ public partial class App : Application
         services.AddDbContext<SietchConsoleDbContext>(options =>
             options.UseSqlite($"Data Source={dbPath}"));
         services.AddScoped<DatabaseInitializerService>();
+
+        // Infrastructure services
+        services.AddSingleton<ISystemReadinessService, SystemReadinessService>();
 
         // Repositories
         services.AddScoped<IApplicationSettingsRepository, ApplicationSettingsRepository>();
