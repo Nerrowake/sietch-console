@@ -1,263 +1,241 @@
 <UserControl x:Class="Sietch_Console.Views.SetupWizardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="#0B0F14">
+             Background="{StaticResource AppBackground}">
 
     <Grid>
         <Grid.RowDefinitions>
-            <!-- Page header -->
             <RowDefinition Height="Auto" />
-            <!-- Step indicator -->
             <RowDefinition Height="Auto" />
-            <!-- Divider -->
             <RowDefinition Height="1" />
-            <!-- Step content -->
             <RowDefinition Height="*" />
-            <!-- Navigation buttons -->
             <RowDefinition Height="72" />
         </Grid.RowDefinitions>
 
-        <!-- ═══════════════════════════════════════ -->
-        <!-- Page Header                             -->
-        <!-- ═══════════════════════════════════════ -->
+        <!-- Page Header -->
         <StackPanel Grid.Row="0" Margin="28,24,28,20">
-            <TextBlock Text="Setup Wizard"
-                       Foreground="#F3EBDD"
-                       FontFamily="Segoe UI Variable"
-                       FontSize="22"
-                       FontWeight="SemiBold"
+            <TextBlock Style="{StaticResource PageTitleStyle}"
+                       Text="Setup Wizard"
                        Margin="0,0,0,4" />
-            <TextBlock Text="Follow the steps below to configure and launch your battlegroup."
-                       Foreground="#7B6F5D"
-                       FontFamily="Segoe UI Variable"
-                       FontSize="13" />
+            <TextBlock Style="{StaticResource PageSubtitleStyle}"
+                       Text="Follow the steps below to configure and launch your battlegroup." />
         </StackPanel>
 
         <!-- ═══════════════════════════════════════ -->
         <!-- Step Indicator Bar                      -->
         <!-- ═══════════════════════════════════════ -->
         <Border Grid.Row="1"
-                Background="#141A22"
-                BorderBrush="#232B35"
+                Background="{StaticResource PanelBackground}"
+                BorderBrush="{StaticResource BorderDefault}"
                 BorderThickness="0,1,0,1"
                 Padding="28,16">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <!-- Step 1 -->
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <!-- Step 2 -->
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <!-- Step 3 -->
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <!-- Step 4 -->
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <!-- Step 5 -->
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <!-- Step 6 -->
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <!-- Step 7 -->
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Step 1: Welcome (active) -->
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                     <Border Width="28" Height="28"
-                            Background="#C46A2B"
-                            CornerRadius="14"
+                            Background="{StaticResource AccentPrimary}"
+                            CornerRadius="{StaticResource CornerRound}"
                             HorizontalAlignment="Center"
                             Margin="0,0,0,6">
                         <TextBlock Text="1"
-                                   Foreground="#F3EBDD"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimary}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="12" FontWeight="SemiBold"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
                     <TextBlock Text="Welcome"
-                               Foreground="#F3EBDD"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="11"
+                               Foreground="{StaticResource TextPrimary}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeSmall}"
                                FontWeight="SemiBold"
                                HorizontalAlignment="Center" />
                 </StackPanel>
 
-                <!-- Connector -->
-                <Rectangle Grid.Column="1"
-                           Height="1" Fill="#232B35"
+                <Rectangle Grid.Column="1" Height="1"
+                           Fill="{StaticResource BorderDefault}"
                            VerticalAlignment="Top" Margin="4,13,4,0" />
 
-                <!-- Step 2: Requirements (future) -->
+                <!-- Step 2: Requirements -->
                 <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                     <Border Width="28" Height="28"
-                            Background="#1A2030"
-                            BorderBrush="#232B35"
+                            Background="{StaticResource OverlayBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
                             BorderThickness="1"
-                            CornerRadius="14"
+                            CornerRadius="{StaticResource CornerRound}"
                             HorizontalAlignment="Center"
                             Margin="0,0,0,6">
                         <TextBlock Text="2"
-                                   Foreground="#4A4F5A"
-                                   FontFamily="Segoe UI Variable"
+                                   Foreground="{StaticResource TextDisabled}"
+                                   FontFamily="{StaticResource FontUI}"
                                    FontSize="12"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
                     <TextBlock Text="Requirements"
-                               Foreground="#4A4F5A"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="11"
+                               Foreground="{StaticResource TextDisabled}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeSmall}"
                                HorizontalAlignment="Center" />
                 </StackPanel>
 
-                <Rectangle Grid.Column="3"
-                           Height="1" Fill="#232B35"
+                <Rectangle Grid.Column="3" Height="1"
+                           Fill="{StaticResource BorderDefault}"
                            VerticalAlignment="Top" Margin="4,13,4,0" />
 
-                <!-- Step 3: Location (future) -->
+                <!-- Step 3: Location -->
                 <StackPanel Grid.Column="4" HorizontalAlignment="Center">
                     <Border Width="28" Height="28"
-                            Background="#1A2030"
-                            BorderBrush="#232B35"
+                            Background="{StaticResource OverlayBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
                             BorderThickness="1"
-                            CornerRadius="14"
+                            CornerRadius="{StaticResource CornerRound}"
                             HorizontalAlignment="Center"
                             Margin="0,0,0,6">
                         <TextBlock Text="3"
-                                   Foreground="#4A4F5A"
-                                   FontFamily="Segoe UI Variable"
+                                   Foreground="{StaticResource TextDisabled}"
+                                   FontFamily="{StaticResource FontUI}"
                                    FontSize="12"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
                     <TextBlock Text="Location"
-                               Foreground="#4A4F5A"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="11"
+                               Foreground="{StaticResource TextDisabled}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeSmall}"
                                HorizontalAlignment="Center" />
                 </StackPanel>
 
-                <Rectangle Grid.Column="5"
-                           Height="1" Fill="#232B35"
+                <Rectangle Grid.Column="5" Height="1"
+                           Fill="{StaticResource BorderDefault}"
                            VerticalAlignment="Top" Margin="4,13,4,0" />
 
-                <!-- Step 4: Token (future) -->
+                <!-- Step 4: Token -->
                 <StackPanel Grid.Column="6" HorizontalAlignment="Center">
                     <Border Width="28" Height="28"
-                            Background="#1A2030"
-                            BorderBrush="#232B35"
+                            Background="{StaticResource OverlayBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
                             BorderThickness="1"
-                            CornerRadius="14"
+                            CornerRadius="{StaticResource CornerRound}"
                             HorizontalAlignment="Center"
                             Margin="0,0,0,6">
                         <TextBlock Text="4"
-                                   Foreground="#4A4F5A"
-                                   FontFamily="Segoe UI Variable"
+                                   Foreground="{StaticResource TextDisabled}"
+                                   FontFamily="{StaticResource FontUI}"
                                    FontSize="12"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
                     <TextBlock Text="Token"
-                               Foreground="#4A4F5A"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="11"
+                               Foreground="{StaticResource TextDisabled}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeSmall}"
                                HorizontalAlignment="Center" />
                 </StackPanel>
 
-                <Rectangle Grid.Column="7"
-                           Height="1" Fill="#232B35"
+                <Rectangle Grid.Column="7" Height="1"
+                           Fill="{StaticResource BorderDefault}"
                            VerticalAlignment="Top" Margin="4,13,4,0" />
 
-                <!-- Step 5: VM Setup (future) -->
+                <!-- Step 5: VM Setup -->
                 <StackPanel Grid.Column="8" HorizontalAlignment="Center">
                     <Border Width="28" Height="28"
-                            Background="#1A2030"
-                            BorderBrush="#232B35"
+                            Background="{StaticResource OverlayBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
                             BorderThickness="1"
-                            CornerRadius="14"
+                            CornerRadius="{StaticResource CornerRound}"
                             HorizontalAlignment="Center"
                             Margin="0,0,0,6">
                         <TextBlock Text="5"
-                                   Foreground="#4A4F5A"
-                                   FontFamily="Segoe UI Variable"
+                                   Foreground="{StaticResource TextDisabled}"
+                                   FontFamily="{StaticResource FontUI}"
                                    FontSize="12"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
                     <TextBlock Text="VM Setup"
-                               Foreground="#4A4F5A"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="11"
+                               Foreground="{StaticResource TextDisabled}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeSmall}"
                                HorizontalAlignment="Center" />
                 </StackPanel>
 
-                <Rectangle Grid.Column="9"
-                           Height="1" Fill="#232B35"
+                <Rectangle Grid.Column="9" Height="1"
+                           Fill="{StaticResource BorderDefault}"
                            VerticalAlignment="Top" Margin="4,13,4,0" />
 
-                <!-- Step 6: Battlegroup (future) -->
+                <!-- Step 6: Battlegroup -->
                 <StackPanel Grid.Column="10" HorizontalAlignment="Center">
                     <Border Width="28" Height="28"
-                            Background="#1A2030"
-                            BorderBrush="#232B35"
+                            Background="{StaticResource OverlayBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
                             BorderThickness="1"
-                            CornerRadius="14"
+                            CornerRadius="{StaticResource CornerRound}"
                             HorizontalAlignment="Center"
                             Margin="0,0,0,6">
                         <TextBlock Text="6"
-                                   Foreground="#4A4F5A"
-                                   FontFamily="Segoe UI Variable"
+                                   Foreground="{StaticResource TextDisabled}"
+                                   FontFamily="{StaticResource FontUI}"
                                    FontSize="12"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
                     <TextBlock Text="Battlegroup"
-                               Foreground="#4A4F5A"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="11"
+                               Foreground="{StaticResource TextDisabled}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeSmall}"
                                HorizontalAlignment="Center" />
                 </StackPanel>
 
-                <Rectangle Grid.Column="11"
-                           Height="1" Fill="#232B35"
+                <Rectangle Grid.Column="11" Height="1"
+                           Fill="{StaticResource BorderDefault}"
                            VerticalAlignment="Top" Margin="4,13,4,0" />
 
-                <!-- Step 7: Review (future) -->
+                <!-- Step 7: Review -->
                 <StackPanel Grid.Column="12" HorizontalAlignment="Center">
                     <Border Width="28" Height="28"
-                            Background="#1A2030"
-                            BorderBrush="#232B35"
+                            Background="{StaticResource OverlayBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
                             BorderThickness="1"
-                            CornerRadius="14"
+                            CornerRadius="{StaticResource CornerRound}"
                             HorizontalAlignment="Center"
                             Margin="0,0,0,6">
                         <TextBlock Text="7"
-                                   Foreground="#4A4F5A"
-                                   FontFamily="Segoe UI Variable"
+                                   Foreground="{StaticResource TextDisabled}"
+                                   FontFamily="{StaticResource FontUI}"
                                    FontSize="12"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
                     <TextBlock Text="Review"
-                               Foreground="#4A4F5A"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="11"
+                               Foreground="{StaticResource TextDisabled}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeSmall}"
                                HorizontalAlignment="Center" />
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Divider -->
-        <Rectangle Grid.Row="2" Fill="#232B35" />
+        <Rectangle Grid.Row="2" Fill="{StaticResource BorderDefault}" />
 
         <!-- ═══════════════════════════════════════ -->
-        <!-- Step Content Area (Welcome placeholder) -->
+        <!-- Step Content: Welcome                   -->
         <!-- ═══════════════════════════════════════ -->
         <ScrollViewer Grid.Row="3"
                       VerticalScrollBarVisibility="Auto"
@@ -267,35 +245,32 @@
                         VerticalAlignment="Center"
                         Margin="40,40">
 
-                <!-- Icon placeholder -->
                 <Border Width="56" Height="56"
-                        Background="#1A2030"
-                        BorderBrush="#C46A2B"
+                        Background="{StaticResource OverlayBackground}"
+                        BorderBrush="{StaticResource AccentPrimary}"
                         BorderThickness="2"
-                        CornerRadius="12"
+                        CornerRadius="{StaticResource CornerLarge}"
                         HorizontalAlignment="Center"
                         Margin="0,0,0,24">
                     <TextBlock Text="⌂"
-                               Foreground="#C46A2B"
+                               Foreground="{StaticResource AccentPrimary}"
                                FontSize="28"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center" />
                 </Border>
 
-                <!-- Step title -->
                 <TextBlock Text="Welcome to Sietch Console"
-                           Foreground="#F3EBDD"
-                           FontFamily="Segoe UI Variable"
+                           Foreground="{StaticResource TextPrimary}"
+                           FontFamily="{StaticResource FontUI}"
                            FontSize="20"
                            FontWeight="SemiBold"
                            HorizontalAlignment="Center"
                            TextAlignment="Center"
                            Margin="0,0,0,12" />
 
-                <!-- Step description -->
-                <TextBlock Foreground="#B8AA92"
-                           FontFamily="Segoe UI Variable"
-                           FontSize="13"
+                <TextBlock Foreground="{StaticResource TextSecondary}"
+                           FontFamily="{StaticResource FontUI}"
+                           FontSize="{StaticResource FontSizeBody}"
                            TextAlignment="Center"
                            TextWrapping="Wrap"
                            Margin="0,0,0,28"
@@ -304,67 +279,55 @@
                     It typically takes 10–20 minutes to complete, depending on your internet speed and hardware.
                 </TextBlock>
 
-                <!-- What the wizard covers -->
-                <Border Background="#141A22"
-                        BorderBrush="#232B35"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Padding="20,16">
+                <Border Style="{StaticResource CardStyle}" Padding="20,16">
                     <StackPanel>
                         <TextBlock Text="This wizard will help you:"
-                                   Foreground="#D6B98C"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="13"
+                                   Foreground="{StaticResource AccentSandstone}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeBody}"
                                    FontWeight="SemiBold"
                                    Margin="0,0,0,12" />
 
                         <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6" Fill="#C46A2B"
+                            <Ellipse Width="6" Height="6"
+                                     Fill="{StaticResource AccentPrimary}"
                                      VerticalAlignment="Center" Margin="0,0,10,0" />
                             <TextBlock Text="Verify your system meets all requirements"
-                                       Foreground="#B8AA92"
-                                       FontFamily="Segoe UI Variable"
-                                       FontSize="13" />
+                                       Style="{StaticResource BodyTextStyle}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6" Fill="#C46A2B"
+                            <Ellipse Width="6" Height="6"
+                                     Fill="{StaticResource AccentPrimary}"
                                      VerticalAlignment="Center" Margin="0,0,10,0" />
                             <TextBlock Text="Choose an installation location"
-                                       Foreground="#B8AA92"
-                                       FontFamily="Segoe UI Variable"
-                                       FontSize="13" />
+                                       Style="{StaticResource BodyTextStyle}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6" Fill="#C46A2B"
+                            <Ellipse Width="6" Height="6"
+                                     Fill="{StaticResource AccentPrimary}"
                                      VerticalAlignment="Center" Margin="0,0,10,0" />
                             <TextBlock Text="Enter your Dune account token"
-                                       Foreground="#B8AA92"
-                                       FontFamily="Segoe UI Variable"
-                                       FontSize="13" />
+                                       Style="{StaticResource BodyTextStyle}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6" Fill="#C46A2B"
+                            <Ellipse Width="6" Height="6"
+                                     Fill="{StaticResource AccentPrimary}"
                                      VerticalAlignment="Center" Margin="0,0,10,0" />
                             <TextBlock Text="Set up the Hyper-V virtual machine"
-                                       Foreground="#B8AA92"
-                                       FontFamily="Segoe UI Variable"
-                                       FontSize="13" />
+                                       Style="{StaticResource BodyTextStyle}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6" Fill="#C46A2B"
+                            <Ellipse Width="6" Height="6"
+                                     Fill="{StaticResource AccentPrimary}"
                                      VerticalAlignment="Center" Margin="0,0,10,0" />
                             <TextBlock Text="Configure and launch your battlegroup"
-                                       Foreground="#B8AA92"
-                                       FontFamily="Segoe UI Variable"
-                                       FontSize="13" />
+                                       Style="{StaticResource BodyTextStyle}" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
-                <TextBlock Text="Click Next to begin. You can return to any step using the Back button."
-                           Foreground="#7B6F5D"
-                           FontFamily="Segoe UI Variable"
-                           FontSize="12"
+                <TextBlock Style="{StaticResource MutedTextStyle}"
+                           Text="Click Next to begin. You can return to any step using the Back button."
                            TextAlignment="Center"
                            TextWrapping="Wrap"
                            Margin="0,20,0,0" />
@@ -375,8 +338,8 @@
         <!-- Navigation Buttons                      -->
         <!-- ═══════════════════════════════════════ -->
         <Border Grid.Row="4"
-                Background="#141A22"
-                BorderBrush="#232B35"
+                Background="{StaticResource PanelBackground}"
+                BorderBrush="{StaticResource BorderDefault}"
                 BorderThickness="0,1,0,0">
             <Grid Margin="28,0">
                 <Grid.ColumnDefinitions>
@@ -386,39 +349,36 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Step counter -->
                 <TextBlock Grid.Column="0"
                            Text="Step 1 of 7"
-                           Foreground="#7B6F5D"
-                           FontFamily="Segoe UI Variable"
+                           Foreground="{StaticResource TextMuted}"
+                           FontFamily="{StaticResource FontUI}"
                            FontSize="12"
                            VerticalAlignment="Center" />
 
-                <!-- Back button (disabled on step 1) -->
                 <Border Grid.Column="1"
                         Width="100" Height="36"
-                        Background="#1A2030"
-                        BorderBrush="#232B35"
+                        Background="{StaticResource OverlayBackground}"
+                        BorderBrush="{StaticResource BorderDefault}"
                         BorderThickness="1"
-                        CornerRadius="6"
+                        CornerRadius="{StaticResource CornerMedium}"
                         Opacity="0.4">
                     <TextBlock Text="← Back"
-                               Foreground="#B8AA92"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="13"
+                               Foreground="{StaticResource TextSecondary}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeBody}"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center" />
                 </Border>
 
-                <!-- Next button -->
                 <Border Grid.Column="3"
                         Width="120" Height="36"
-                        Background="#C46A2B"
-                        CornerRadius="6">
+                        Background="{StaticResource AccentPrimary}"
+                        CornerRadius="{StaticResource CornerMedium}">
                     <TextBlock Text="Next →"
-                               Foreground="#F3EBDD"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="13"
+                               Foreground="{StaticResource TextPrimary}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeBody}"
                                FontWeight="SemiBold"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center" />

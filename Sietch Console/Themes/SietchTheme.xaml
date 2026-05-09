@@ -1,0 +1,222 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- BACKGROUND BRUSHES                          -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- Deep Onyx — main window and view backgrounds -->
+    <SolidColorBrush x:Key="AppBackground"     Color="#0B0F14" />
+    <!-- Charcoal Slate — panels, cards, sidebar -->
+    <SolidColorBrush x:Key="PanelBackground"   Color="#141A22" />
+    <!-- Panel Dark — inner surfaces, log stream header -->
+    <SolidColorBrush x:Key="SurfaceBackground" Color="#111820" />
+    <!-- Near-black — log stream body -->
+    <SolidColorBrush x:Key="DeepBackground"    Color="#0A0D11" />
+    <!-- Dark overlay — input fields, depressed surfaces -->
+    <SolidColorBrush x:Key="FieldBackground"   Color="#0F151C" />
+    <!-- Subtle blue-dark — hover states, selected overlays -->
+    <SolidColorBrush x:Key="OverlayBackground" Color="#1A2030" />
+    <!-- Slightly lifted — nav item selected state -->
+    <SolidColorBrush x:Key="SelectionBackground" Color="#1F2A36" />
+    <!-- Nav item hover -->
+    <SolidColorBrush x:Key="HoverBackground"   Color="#191F29" />
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- BORDER BRUSHES                              -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- Iron Gray — default card and panel borders -->
+    <SolidColorBrush x:Key="BorderDefault" Color="#232B35" />
+    <!-- Slightly lighter — subtle dividers -->
+    <SolidColorBrush x:Key="BorderSubtle"  Color="#26313D" />
+    <!-- Ash Brown — warm subtle borders -->
+    <SolidColorBrush x:Key="BorderWarm"    Color="#4A3A2A" />
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- ACCENT BRUSHES                              -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- Spice Orange — primary actions, active states, logo mark -->
+    <SolidColorBrush x:Key="AccentPrimary"    Color="#C46A2B" />
+    <!-- Sandstone — headings and warm highlights -->
+    <SolidColorBrush x:Key="AccentSandstone"  Color="#D6B98C" />
+    <!-- Dune Amber — warnings, attention states -->
+    <SolidColorBrush x:Key="AccentAmber"      Color="#E0A64B" />
+    <!-- Muted Cyan — info, networking, system signals -->
+    <SolidColorBrush x:Key="AccentCyan"       Color="#4FB3B8" />
+    <!-- Deep Teal — secondary actions -->
+    <SolidColorBrush x:Key="AccentTeal"       Color="#1F6F73" />
+    <!-- Violet Signal — update/maintenance states -->
+    <SolidColorBrush x:Key="AccentViolet"     Color="#8B7CF6" />
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- TEXT BRUSHES                                -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- Warm near-white — primary readable text -->
+    <SolidColorBrush x:Key="TextPrimary"   Color="#F3EBDD" />
+    <!-- Warm mid — secondary and body text -->
+    <SolidColorBrush x:Key="TextSecondary" Color="#B8AA92" />
+    <!-- Muted warm — labels, captions, helper text -->
+    <SolidColorBrush x:Key="TextMuted"     Color="#7B6F5D" />
+    <!-- Dark gray — disabled and placeholder text -->
+    <SolidColorBrush x:Key="TextDisabled"  Color="#4A4F5A" />
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- STATUS BRUSHES                              -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- Soft Fremen Green — healthy / pass / complete -->
+    <SolidColorBrush x:Key="StatusSuccess"  Color="#58B878" />
+    <!-- Dune Amber — attention needed / warning -->
+    <SolidColorBrush x:Key="StatusWarning"  Color="#E0A64B" />
+    <!-- Deep Signal Red — failure / error / blocked -->
+    <SolidColorBrush x:Key="StatusError"    Color="#D9534F" />
+    <!-- Muted Cyan — informational -->
+    <SolidColorBrush x:Key="StatusInfo"     Color="#4FB3B8" />
+    <!-- Dust Gray — stopped / offline / unavailable -->
+    <SolidColorBrush x:Key="StatusOffline"  Color="#6E747C" />
+    <!-- Spice Orange — active / running -->
+    <SolidColorBrush x:Key="StatusRunning"  Color="#C46A2B" />
+    <!-- Violet Signal — updating / maintenance -->
+    <SolidColorBrush x:Key="StatusUpdating" Color="#8B7CF6" />
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- STATUS BACKGROUND BRUSHES (tinted cards)   -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <SolidColorBrush x:Key="StatusSuccessBg" Color="#1A2A1A" />
+    <SolidColorBrush x:Key="StatusSuccessBorder" Color="#2A3D2A" />
+    <SolidColorBrush x:Key="StatusErrorBg"   Color="#2A1A1A" />
+    <SolidColorBrush x:Key="StatusErrorBorder" Color="#3D2A2A" />
+    <SolidColorBrush x:Key="StatusInfoBg"    Color="#1A1F2A" />
+    <SolidColorBrush x:Key="StatusInfoBorder" Color="#2A3040" />
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- TYPOGRAPHY                                  -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <FontFamily x:Key="FontUI">Segoe UI Variable</FontFamily>
+    <FontFamily x:Key="FontMono">Cascadia Mono, Consolas, Courier New</FontFamily>
+
+    <sys:Double x:Key="FontSizeSmall">11</sys:Double>
+    <sys:Double x:Key="FontSizeBody">13</sys:Double>
+    <sys:Double x:Key="FontSizeSubheading">14</sys:Double>
+    <sys:Double x:Key="FontSizeHeading">18</sys:Double>
+    <sys:Double x:Key="FontSizeTitle">22</sys:Double>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- CORNER RADII                                -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <CornerRadius x:Key="CornerSmall">4</CornerRadius>
+    <CornerRadius x:Key="CornerMedium">6</CornerRadius>
+    <CornerRadius x:Key="CornerLarge">8</CornerRadius>
+    <CornerRadius x:Key="CornerRound">14</CornerRadius>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- TEXTBLOCK STYLES                            -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <Style x:Key="PageTitleStyle" TargetType="TextBlock">
+        <Setter Property="Foreground"  Value="{StaticResource TextPrimary}" />
+        <Setter Property="FontFamily"  Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"    Value="{StaticResource FontSizeTitle}" />
+        <Setter Property="FontWeight"  Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="PageSubtitleStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+        <Setter Property="FontFamily" Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"   Value="{StaticResource FontSizeBody}" />
+    </Style>
+
+    <Style x:Key="SectionLabelStyle" TargetType="TextBlock">
+        <Setter Property="Foreground"  Value="{StaticResource TextMuted}" />
+        <Setter Property="FontFamily"  Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"    Value="10" />
+        <Setter Property="FontWeight"  Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="CardTitleStyle" TargetType="TextBlock">
+        <Setter Property="Foreground"  Value="{StaticResource TextPrimary}" />
+        <Setter Property="FontFamily"  Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"    Value="{StaticResource FontSizeSubheading}" />
+        <Setter Property="FontWeight"  Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="BodyTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+        <Setter Property="FontFamily" Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"   Value="{StaticResource FontSizeBody}" />
+    </Style>
+
+    <Style x:Key="MutedTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+        <Setter Property="FontFamily" Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"   Value="12" />
+    </Style>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- BORDER STYLES                               -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <Style x:Key="CardStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource PanelBackground}" />
+        <Setter Property="BorderBrush"     Value="{StaticResource BorderDefault}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius"    Value="{StaticResource CornerLarge}" />
+    </Style>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SIDEBAR NAVIGATION STYLES                   -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <Style x:Key="NavListBoxStyle" TargetType="ListBox">
+        <Setter Property="Background"      Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding"         Value="0" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"   Value="Auto" />
+    </Style>
+
+    <Style x:Key="NavItemStyle" TargetType="ListBoxItem">
+        <Setter Property="Padding"  Value="0" />
+        <Setter Property="Margin"   Value="8,2" />
+        <Setter Property="Cursor"   Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="ItemBorder"
+                            Height="36"
+                            CornerRadius="{StaticResource CornerSmall}"
+                            Background="Transparent">
+                        <TextBlock x:Name="ItemLabel"
+                                   Text="{Binding Label}"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   VerticalAlignment="Center"
+                                   Margin="12,0" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource SelectionBackground}" />
+                            <Setter TargetName="ItemLabel"  Property="Foreground" Value="{StaticResource TextPrimary}" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsSelected"  Value="False" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource HoverBackground}" />
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

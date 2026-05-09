@@ -1,42 +1,31 @@
 <UserControl x:Class="Sietch_Console.Views.LogsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="#0B0F14">
+             Background="{StaticResource AppBackground}">
 
     <Grid>
         <Grid.RowDefinitions>
-            <!-- Page header -->
             <RowDefinition Height="Auto" />
-            <!-- Toolbar -->
             <RowDefinition Height="Auto" />
-            <!-- Detected issues -->
             <RowDefinition Height="Auto" />
-            <!-- Log stream -->
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- ═══════════════════════════════════════ -->
-        <!-- Page Header                             -->
-        <!-- ═══════════════════════════════════════ -->
+        <!-- Page Header -->
         <StackPanel Grid.Row="0" Margin="28,24,28,16">
-            <TextBlock Text="Logs"
-                       Foreground="#F3EBDD"
-                       FontFamily="Segoe UI Variable"
-                       FontSize="22"
-                       FontWeight="SemiBold"
+            <TextBlock Style="{StaticResource PageTitleStyle}"
+                       Text="Logs"
                        Margin="0,0,0,4" />
-            <TextBlock Text="View and search live battlegroup log output. Detected issues appear above the log stream."
-                       Foreground="#7B6F5D"
-                       FontFamily="Segoe UI Variable"
-                       FontSize="13" />
+            <TextBlock Style="{StaticResource PageSubtitleStyle}"
+                       Text="View and search live battlegroup log output. Detected issues appear above the log stream." />
         </StackPanel>
 
         <!-- ═══════════════════════════════════════ -->
-        <!-- Toolbar: Search + Filters + Actions     -->
+        <!-- Toolbar                                 -->
         <!-- ═══════════════════════════════════════ -->
         <Border Grid.Row="1"
-                Background="#141A22"
-                BorderBrush="#232B35"
+                Background="{StaticResource PanelBackground}"
+                BorderBrush="{StaticResource BorderDefault}"
                 BorderThickness="0,1,0,1"
                 Padding="28,10">
             <Grid>
@@ -50,10 +39,10 @@
 
                 <!-- Search box -->
                 <Border Grid.Column="0"
-                        Background="#0F151C"
-                        BorderBrush="#232B35"
+                        Background="{StaticResource FieldBackground}"
+                        BorderBrush="{StaticResource BorderDefault}"
                         BorderThickness="1"
-                        CornerRadius="6"
+                        CornerRadius="{StaticResource CornerMedium}"
                         Height="34">
                     <Grid Margin="10,0">
                         <Grid.ColumnDefinitions>
@@ -62,115 +51,89 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
                                    Text="🔍"
-                                   Foreground="#4A4F5A"
+                                   Foreground="{StaticResource TextDisabled}"
                                    FontSize="12"
                                    VerticalAlignment="Center"
                                    Margin="0,0,8,0" />
                         <TextBlock Grid.Column="1"
                                    Text="Search logs..."
-                                   Foreground="#4A4F5A"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="13"
+                                   Foreground="{StaticResource TextDisabled}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeBody}"
                                    VerticalAlignment="Center" />
                     </Grid>
                 </Border>
 
-                <!-- Severity filter buttons -->
-                <StackPanel Grid.Column="2"
-                            Orientation="Horizontal">
-
-                    <!-- All (active) -->
+                <!-- Severity filters -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
                     <Border Background="#2A1E12"
-                            BorderBrush="#C46A2B"
+                            BorderBrush="{StaticResource AccentPrimary}"
                             BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="14,0"
-                            Height="34"
-                            Margin="0,0,4,0">
+                            CornerRadius="{StaticResource CornerMedium}"
+                            Padding="14,0" Height="34" Margin="0,0,4,0">
                         <TextBlock Text="All"
-                                   Foreground="#C46A2B"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource AccentPrimary}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="12" FontWeight="SemiBold"
                                    VerticalAlignment="Center" />
                     </Border>
-
-                    <!-- Error -->
-                    <Border Background="#0F151C"
-                            BorderBrush="#232B35"
+                    <Border Background="{StaticResource FieldBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
                             BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="14,0"
-                            Height="34"
-                            Margin="0,0,4,0">
+                            CornerRadius="{StaticResource CornerMedium}"
+                            Padding="14,0" Height="34" Margin="0,0,4,0">
                         <TextBlock Text="Error"
-                                   Foreground="#D9534F"
-                                   FontFamily="Segoe UI Variable"
+                                   Foreground="{StaticResource StatusError}"
+                                   FontFamily="{StaticResource FontUI}"
                                    FontSize="12"
                                    VerticalAlignment="Center" />
                     </Border>
-
-                    <!-- Warning -->
-                    <Border Background="#0F151C"
-                            BorderBrush="#232B35"
+                    <Border Background="{StaticResource FieldBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
                             BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="14,0"
-                            Height="34"
-                            Margin="0,0,4,0">
+                            CornerRadius="{StaticResource CornerMedium}"
+                            Padding="14,0" Height="34" Margin="0,0,4,0">
                         <TextBlock Text="Warning"
-                                   Foreground="#E0A64B"
-                                   FontFamily="Segoe UI Variable"
+                                   Foreground="{StaticResource StatusWarning}"
+                                   FontFamily="{StaticResource FontUI}"
                                    FontSize="12"
                                    VerticalAlignment="Center" />
                     </Border>
-
-                    <!-- Info -->
-                    <Border Background="#0F151C"
-                            BorderBrush="#232B35"
+                    <Border Background="{StaticResource FieldBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
                             BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="14,0"
-                            Height="34">
+                            CornerRadius="{StaticResource CornerMedium}"
+                            Padding="14,0" Height="34">
                         <TextBlock Text="Info"
-                                   Foreground="#4FB3B8"
-                                   FontFamily="Segoe UI Variable"
+                                   Foreground="{StaticResource StatusInfo}"
+                                   FontFamily="{StaticResource FontUI}"
                                    FontSize="12"
                                    VerticalAlignment="Center" />
                     </Border>
                 </StackPanel>
 
                 <!-- Action buttons -->
-                <StackPanel Grid.Column="4"
-                            Orientation="Horizontal">
-
-                    <!-- Copy -->
-                    <Border Background="#0F151C"
-                            BorderBrush="#232B35"
+                <StackPanel Grid.Column="4" Orientation="Horizontal">
+                    <Border Background="{StaticResource FieldBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
                             BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="14,0"
-                            Height="34"
-                            Margin="0,0,8,0"
-                            Opacity="0.5">
+                            CornerRadius="{StaticResource CornerMedium}"
+                            Padding="14,0" Height="34"
+                            Margin="0,0,8,0" Opacity="0.5">
                         <TextBlock Text="Copy"
-                                   Foreground="#B8AA92"
-                                   FontFamily="Segoe UI Variable"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   FontFamily="{StaticResource FontUI}"
                                    FontSize="12"
                                    VerticalAlignment="Center" />
                     </Border>
-
-                    <!-- Export -->
-                    <Border Background="#0F151C"
-                            BorderBrush="#232B35"
+                    <Border Background="{StaticResource FieldBackground}"
+                            BorderBrush="{StaticResource BorderDefault}"
                             BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="14,0"
-                            Height="34"
-                            Opacity="0.5">
+                            CornerRadius="{StaticResource CornerMedium}"
+                            Padding="14,0" Height="34" Opacity="0.5">
                         <TextBlock Text="Export"
-                                   Foreground="#B8AA92"
-                                   FontFamily="Segoe UI Variable"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   FontFamily="{StaticResource FontUI}"
                                    FontSize="12"
                                    VerticalAlignment="Center" />
                     </Border>
@@ -179,14 +142,11 @@
         </Border>
 
         <!-- ═══════════════════════════════════════ -->
-        <!-- Detected Issues Summary                 -->
+        <!-- Detected Issues Bar                     -->
         <!-- ═══════════════════════════════════════ -->
         <Border Grid.Row="2"
+                Style="{StaticResource CardStyle}"
                 Margin="28,16,28,0"
-                Background="#141A22"
-                BorderBrush="#232B35"
-                BorderThickness="1"
-                CornerRadius="8"
                 Padding="20,14">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -195,33 +155,31 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <Ellipse Width="8" Height="8"
-                             Fill="#6E747C"
+                             Fill="{StaticResource StatusOffline}"
                              VerticalAlignment="Center"
                              Margin="0,0,10,0" />
                     <TextBlock Text="Detected Issues"
-                               Foreground="#F3EBDD"
-                               FontFamily="Segoe UI Variable"
-                               FontSize="13"
+                               Foreground="{StaticResource TextPrimary}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeBody}"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center" />
                 </StackPanel>
 
                 <TextBlock Grid.Column="1"
                            Text="No issues detected. Start your battlegroup to begin streaming logs."
-                           Foreground="#7B6F5D"
-                           FontFamily="Segoe UI Variable"
+                           Foreground="{StaticResource TextMuted}"
+                           FontFamily="{StaticResource FontUI}"
                            FontSize="12"
                            VerticalAlignment="Center"
                            Margin="16,0,0,0" />
 
                 <TextBlock Grid.Column="2"
                            Text="0 issues"
-                           Foreground="#4A4F5A"
-                           FontFamily="Segoe UI Variable"
+                           Foreground="{StaticResource TextDisabled}"
+                           FontFamily="{StaticResource FontUI}"
                            FontSize="12"
                            VerticalAlignment="Center" />
             </Grid>
@@ -232,20 +190,20 @@
         <!-- ═══════════════════════════════════════ -->
         <Border Grid.Row="3"
                 Margin="28,12,28,20"
-                Background="#0A0D11"
-                BorderBrush="#232B35"
+                Background="{StaticResource DeepBackground}"
+                BorderBrush="{StaticResource BorderDefault}"
                 BorderThickness="1"
-                CornerRadius="8">
+                CornerRadius="{StaticResource CornerLarge}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <!-- Log stream header -->
+                <!-- Stream header -->
                 <Border Grid.Row="0"
-                        Background="#111820"
-                        BorderBrush="#232B35"
+                        Background="{StaticResource SurfaceBackground}"
+                        BorderBrush="{StaticResource BorderDefault}"
                         BorderThickness="0,0,0,1"
                         CornerRadius="8,8,0,0"
                         Padding="16,8">
@@ -255,79 +213,69 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
-                                   Text="Log Output"
-                                   Foreground="#7B6F5D"
-                                   FontFamily="Segoe UI Variable"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
+                                   Style="{StaticResource SectionLabelStyle}"
+                                   Text="LOG OUTPUT"
                                    VerticalAlignment="Center" />
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <Ellipse Width="7" Height="7"
-                                     Fill="#6E747C"
+                                     Fill="{StaticResource StatusOffline}"
                                      VerticalAlignment="Center"
                                      Margin="0,0,6,0" />
                             <TextBlock Text="Not streaming"
-                                       Foreground="#4A4F5A"
-                                       FontFamily="Segoe UI Variable"
-                                       FontSize="11"
+                                       Foreground="{StaticResource TextDisabled}"
+                                       FontFamily="{StaticResource FontUI}"
+                                       FontSize="{StaticResource FontSizeSmall}"
                                        VerticalAlignment="Center" />
                         </StackPanel>
                     </Grid>
                 </Border>
 
-                <!-- Log content area -->
+                <!-- Log content -->
                 <ScrollViewer Grid.Row="1"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Auto"
                               Padding="16">
                     <StackPanel>
-
-                        <!-- Empty state message -->
                         <StackPanel HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
                                     Margin="0,60">
                             <TextBlock Text="No log output available."
-                                       Foreground="#4A4F5A"
-                                       FontFamily="Cascadia Mono, Consolas, Courier New"
-                                       FontSize="13"
+                                       Foreground="{StaticResource TextDisabled}"
+                                       FontFamily="{StaticResource FontMono}"
+                                       FontSize="{StaticResource FontSizeBody}"
                                        HorizontalAlignment="Center"
                                        Margin="0,0,0,8" />
                             <TextBlock Text="Start your battlegroup to begin streaming live log data."
-                                       Foreground="#3A3830"
-                                       FontFamily="Segoe UI Variable"
+                                       Foreground="{StaticResource TextDisabled}"
+                                       FontFamily="{StaticResource FontUI}"
                                        FontSize="12"
-                                       HorizontalAlignment="Center" />
+                                       HorizontalAlignment="Center"
+                                       Opacity="0.6" />
                         </StackPanel>
 
-                        <!-- Sample log format preview (muted, shows expected format) -->
-                        <StackPanel Opacity="0.35">
-                            <TextBlock FontFamily="Cascadia Mono, Consolas, Courier New"
-                                       FontSize="12"
-                                       Margin="0,0,0,3">
-                                <Run Foreground="#4A4F5A" Text="[00:00:00] " />
-                                <Run Foreground="#4FB3B8"  Text="INFO  " />
-                                <Run Foreground="#6A6050"  Text="Server initializing..." />
+                        <!-- Sample format preview -->
+                        <StackPanel Opacity="0.3">
+                            <TextBlock FontFamily="{StaticResource FontMono}"
+                                       FontSize="12" Margin="0,0,0,3">
+                                <Run Foreground="{StaticResource TextDisabled}" Text="[00:00:00] " />
+                                <Run Foreground="{StaticResource StatusInfo}"    Text="INFO  " />
+                                <Run Foreground="{StaticResource TextMuted}"     Text="Server initializing..." />
                             </TextBlock>
-                            <TextBlock FontFamily="Cascadia Mono, Consolas, Courier New"
-                                       FontSize="12"
-                                       Margin="0,0,0,3">
-                                <Run Foreground="#4A4F5A" Text="[00:00:01] " />
-                                <Run Foreground="#7A8030"  Text="WARN  " />
-                                <Run Foreground="#6A6050"  Text="Waiting for cluster readiness..." />
+                            <TextBlock FontFamily="{StaticResource FontMono}"
+                                       FontSize="12" Margin="0,0,0,3">
+                                <Run Foreground="{StaticResource TextDisabled}" Text="[00:00:01] " />
+                                <Run Foreground="{StaticResource StatusWarning}" Text="WARN  " />
+                                <Run Foreground="{StaticResource TextMuted}"     Text="Waiting for cluster readiness..." />
                             </TextBlock>
-                            <TextBlock FontFamily="Cascadia Mono, Consolas, Courier New"
+                            <TextBlock FontFamily="{StaticResource FontMono}"
                                        FontSize="12">
-                                <Run Foreground="#4A4F5A" Text="[00:00:02] " />
-                                <Run Foreground="#8A3530"  Text="ERROR " />
-                                <Run Foreground="#6A6050"  Text="Connection refused on port 7777" />
+                                <Run Foreground="{StaticResource TextDisabled}" Text="[00:00:02] " />
+                                <Run Foreground="{StaticResource StatusError}"  Text="ERROR " />
+                                <Run Foreground="{StaticResource TextMuted}"    Text="Connection refused on port 7777" />
                             </TextBlock>
                         </StackPanel>
-
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
         </Border>
-
     </Grid>
 </UserControl>
