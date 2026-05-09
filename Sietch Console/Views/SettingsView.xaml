@@ -2,5 +2,643 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource AppBackground}">
-    <Grid />
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="28,24,28,28">
+
+                <!-- Page Header -->
+                <TextBlock Style="{StaticResource PageTitleStyle}"
+                           Text="Settings"
+                           Margin="0,0,0,4" />
+                <TextBlock Style="{StaticResource PageSubtitleStyle}"
+                           Text="Edit battlegroup configuration files and server settings."
+                           Margin="0,0,0,20" />
+
+                <!-- #65 – Restart required banner -->
+                <Border Background="{StaticResource StatusWarningBg}"
+                        BorderBrush="{StaticResource StatusWarningBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource CornerMedium}"
+                        Padding="14,10"
+                        Margin="0,0,0,12"
+                        Visibility="{Binding RestartRequired, Converter={StaticResource BoolToVisibleConverter}}">
+                    <TextBlock Foreground="{StaticResource StatusWarning}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeBody}"
+                               FontWeight="SemiBold"
+                               Text="Some changes require a battlegroup restart to take effect." />
+                </Border>
+
+                <!-- Validation errors banner -->
+                <Border Background="{StaticResource StatusErrorBg}"
+                        BorderBrush="{StaticResource StatusErrorBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource CornerMedium}"
+                        Padding="14,10"
+                        Margin="0,0,0,12"
+                        Visibility="{Binding HasValidationErrors, Converter={StaticResource BoolToVisibleConverter}}">
+                    <ItemsControl ItemsSource="{Binding ValidationErrors}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           Foreground="{StaticResource StatusError}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           Margin="0,1" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+
+                <!-- Status message -->
+                <TextBlock Text="{Binding StatusMessage}"
+                           Foreground="{StaticResource AccentCyan}"
+                           FontFamily="{StaticResource FontUI}"
+                           FontSize="{StaticResource FontSizeBody}"
+                           Margin="0,0,0,12"
+                           Visibility="{Binding StatusMessage, Converter={StaticResource NullToCollapsedConverter}}" />
+
+                <!-- No config state -->
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="20,16"
+                        Margin="0,0,0,16"
+                        Visibility="{Binding HasConfig, Converter={StaticResource BoolToCollapsedConverter}}">
+                    <StackPanel HorizontalAlignment="Center" Margin="0,16">
+                        <TextBlock Text="No configuration files found."
+                                   Foreground="{StaticResource TextMuted}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeSubheading}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,8" />
+                        <TextBlock Text="Complete the setup wizard to configure a battlegroup, or ensure the install path is correct."
+                                   Foreground="{StaticResource TextDisabled}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   HorizontalAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   MaxWidth="460" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Config directory info -->
+                <StackPanel Orientation="Horizontal"
+                            Margin="0,0,0,16"
+                            Visibility="{Binding HasConfig, Converter={StaticResource BoolToVisibleConverter}}">
+                    <TextBlock Style="{StaticResource MutedTextStyle}"
+                               Text="Config directory: "
+                               VerticalAlignment="Center" />
+                    <TextBlock Foreground="{StaticResource TextSecondary}"
+                               FontFamily="{StaticResource FontMono}"
+                               FontSize="11"
+                               Text="{Binding ConfigDirectory}"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- ═══════════════════════════════════════════════ -->
+                <!-- Tab control (visible when config is found)      -->
+                <!-- ═══════════════════════════════════════════════ -->
+                <TabControl Visibility="{Binding HasConfig, Converter={StaticResource BoolToVisibleConverter}}"
+                            Margin="0,0,0,16">
+                    <TabControl.Style>
+                        <Style TargetType="TabControl">
+                            <Setter Property="Background"     Value="Transparent" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Padding"         Value="0" />
+                        </Style>
+                    </TabControl.Style>
+                    <TabControl.Resources>
+                        <Style TargetType="TabItem">
+                            <Setter Property="Foreground"  Value="{StaticResource TextSecondary}" />
+                            <Setter Property="FontFamily"  Value="{StaticResource FontUI}" />
+                            <Setter Property="FontSize"    Value="{StaticResource FontSizeBody}" />
+                            <Setter Property="Padding"     Value="14,8" />
+                            <Setter Property="Background"  Value="Transparent" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TabItem">
+                                        <Border x:Name="Tab"
+                                                Background="Transparent"
+                                                BorderThickness="0,0,0,2"
+                                                BorderBrush="Transparent"
+                                                Padding="{TemplateBinding Padding}"
+                                                Margin="0,0,4,0">
+                                            <ContentPresenter ContentSource="Header"
+                                                              TextBlock.Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Tab" Property="BorderBrush" Value="{StaticResource AccentPrimary}" />
+                                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TabControl.Resources>
+
+                    <!-- ── Server tab (#62) ── -->
+                    <TabItem Header="Server">
+                        <Border Style="{StaticResource CardStyle}"
+                                Padding="20,16"
+                                Margin="0,8,0,0">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource CardTitleStyle}"
+                                           Text="Server Identity"
+                                           Margin="0,0,0,16" />
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                               Text="Server Name" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding ServerName, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{StaticResource FieldBackground}"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             BorderBrush="{StaticResource BorderDefault}"
+                                             BorderThickness="1"
+                                             FontFamily="{StaticResource FontUI}"
+                                             FontSize="{StaticResource FontSizeBody}"
+                                             Padding="8,6"
+                                             CaretBrush="{StaticResource AccentPrimary}" />
+                                </Grid>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                               Text="Max Players" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding MaxPlayers, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{StaticResource FieldBackground}"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             BorderBrush="{StaticResource BorderDefault}"
+                                             BorderThickness="1"
+                                             FontFamily="{StaticResource FontUI}"
+                                             FontSize="{StaticResource FontSizeBody}"
+                                             Padding="8,6"
+                                             CaretBrush="{StaticResource AccentPrimary}" />
+                                </Grid>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                               Text="Server Password" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding ServerPassword, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{StaticResource FieldBackground}"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             BorderBrush="{StaticResource BorderDefault}"
+                                             BorderThickness="1"
+                                             FontFamily="{StaticResource FontUI}"
+                                             FontSize="{StaticResource FontSizeBody}"
+                                             Padding="8,6"
+                                             CaretBrush="{StaticResource AccentPrimary}" />
+                                </Grid>
+
+                                <Grid Margin="0,0,0,20">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                               Text="Admin Password" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding AdminPassword, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{StaticResource FieldBackground}"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             BorderBrush="{StaticResource BorderDefault}"
+                                             BorderThickness="1"
+                                             FontFamily="{StaticResource FontUI}"
+                                             FontSize="{StaticResource FontSizeBody}"
+                                             Padding="8,6"
+                                             CaretBrush="{StaticResource AccentPrimary}" />
+                                </Grid>
+
+                                <Separator Background="{StaticResource BorderDefault}"
+                                           Margin="0,0,0,16" />
+
+                                <TextBlock Style="{StaticResource CardTitleStyle}"
+                                           Text="Network"
+                                           Margin="0,0,0,12" />
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Style="{StaticResource BodyTextStyle}"
+                                                   Text="Game Port" VerticalAlignment="Center" />
+                                        <TextBlock Style="{StaticResource MutedTextStyle}"
+                                                   Text="Requires restart" />
+                                    </StackPanel>
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding GamePort, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{StaticResource FieldBackground}"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             BorderBrush="{StaticResource BorderDefault}"
+                                             BorderThickness="1"
+                                             FontFamily="{StaticResource FontUI}"
+                                             FontSize="{StaticResource FontSizeBody}"
+                                             Padding="8,6"
+                                             VerticalAlignment="Top"
+                                             CaretBrush="{StaticResource AccentPrimary}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </TabItem>
+
+                    <!-- ── Gameplay tab (#62) ── -->
+                    <TabItem Header="Gameplay">
+                        <Border Style="{StaticResource CardStyle}"
+                                Padding="20,16"
+                                Margin="0,8,0,0">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource CardTitleStyle}"
+                                           Text="Gameplay Settings"
+                                           Margin="0,0,0,16" />
+
+                                <!-- PvP toggle -->
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Style="{StaticResource BodyTextStyle}" Text="PvP Mode" />
+                                        <TextBlock Style="{StaticResource MutedTextStyle}" Text="Requires restart" />
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1"
+                                              IsChecked="{Binding PvpEnabled}"
+                                              VerticalAlignment="Center"
+                                              Foreground="{StaticResource TextSecondary}"
+                                              FontFamily="{StaticResource FontUI}"
+                                              FontSize="{StaticResource FontSizeBody}"
+                                              Content="Enable PvP" />
+                                </Grid>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                               Text="Max Tribe Members" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding MaxTribeMemberCount, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{StaticResource FieldBackground}"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             BorderBrush="{StaticResource BorderDefault}"
+                                             BorderThickness="1"
+                                             FontFamily="{StaticResource FontUI}"
+                                             FontSize="{StaticResource FontSizeBody}"
+                                             Padding="8,6"
+                                             CaretBrush="{StaticResource AccentPrimary}" />
+                                </Grid>
+
+                                <Separator Background="{StaticResource BorderDefault}"
+                                           Margin="0,4,0,16" />
+
+                                <TextBlock Style="{StaticResource CardTitleStyle}"
+                                           Text="Multipliers"
+                                           Margin="0,0,0,12" />
+
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                               Text="Day Length ×" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding DayLengthMultiplier, UpdateSourceTrigger=PropertyChanged, StringFormat=G}"
+                                             Background="{StaticResource FieldBackground}"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             BorderBrush="{StaticResource BorderDefault}"
+                                             BorderThickness="1"
+                                             FontFamily="{StaticResource FontUI}"
+                                             FontSize="{StaticResource FontSizeBody}"
+                                             Padding="8,6"
+                                             CaretBrush="{StaticResource AccentPrimary}" />
+                                </Grid>
+
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                               Text="Night Length ×" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding NightLengthMultiplier, UpdateSourceTrigger=PropertyChanged, StringFormat=G}"
+                                             Background="{StaticResource FieldBackground}"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             BorderBrush="{StaticResource BorderDefault}"
+                                             BorderThickness="1"
+                                             FontFamily="{StaticResource FontUI}"
+                                             FontSize="{StaticResource FontSizeBody}"
+                                             Padding="8,6"
+                                             CaretBrush="{StaticResource AccentPrimary}" />
+                                </Grid>
+
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                               Text="Resource Harvest ×" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding ResourceHarvestingRate, UpdateSourceTrigger=PropertyChanged, StringFormat=G}"
+                                             Background="{StaticResource FieldBackground}"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             BorderBrush="{StaticResource BorderDefault}"
+                                             BorderThickness="1"
+                                             FontFamily="{StaticResource FontUI}"
+                                             FontSize="{StaticResource FontSizeBody}"
+                                             Padding="8,6"
+                                             CaretBrush="{StaticResource AccentPrimary}" />
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                               Text="XP Multiplier ×" VerticalAlignment="Center" />
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding XpMultiplier, UpdateSourceTrigger=PropertyChanged, StringFormat=G}"
+                                             Background="{StaticResource FieldBackground}"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             BorderBrush="{StaticResource BorderDefault}"
+                                             BorderThickness="1"
+                                             FontFamily="{StaticResource FontUI}"
+                                             FontSize="{StaticResource FontSizeBody}"
+                                             Padding="8,6"
+                                             CaretBrush="{StaticResource AccentPrimary}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </TabItem>
+
+                    <!-- ── Raw Editor tab (#67) ── -->
+                    <TabItem Header="Raw Editor">
+                        <Border Style="{StaticResource CardStyle}"
+                                Padding="20,16"
+                                Margin="0,8,0,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <!-- File selector -->
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                                    <TextBlock Style="{StaticResource BodyTextStyle}"
+                                               Text="File:"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,10,0" />
+                                    <ComboBox ItemsSource="{Binding AvailableFiles}"
+                                              SelectedItem="{Binding SelectedFile}"
+                                              MinWidth="320"
+                                              Background="{StaticResource FieldBackground}"
+                                              Foreground="{StaticResource TextPrimary}"
+                                              BorderBrush="{StaticResource BorderDefault}"
+                                              FontFamily="{StaticResource FontMono}"
+                                              FontSize="11"
+                                              Padding="8,5">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}"
+                                                           FontFamily="{StaticResource FontMono}"
+                                                           FontSize="11" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <!-- Raw editor hint -->
+                                <TextBlock Grid.Row="1"
+                                           Style="{StaticResource MutedTextStyle}"
+                                           Text="Editing raw INI content directly. A timestamped backup is created automatically before saving."
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,10" />
+
+                                <!-- Text editor -->
+                                <TextBox Grid.Row="2"
+                                         Text="{Binding RawContent, UpdateSourceTrigger=PropertyChanged}"
+                                         AcceptsReturn="True"
+                                         AcceptsTab="True"
+                                         TextWrapping="NoWrap"
+                                         HorizontalScrollBarVisibility="Auto"
+                                         VerticalScrollBarVisibility="Auto"
+                                         Background="{StaticResource DeepBackground}"
+                                         Foreground="{StaticResource TextPrimary}"
+                                         BorderBrush="{StaticResource BorderDefault}"
+                                         BorderThickness="1"
+                                         FontFamily="{StaticResource FontMono}"
+                                         FontSize="12"
+                                         Padding="10"
+                                         MinHeight="320"
+                                         CaretBrush="{StaticResource AccentPrimary}" />
+
+                                <!-- Raw save button -->
+                                <StackPanel Grid.Row="3" Orientation="Horizontal"
+                                            HorizontalAlignment="Right" Margin="0,10,0,0">
+                                    <Button Command="{Binding ReloadRawCommand}"
+                                            Margin="0,0,8,0"
+                                            Padding="14,7"
+                                            Cursor="Hand">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
+                                                <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
+                                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
+                                                <Setter Property="BorderThickness" Value="1" />
+                                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
+                                                <Setter Property="FontSize"       Value="{StaticResource FontSizeBody}" />
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}"
+                                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                                    CornerRadius="{StaticResource CornerMedium}"
+                                                                    Padding="{TemplateBinding Padding}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </Button.Style>
+                                        <TextBlock Text="Revert" />
+                                    </Button>
+
+                                    <Button Command="{Binding SaveRawCommand}"
+                                            Padding="14,7"
+                                            Cursor="Hand">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background"   Value="{StaticResource StatusWarningBg}" />
+                                                <Setter Property="Foreground"   Value="{StaticResource StatusWarning}" />
+                                                <Setter Property="BorderBrush"  Value="{StaticResource StatusWarningBorder}" />
+                                                <Setter Property="BorderThickness" Value="1" />
+                                                <Setter Property="FontFamily"   Value="{StaticResource FontUI}" />
+                                                <Setter Property="FontSize"     Value="{StaticResource FontSizeBody}" />
+                                                <Setter Property="FontWeight"   Value="SemiBold" />
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}"
+                                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                                    CornerRadius="{StaticResource CornerMedium}"
+                                                                    Padding="{TemplateBinding Padding}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsEnabled" Value="False">
+                                                                    <Setter Property="Opacity" Value="0.35" />
+                                                                </Trigger>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Opacity" Value="0.85" />
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </Button.Style>
+                                        <TextBlock Text="Save Raw File" />
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </TabItem>
+
+                </TabControl>
+
+                <!-- ── Save / Reload action bar ── -->
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="16,12"
+                        Visibility="{Binding HasConfig, Converter={StaticResource BoolToVisibleConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   Text="Unsaved changes"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding HasUnsavedChanges, Converter={StaticResource BoolToVisibleConverter}}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <!-- Reload from disk -->
+                            <Button Command="{Binding ReloadCommand}"
+                                    Margin="0,0,8,0"
+                                    Padding="14,7"
+                                    Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
+                                        <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
+                                        <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
+                                        <Setter Property="BorderThickness" Value="1" />
+                                        <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
+                                        <Setter Property="FontSize"       Value="{StaticResource FontSizeBody}" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                            CornerRadius="{StaticResource CornerMedium}"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                                <TextBlock Text="Reload from Disk" />
+                            </Button>
+
+                            <!-- Save -->
+                            <Button Command="{Binding SaveCommand}"
+                                    Padding="16,7"
+                                    Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background"   Value="{StaticResource StatusSuccessBg}" />
+                                        <Setter Property="Foreground"   Value="{StaticResource StatusSuccess}" />
+                                        <Setter Property="BorderBrush"  Value="{StaticResource StatusSuccessBorder}" />
+                                        <Setter Property="BorderThickness" Value="1" />
+                                        <Setter Property="FontFamily"   Value="{StaticResource FontUI}" />
+                                        <Setter Property="FontSize"     Value="{StaticResource FontSizeBody}" />
+                                        <Setter Property="FontWeight"   Value="SemiBold" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                            CornerRadius="{StaticResource CornerMedium}"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsEnabled" Value="False">
+                                                            <Setter Property="Opacity" Value="0.35" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Opacity" Value="0.85" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                                <TextBlock Text="Save Configuration" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </UserControl>
