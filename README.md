@@ -2,6 +2,14 @@
 
 > The easiest way to self-host a Dune: Awakening battlegroup.
 
+[![CI](https://github.com/michaelstoffer/sietch-console/actions/workflows/build.yml/badge.svg)](https://github.com/michaelstoffer/sietch-console/actions/workflows/build.yml)
+[![Release](https://github.com/michaelstoffer/sietch-console/actions/workflows/release.yml/badge.svg)](https://github.com/michaelstoffer/sietch-console/actions/workflows/release.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/michaelstoffer/sietch-console?include_prereleases&label=version)](https://github.com/michaelstoffer/sietch-console/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D4?logo=windows)](https://github.com/michaelstoffer/sietch-console/blob/main/INSTALL.md)
+[![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/8.0)
+[![GitHub Sponsors](https://img.shields.io/badge/sponsor-%E2%9D%A4-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/michaelstoffer)
+
 Sietch Console is a Windows-native desktop application that replaces the manual scripts, terminal windows, and raw INI editing required to host a Dune: Awakening dedicated server. It provides a single, modern UI for setup, configuration, monitoring, diagnostics, backups, and networking — designed for both non-technical players and advanced server hosts.
 
 ---
