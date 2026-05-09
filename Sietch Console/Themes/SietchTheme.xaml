@@ -336,6 +336,7 @@
         <Setter Property="FontFamily"      Value="{StaticResource FontUI}" />
         <Setter Property="FontSize"        Value="{StaticResource FontSizeBody}" />
         <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding"         Value="14,8" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
