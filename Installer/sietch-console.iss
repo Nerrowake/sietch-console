@@ -58,14 +58,10 @@ Name: "{commondesktop}\{#AppName}";                   Filename: "{app}\{#AppExeN
 
 [Registry]
 ; Startup registry entry (optional task)
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run";
-  ValueType: string; ValueName: "{#AppName}"; ValueData: """{app}\{#AppExeName}""";
-  Flags: uninsdeletevalue; Tasks: startupicon
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#AppName}"; ValueData: """{app}\{#AppExeName}"""; Flags: uninsdeletevalue; Tasks: startupicon
 
 [Run]
-Filename: "{app}\{#AppExeName}";
-  Description: "{cm:LaunchProgram,{#AppName}}";
-  Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
 ; Remove any SQLite database and app data left behind only if user confirms via
