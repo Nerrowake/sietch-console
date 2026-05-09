@@ -20,60 +20,6 @@
             <Setter Property="BorderThickness" Value="1" />
         </Style>
 
-        <!-- ── Action button (primary) ──────────────────────────── -->
-        <Style x:Key="ActionButtonStyle" TargetType="Button">
-            <Setter Property="Cursor"  Value="Hand" />
-            <Setter Property="Padding" Value="14,7" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd"
-                                Background="{StaticResource AccentPrimary}"
-                                CornerRadius="{StaticResource CornerSmall}"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Opacity" Value="0.85" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Bd" Property="Opacity" Value="0.4" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- ── Secondary button (teal) ──────────────────────────── -->
-        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
-            <Setter Property="Cursor"  Value="Hand" />
-            <Setter Property="Padding" Value="12,7" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd"
-                                Background="{StaticResource AccentTeal}"
-                                CornerRadius="{StaticResource CornerSmall}"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Opacity" Value="0.85" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Bd" Property="Opacity" Value="0.4" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
         <!-- ── Required-port row DataTemplate ───────────────────── -->
         <DataTemplate DataType="{x:Type models:BattlegroupPort}">
             <Border BorderBrush="{StaticResource BorderSubtle}"
@@ -295,14 +241,16 @@
                 <Button Grid.Column="1"
                         Command="{Binding RefreshCommand}"
                         IsEnabled="{Binding IsLoading, Converter={StaticResource BoolInverseConverter}}"
-                        Style="{StaticResource SecondaryButtonStyle}"
+                        Style="{StaticResource TealButtonStyle}"
                         VerticalAlignment="Top">
-                    <TextBlock Text="Refresh"
-                               Foreground="{StaticResource TextPrimary}"
-                               FontFamily="{StaticResource FontUI}"
-                               FontSize="{StaticResource FontSizeBody}" />
+                    <TextBlock Text="Refresh" />
                 </Button>
             </Grid>
+
+            <!-- Loading bar while network operations run -->
+            <ProgressBar Style="{StaticResource LoadingBarStyle}"
+                         Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibleConverter}}"
+                         Margin="0,0,0,12" />
 
             <!-- ── Status message ──────────────────────────────────── -->
             <TextBlock Text="{Binding StatusMessage}"
@@ -454,13 +402,10 @@
                         <Button Grid.Column="1"
                                 Command="{Binding CreateFirewallRulesCommand}"
                                 IsEnabled="{Binding IsLoading, Converter={StaticResource BoolInverseConverter}}"
-                                Style="{StaticResource ActionButtonStyle}"
+                                Style="{StaticResource PrimaryButtonStyle}"
                                 Visibility="{Binding HasFirewallIssues, Converter={StaticResource BoolToVisibleConverter}}"
                                 VerticalAlignment="Center">
-                            <TextBlock Text="Create Missing Rules"
-                                       Foreground="{StaticResource TextPrimary}"
-                                       FontFamily="{StaticResource FontUI}"
-                                       FontSize="{StaticResource FontSizeBody}" />
+                            <TextBlock Text="Create Missing Rules" />
                         </Button>
                     </Grid>
 
@@ -665,12 +610,9 @@
                         <Button Grid.Column="1"
                                 Command="{Binding TestConnectivityCommand}"
                                 IsEnabled="{Binding IsLoading, Converter={StaticResource BoolInverseConverter}}"
-                                Style="{StaticResource SecondaryButtonStyle}"
+                                Style="{StaticResource TealButtonStyle}"
                                 VerticalAlignment="Center">
-                            <TextBlock Text="Run Check"
-                                       Foreground="{StaticResource TextPrimary}"
-                                       FontFamily="{StaticResource FontUI}"
-                                       FontSize="{StaticResource FontSizeBody}" />
+                            <TextBlock Text="Run Check" />
                         </Button>
                     </Grid>
 
@@ -726,12 +668,9 @@
                         </StackPanel>
                         <Button Grid.Column="1"
                                 Command="{Binding CopyConnectionSummaryCommand}"
-                                Style="{StaticResource ActionButtonStyle}"
+                                Style="{StaticResource PrimaryButtonStyle}"
                                 VerticalAlignment="Center">
-                            <TextBlock Text="Copy to Clipboard"
-                                       Foreground="{StaticResource TextPrimary}"
-                                       FontFamily="{StaticResource FontUI}"
-                                       FontSize="{StaticResource FontSizeBody}" />
+                            <TextBlock Text="Copy to Clipboard" />
                         </Button>
                     </Grid>
 

@@ -15,7 +15,12 @@
                            Margin="0,0,0,4" />
                 <TextBlock Style="{StaticResource PageSubtitleStyle}"
                            Text="Create and restore battlegroup configuration and save data backups."
-                           Margin="0,0,0,20" />
+                           Margin="0,0,0,16" />
+
+                <!-- Loading bar while backup operation runs -->
+                <ProgressBar Style="{StaticResource LoadingBarStyle}"
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibleConverter}}"
+                             Margin="0,0,0,16" />
 
                 <!-- Status message -->
                 <Border Background="{StaticResource StatusSuccessBg}"
@@ -52,82 +57,18 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <!-- Backup Config -->
                             <Button Command="{Binding BackupConfigCommand}"
+                                    Style="{StaticResource InfoButtonStyle}"
                                     Margin="0,0,8,0"
                                     Padding="16,8"
-                                    Cursor="Hand"
                                     IsEnabled="{Binding IsLoading, Converter={StaticResource BoolInverseConverter}}">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background"   Value="{StaticResource StatusInfoBg}" />
-                                        <Setter Property="Foreground"   Value="{StaticResource AccentCyan}" />
-                                        <Setter Property="BorderBrush"  Value="{StaticResource StatusInfoBorder}" />
-                                        <Setter Property="BorderThickness" Value="1" />
-                                        <Setter Property="FontFamily"   Value="{StaticResource FontUI}" />
-                                        <Setter Property="FontSize"     Value="{StaticResource FontSizeBody}" />
-                                        <Setter Property="FontWeight"   Value="SemiBold" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="{StaticResource CornerMedium}"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsEnabled" Value="False">
-                                                            <Setter Property="Opacity" Value="0.35" />
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Opacity" Value="0.85" />
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
                                 <TextBlock Text="Backup Configuration" />
                             </Button>
 
                             <!-- Backup Save Data -->
                             <Button Command="{Binding BackupSaveDataCommand}"
+                                    Style="{StaticResource SuccessButtonStyle}"
                                     Padding="16,8"
-                                    Cursor="Hand"
                                     IsEnabled="{Binding IsLoading, Converter={StaticResource BoolInverseConverter}}">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background"   Value="{StaticResource StatusSuccessBg}" />
-                                        <Setter Property="Foreground"   Value="{StaticResource StatusSuccess}" />
-                                        <Setter Property="BorderBrush"  Value="{StaticResource StatusSuccessBorder}" />
-                                        <Setter Property="BorderThickness" Value="1" />
-                                        <Setter Property="FontFamily"   Value="{StaticResource FontUI}" />
-                                        <Setter Property="FontSize"     Value="{StaticResource FontSizeBody}" />
-                                        <Setter Property="FontWeight"   Value="SemiBold" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="{StaticResource CornerMedium}"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsEnabled" Value="False">
-                                                            <Setter Property="Opacity" Value="0.35" />
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Opacity" Value="0.85" />
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
                                 <TextBlock Text="Backup Save Data" />
                             </Button>
                         </StackPanel>
@@ -137,24 +78,19 @@
                 <!-- #79 – Backup listing -->
                 <!-- Empty state -->
                 <Border Style="{StaticResource CardStyle}"
-                        Padding="20,40"
+                        Padding="20,16"
+                        Margin="0,0,0,8"
                         Visibility="{Binding HasBackups, Converter={StaticResource BoolToCollapsedConverter}}">
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="No backups yet."
-                                   Foreground="{StaticResource TextMuted}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="{StaticResource FontSizeSubheading}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,0,0,8" />
-                        <TextBlock Text="Use the buttons above to create your first configuration or save data backup."
-                                   Foreground="{StaticResource TextDisabled}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   HorizontalAlignment="Center"
-                                   TextWrapping="Wrap"
-                                   TextAlignment="Center"
-                                   MaxWidth="420" />
-                    </StackPanel>
+                    <Border Style="{StaticResource EmptyStateBorderStyle}">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Style="{StaticResource EmptyStateHeadingStyle}"
+                                       Text="No backups yet."
+                                       Margin="0,0,0,6" />
+                            <TextBlock Style="{StaticResource EmptyStateSubtextStyle}"
+                                       Text="Use the buttons above to create your first configuration or save data backup."
+                                       MaxWidth="420" />
+                        </StackPanel>
+                    </Border>
                 </Border>
 
                 <!-- Backup cards -->
@@ -239,38 +175,9 @@
                                         <Button Command="{Binding DataContext.RequestRestoreCommand,
                                                           RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 CommandParameter="{Binding}"
+                                                Style="{StaticResource CancelButtonStyle}"
                                                 Margin="0,0,6,0"
-                                                Padding="12,6"
-                                                Cursor="Hand">
-                                            <Button.Style>
-                                                <Style TargetType="Button">
-                                                    <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                                    <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
-                                                    <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                                    <Setter Property="BorderThickness" Value="1" />
-                                                    <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                                    <Setter Property="FontSize"       Value="12" />
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="Button">
-                                                                <Border Background="{TemplateBinding Background}"
-                                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                                                        CornerRadius="{StaticResource CornerMedium}"
-                                                                        Padding="{TemplateBinding Padding}">
-                                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-                                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                                        <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
-                                                                        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
-                                                                    </Trigger>
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </Button.Style>
+                                                Padding="12,6">
                                             <TextBlock Text="Restore" />
                                         </Button>
 
@@ -278,36 +185,8 @@
                                         <Button Command="{Binding DataContext.RequestDeleteCommand,
                                                           RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 CommandParameter="{Binding}"
-                                                Padding="12,6"
-                                                Cursor="Hand">
-                                            <Button.Style>
-                                                <Style TargetType="Button">
-                                                    <Setter Property="Background"     Value="{StaticResource StatusErrorBg}" />
-                                                    <Setter Property="Foreground"     Value="{StaticResource StatusError}" />
-                                                    <Setter Property="BorderBrush"    Value="{StaticResource StatusErrorBorder}" />
-                                                    <Setter Property="BorderThickness" Value="1" />
-                                                    <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                                    <Setter Property="FontSize"       Value="12" />
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="Button">
-                                                                <Border Background="{TemplateBinding Background}"
-                                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                                                        CornerRadius="{StaticResource CornerMedium}"
-                                                                        Padding="{TemplateBinding Padding}">
-                                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-                                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                                        <Setter Property="Opacity" Value="0.8" />
-                                                                    </Trigger>
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </Button.Style>
+                                                Style="{StaticResource DangerButtonStyle}"
+                                                Padding="12,6">
                                             <TextBlock Text="Delete" />
                                         </Button>
                                     </StackPanel>
@@ -346,68 +225,14 @@
                                Margin="0,0,0,20" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Command="{Binding CancelActionCommand}"
-                                Margin="0,0,8,0" Padding="16,8" Cursor="Hand">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                    <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
-                                    <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                    <Setter Property="BorderThickness" Value="1" />
-                                    <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                    <Setter Property="FontSize"       Value="{StaticResource FontSizeBody}" />
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}"
-                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                                        CornerRadius="{StaticResource CornerMedium}"
-                                                        Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </Button.Style>
+                                Style="{StaticResource CancelButtonStyle}"
+                                Margin="0,0,8,0"
+                                Padding="16,8">
                             <TextBlock Text="Cancel" />
                         </Button>
                         <Button Command="{Binding ConfirmActionCommand}"
-                                Padding="16,8" Cursor="Hand">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background"   Value="{StaticResource StatusErrorBg}" />
-                                    <Setter Property="Foreground"   Value="{StaticResource StatusError}" />
-                                    <Setter Property="BorderBrush"  Value="{StaticResource StatusErrorBorder}" />
-                                    <Setter Property="BorderThickness" Value="1" />
-                                    <Setter Property="FontFamily"   Value="{StaticResource FontUI}" />
-                                    <Setter Property="FontSize"     Value="{StaticResource FontSizeBody}" />
-                                    <Setter Property="FontWeight"   Value="SemiBold" />
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}"
-                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                                        CornerRadius="{StaticResource CornerMedium}"
-                                                        Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Opacity" Value="0.85" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </Button.Style>
+                                Style="{StaticResource DangerButtonStyle}"
+                                Padding="16,8">
                             <TextBlock Text="Confirm" />
                         </Button>
                     </StackPanel>

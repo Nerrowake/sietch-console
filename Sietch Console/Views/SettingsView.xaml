@@ -14,7 +14,12 @@
                            Margin="0,0,0,4" />
                 <TextBlock Style="{StaticResource PageSubtitleStyle}"
                            Text="Edit battlegroup configuration files and server settings."
-                           Margin="0,0,0,20" />
+                           Margin="0,0,0,16" />
+
+                <!-- Loading bar while settings load or save -->
+                <ProgressBar Style="{StaticResource LoadingBarStyle}"
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibleConverter}}"
+                             Margin="0,0,0,16" />
 
                 <!-- #65 – Restart required banner -->
                 <Border Background="{StaticResource StatusWarningBg}"
