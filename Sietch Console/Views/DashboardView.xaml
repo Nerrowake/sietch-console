@@ -2,5 +2,404 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="#0B0F14">
-    <Grid />
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="28,24,28,28">
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- Page Header                             -->
+            <!-- ═══════════════════════════════════════ -->
+            <TextBlock Text="Dashboard"
+                       Foreground="#F3EBDD"
+                       FontFamily="Segoe UI Variable"
+                       FontSize="22"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,4" />
+            <TextBlock Text="Overview of your battlegroup, system health, and recent activity."
+                       Foreground="#7B6F5D"
+                       FontFamily="Segoe UI Variable"
+                       FontSize="13"
+                       Margin="0,0,0,24" />
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- Status Cards Row                        -->
+            <!-- ═══════════════════════════════════════ -->
+            <UniformGrid Rows="1" Columns="3" Margin="0,0,0,16">
+
+                <!-- Battlegroup Status -->
+                <Border Margin="0,0,8,0"
+                        Background="#141A22"
+                        BorderBrush="#232B35"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20,16">
+                    <StackPanel>
+                        <TextBlock Text="BATTLEGROUP"
+                                   Foreground="#7B6F5D"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,12" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Ellipse Width="10" Height="10"
+                                     Fill="#6E747C"
+                                     VerticalAlignment="Center"
+                                     Margin="0,0,8,0" />
+                            <TextBlock Text="Offline"
+                                       Foreground="#F3EBDD"
+                                       FontFamily="Segoe UI Variable"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="No active battlegroup detected."
+                                   Foreground="#7B6F5D"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="12" />
+                    </StackPanel>
+                </Border>
+
+                <!-- VM Status -->
+                <Border Margin="4,0"
+                        Background="#141A22"
+                        BorderBrush="#232B35"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20,16">
+                    <StackPanel>
+                        <TextBlock Text="VIRTUAL MACHINE"
+                                   Foreground="#7B6F5D"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,12" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Ellipse Width="10" Height="10"
+                                     Fill="#6E747C"
+                                     VerticalAlignment="Center"
+                                     Margin="0,0,8,0" />
+                            <TextBlock Text="Not Running"
+                                       Foreground="#F3EBDD"
+                                       FontFamily="Segoe UI Variable"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Hyper-V VM is stopped."
+                                   Foreground="#7B6F5D"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="12" />
+                    </StackPanel>
+                </Border>
+
+                <!-- System Health -->
+                <Border Margin="8,0,0,0"
+                        Background="#141A22"
+                        BorderBrush="#232B35"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20,16">
+                    <StackPanel>
+                        <TextBlock Text="SYSTEM HEALTH"
+                                   Foreground="#7B6F5D"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,12" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Ellipse Width="10" Height="10"
+                                     Fill="#6E747C"
+                                     VerticalAlignment="Center"
+                                     Margin="0,0,8,0" />
+                            <TextBlock Text="Not Checked"
+                                       Foreground="#F3EBDD"
+                                       FontFamily="Segoe UI Variable"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Run diagnostics to verify readiness."
+                                   Foreground="#7B6F5D"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="12" />
+                    </StackPanel>
+                </Border>
+
+            </UniformGrid>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- Middle Row: Quick Actions + Diagnostics -->
+            <!-- ═══════════════════════════════════════ -->
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Quick Actions -->
+                <Border Grid.Column="0"
+                        Background="#141A22"
+                        BorderBrush="#232B35"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20,16">
+                    <StackPanel>
+                        <TextBlock Text="Quick Actions"
+                                   Foreground="#F3EBDD"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,16" />
+
+                        <!-- Action buttons row 1 -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Background="#1A2A1A"
+                                    BorderBrush="#2A3D2A"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Height="40"
+                                    Opacity="0.5">
+                                <TextBlock Text="Start Battlegroup"
+                                           Foreground="#58B878"
+                                           FontFamily="Segoe UI Variable"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+
+                            <Border Grid.Column="2"
+                                    Background="#2A1A1A"
+                                    BorderBrush="#3D2A2A"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Height="40"
+                                    Opacity="0.5">
+                                <TextBlock Text="Stop Battlegroup"
+                                           Foreground="#D9534F"
+                                           FontFamily="Segoe UI Variable"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                        </Grid>
+
+                        <!-- Action buttons row 2 -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Background="#1A1F2A"
+                                    BorderBrush="#2A3040"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Height="40"
+                                    Opacity="0.5">
+                                <TextBlock Text="Restart"
+                                           Foreground="#4FB3B8"
+                                           FontFamily="Segoe UI Variable"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+
+                            <Border Grid.Column="2"
+                                    Background="#141A22"
+                                    BorderBrush="#232B35"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Height="40"
+                                    Opacity="0.5">
+                                <TextBlock Text="Open Logs"
+                                           Foreground="#B8AA92"
+                                           FontFamily="Segoe UI Variable"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                        </Grid>
+
+                        <TextBlock Text="Actions are unavailable until a battlegroup is configured."
+                                   Foreground="#7B6F5D"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"
+                                   Margin="0,12,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Recent Diagnostics -->
+                <Border Grid.Column="2"
+                        Background="#141A22"
+                        BorderBrush="#232B35"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20,16">
+                    <StackPanel>
+                        <TextBlock Text="Recent Diagnostics"
+                                   Foreground="#F3EBDD"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,16" />
+
+                        <Border Background="#0F151C"
+                                BorderBrush="#232B35"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="16">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="No diagnostics have been run."
+                                           Foreground="#7B6F5D"
+                                           FontFamily="Segoe UI Variable"
+                                           FontSize="13"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,6" />
+                                <TextBlock Text="Use the Diagnostics section to check system readiness."
+                                           Foreground="#4A4035"
+                                           FontFamily="Segoe UI Variable"
+                                           FontSize="11"
+                                           HorizontalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           TextAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- Bottom Row: Last Backup + Networking    -->
+            <!-- ═══════════════════════════════════════ -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Last Backup -->
+                <Border Grid.Column="0"
+                        Background="#141A22"
+                        BorderBrush="#232B35"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20,16">
+                    <StackPanel>
+                        <TextBlock Text="Last Backup"
+                                   Foreground="#F3EBDD"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,16" />
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Ellipse Width="8" Height="8"
+                                     Fill="#6E747C"
+                                     VerticalAlignment="Center"
+                                     Margin="0,0,8,0" />
+                            <TextBlock Text="No backups found"
+                                       Foreground="#B8AA92"
+                                       FontFamily="Segoe UI Variable"
+                                       FontSize="13" />
+                        </StackPanel>
+                        <TextBlock Text="Create a backup from the Backups section before making configuration changes."
+                                   Foreground="#7B6F5D"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="11"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Networking -->
+                <Border Grid.Column="2"
+                        Background="#141A22"
+                        BorderBrush="#232B35"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20,16">
+                    <StackPanel>
+                        <TextBlock Text="Networking"
+                                   Foreground="#F3EBDD"
+                                   FontFamily="Segoe UI Variable"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,16" />
+
+                        <!-- Networking info rows -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="Host LAN IP"
+                                       Foreground="#7B6F5D"
+                                       FontFamily="Segoe UI Variable"
+                                       FontSize="12"
+                                       Margin="0,0,16,0" />
+                            <TextBlock Grid.Column="1"
+                                       Text="—"
+                                       Foreground="#B8AA92"
+                                       FontFamily="Segoe UI Variable"
+                                       FontSize="12" />
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="VM IP"
+                                       Foreground="#7B6F5D"
+                                       FontFamily="Segoe UI Variable"
+                                       FontSize="12"
+                                       Margin="0,0,16,0" />
+                            <TextBlock Grid.Column="1"
+                                       Text="—"
+                                       Foreground="#B8AA92"
+                                       FontFamily="Segoe UI Variable"
+                                       FontSize="12" />
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="Required Ports"
+                                       Foreground="#7B6F5D"
+                                       FontFamily="Segoe UI Variable"
+                                       FontSize="12"
+                                       Margin="0,0,16,0" />
+                            <TextBlock Grid.Column="1"
+                                       Text="7777–7810 UDP, 31982 TCP"
+                                       Foreground="#B8AA92"
+                                       FontFamily="Segoe UI Variable"
+                                       FontSize="12" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>
