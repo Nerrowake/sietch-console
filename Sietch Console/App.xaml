@@ -9,6 +9,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Themes/SietchTheme.xaml" />
+                <ResourceDictionary Source="Themes/BrandResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Main section ViewModel → View routing -->

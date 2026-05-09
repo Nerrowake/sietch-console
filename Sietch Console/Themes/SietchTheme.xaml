@@ -15,113 +15,176 @@
     <converters:FileSizeConverter         x:Key="FileSizeConverter" />
 
     <!-- ═══════════════════════════════════════════ -->
+    <!-- BRAND COLOR TOKENS  (raw Color resources)   -->
+    <!-- Aligned to Sietch Console Brand Board v1.0  -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- Primary surface ramp -->
+    <Color x:Key="ColorVoid">#FF06090C</Color>
+    <Color x:Key="ColorOnyx">#FF0B0F14</Color>
+    <Color x:Key="ColorCharcoal">#FF141A22</Color>
+    <Color x:Key="ColorIron">#FF232B35</Color>
+    <Color x:Key="ColorIronTwo">#FF1A212B</Color>
+
+    <!-- Brand accents -->
+    <Color x:Key="ColorSandstone">#FFD6B98C</Color>
+    <Color x:Key="ColorSpice">#FFC46A2B</Color>
+    <Color x:Key="ColorAmber">#FFE0A64B</Color>
+
+    <!-- Secondary tonal range -->
+    <Color x:Key="ColorDustBeige">#FFE8D7B5</Color>
+    <Color x:Key="ColorMutedCyan">#FF4FB3B8</Color>
+    <Color x:Key="ColorDeepTeal">#FF1F6F73</Color>
+    <Color x:Key="ColorAshBrown">#FF4A3A2A</Color>
+    <Color x:Key="ColorFadedSand">#FF9C8564</Color>
+    <Color x:Key="ColorViolet">#FF887CF6</Color>
+
+    <!-- Wordmark gold gradient stops (used by BrandResources logo) -->
+    <Color x:Key="ColorGoldHigh">#FFF4D49A</Color>
+    <Color x:Key="ColorGoldMid">#FFE0A64B</Color>
+    <Color x:Key="ColorGoldLow">#FFC46A2B</Color>
+
+    <!-- ═══════════════════════════════════════════ -->
     <!-- BACKGROUND BRUSHES                          -->
     <!-- ═══════════════════════════════════════════ -->
 
     <!-- Deep Onyx — main window and view backgrounds -->
-    <SolidColorBrush x:Key="AppBackground"     Color="#0B0F14" />
+    <SolidColorBrush x:Key="AppBackground"     Color="{StaticResource ColorOnyx}" />
     <!-- Charcoal Slate — panels, cards, sidebar -->
-    <SolidColorBrush x:Key="PanelBackground"   Color="#141A22" />
+    <SolidColorBrush x:Key="PanelBackground"   Color="{StaticResource ColorCharcoal}" />
     <!-- Panel Dark — inner surfaces, log stream header -->
-    <SolidColorBrush x:Key="SurfaceBackground" Color="#111820" />
+    <SolidColorBrush x:Key="SurfaceBackground" Color="#FF111820" />
     <!-- Near-black — log stream body -->
-    <SolidColorBrush x:Key="DeepBackground"    Color="#0A0D11" />
+    <SolidColorBrush x:Key="DeepBackground"    Color="#FF0A0D11" />
+    <!-- Void — drop-shadow / behind-canvas -->
+    <SolidColorBrush x:Key="VoidBackground"    Color="{StaticResource ColorVoid}" />
     <!-- Dark overlay — input fields, depressed surfaces -->
-    <SolidColorBrush x:Key="FieldBackground"   Color="#0F151C" />
+    <SolidColorBrush x:Key="FieldBackground"   Color="#FF0F151C" />
     <!-- Subtle blue-dark — hover states, selected overlays -->
-    <SolidColorBrush x:Key="OverlayBackground" Color="#1A2030" />
+    <SolidColorBrush x:Key="OverlayBackground" Color="#FF1A2030" />
     <!-- Slightly lifted — nav item selected state -->
-    <SolidColorBrush x:Key="SelectionBackground" Color="#1F2A36" />
+    <SolidColorBrush x:Key="SelectionBackground" Color="#FF1F2A36" />
     <!-- Nav item hover -->
-    <SolidColorBrush x:Key="HoverBackground"   Color="#191F29" />
+    <SolidColorBrush x:Key="HoverBackground"   Color="#FF191F29" />
     <!-- Card surface — elevated above AppBackground, below PanelBackground -->
-    <SolidColorBrush x:Key="CardBackground"    Color="#1A212B" />
+    <SolidColorBrush x:Key="CardBackground"    Color="{StaticResource ColorIronTwo}" />
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- BORDER BRUSHES                              -->
     <!-- ═══════════════════════════════════════════ -->
 
     <!-- Iron Gray — default card and panel borders -->
-    <SolidColorBrush x:Key="BorderDefault" Color="#232B35" />
+    <SolidColorBrush x:Key="BorderDefault" Color="{StaticResource ColorIron}" />
     <!-- Slightly lighter — subtle dividers -->
-    <SolidColorBrush x:Key="BorderSubtle"  Color="#26313D" />
+    <SolidColorBrush x:Key="BorderSubtle"  Color="#FF26313D" />
+    <!-- Hairline — sandstone @ 18% on dark, for premium dividers -->
+    <SolidColorBrush x:Key="BorderHairline" Color="#2EFF000000" />
     <!-- Ash Brown — warm subtle borders -->
-    <SolidColorBrush x:Key="BorderWarm"    Color="#4A3A2A" />
+    <SolidColorBrush x:Key="BorderWarm"    Color="{StaticResource ColorAshBrown}" />
+    <!-- Faded Sand — for icon strokes & callouts -->
+    <SolidColorBrush x:Key="BorderSand"    Color="{StaticResource ColorFadedSand}" />
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- ACCENT BRUSHES                              -->
     <!-- ═══════════════════════════════════════════ -->
 
     <!-- Spice Orange — primary actions, active states, logo mark -->
-    <SolidColorBrush x:Key="AccentPrimary"    Color="#C46A2B" />
+    <SolidColorBrush x:Key="AccentPrimary"    Color="{StaticResource ColorSpice}" />
     <!-- Sandstone — headings and warm highlights -->
-    <SolidColorBrush x:Key="AccentSandstone"  Color="#D6B98C" />
+    <SolidColorBrush x:Key="AccentSandstone"  Color="{StaticResource ColorSandstone}" />
     <!-- Dune Amber — warnings, attention states -->
-    <SolidColorBrush x:Key="AccentAmber"      Color="#E0A64B" />
+    <SolidColorBrush x:Key="AccentAmber"      Color="{StaticResource ColorAmber}" />
+    <!-- Dust Beige — soft highlight -->
+    <SolidColorBrush x:Key="AccentDustBeige"  Color="{StaticResource ColorDustBeige}" />
     <!-- Muted Cyan — info, networking, system signals -->
-    <SolidColorBrush x:Key="AccentCyan"       Color="#4FB3B8" />
+    <SolidColorBrush x:Key="AccentCyan"       Color="{StaticResource ColorMutedCyan}" />
     <!-- Deep Teal — secondary actions -->
-    <SolidColorBrush x:Key="AccentTeal"       Color="#1F6F73" />
+    <SolidColorBrush x:Key="AccentTeal"       Color="{StaticResource ColorDeepTeal}" />
     <!-- Violet Signal — update/maintenance states -->
-    <SolidColorBrush x:Key="AccentViolet"     Color="#8B7CF6" />
+    <SolidColorBrush x:Key="AccentViolet"     Color="{StaticResource ColorViolet}" />
+    <!-- Faded Sand — neutral icon stroke -->
+    <SolidColorBrush x:Key="AccentFadedSand"  Color="{StaticResource ColorFadedSand}" />
+
+    <!-- Gold gradient brush for the wordmark / logo mark -->
+    <LinearGradientBrush x:Key="GoldGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0.00" Color="{StaticResource ColorGoldHigh}" />
+        <GradientStop Offset="0.35" Color="{StaticResource ColorGoldMid}" />
+        <GradientStop Offset="1.00" Color="{StaticResource ColorGoldLow}" />
+    </LinearGradientBrush>
+
+    <!-- Horizontal gold sweep — for accent rules / progress -->
+    <LinearGradientBrush x:Key="GoldSweep" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Offset="0.00" Color="{StaticResource ColorAmber}" />
+        <GradientStop Offset="1.00" Color="{StaticResource ColorSpice}" />
+    </LinearGradientBrush>
+
+    <!-- Dune gradient — for inner accents on the mark -->
+    <LinearGradientBrush x:Key="DuneGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0.00" Color="#FF9A4F1B" />
+        <GradientStop Offset="1.00" Color="#FF5C2D0E" />
+    </LinearGradientBrush>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- TEXT BRUSHES                                -->
     <!-- ═══════════════════════════════════════════ -->
 
     <!-- Warm near-white — primary readable text -->
-    <SolidColorBrush x:Key="TextPrimary"   Color="#F3EBDD" />
+    <SolidColorBrush x:Key="TextPrimary"   Color="#FFF3EBDD" />
     <!-- Warm mid — secondary and body text -->
-    <SolidColorBrush x:Key="TextSecondary" Color="#B8AA92" />
+    <SolidColorBrush x:Key="TextSecondary" Color="#FFB8AA92" />
     <!-- Muted warm — labels, captions, helper text -->
-    <SolidColorBrush x:Key="TextMuted"     Color="#7B6F5D" />
+    <SolidColorBrush x:Key="TextMuted"     Color="#FF7B6F5D" />
     <!-- Dark gray — disabled and placeholder text -->
-    <SolidColorBrush x:Key="TextDisabled"  Color="#4A4F5A" />
+    <SolidColorBrush x:Key="TextDisabled"  Color="#FF4A4F5A" />
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- STATUS BRUSHES                              -->
     <!-- ═══════════════════════════════════════════ -->
 
     <!-- Soft Fremen Green — healthy / pass / complete -->
-    <SolidColorBrush x:Key="StatusSuccess"  Color="#58B878" />
+    <SolidColorBrush x:Key="StatusSuccess"  Color="#FF58B878" />
     <!-- Dune Amber — attention needed / warning -->
-    <SolidColorBrush x:Key="StatusWarning"  Color="#E0A64B" />
+    <SolidColorBrush x:Key="StatusWarning"  Color="{StaticResource ColorAmber}" />
     <!-- Deep Signal Red — failure / error / blocked -->
-    <SolidColorBrush x:Key="StatusError"    Color="#D9534F" />
+    <SolidColorBrush x:Key="StatusError"    Color="#FFD9534F" />
     <!-- Muted Cyan — informational -->
-    <SolidColorBrush x:Key="StatusInfo"     Color="#4FB3B8" />
+    <SolidColorBrush x:Key="StatusInfo"     Color="{StaticResource ColorMutedCyan}" />
     <!-- Dust Gray — stopped / offline / unavailable -->
-    <SolidColorBrush x:Key="StatusOffline"  Color="#6E747C" />
+    <SolidColorBrush x:Key="StatusOffline"  Color="#FF6E747C" />
     <!-- Spice Orange — active / running -->
-    <SolidColorBrush x:Key="StatusRunning"  Color="#C46A2B" />
+    <SolidColorBrush x:Key="StatusRunning"  Color="{StaticResource ColorSpice}" />
     <!-- Violet Signal — updating / maintenance -->
-    <SolidColorBrush x:Key="StatusUpdating" Color="#8B7CF6" />
+    <SolidColorBrush x:Key="StatusUpdating" Color="{StaticResource ColorViolet}" />
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- STATUS BACKGROUND BRUSHES (tinted cards)   -->
+    <!-- STATUS BACKGROUND BRUSHES (tinted cards)    -->
     <!-- ═══════════════════════════════════════════ -->
 
-    <SolidColorBrush x:Key="StatusSuccessBg" Color="#1A2A1A" />
-    <SolidColorBrush x:Key="StatusSuccessBorder" Color="#2A3D2A" />
-    <SolidColorBrush x:Key="StatusWarningBg"  Color="#2A2010" />
-    <SolidColorBrush x:Key="StatusWarningBorder" Color="#3D3018" />
-    <SolidColorBrush x:Key="StatusErrorBg"   Color="#2A1A1A" />
-    <SolidColorBrush x:Key="StatusErrorBorder" Color="#3D2A2A" />
-    <SolidColorBrush x:Key="StatusInfoBg"    Color="#1A1F2A" />
-    <SolidColorBrush x:Key="StatusInfoBorder" Color="#2A3040" />
+    <SolidColorBrush x:Key="StatusSuccessBg"     Color="#FF1A2A1A" />
+    <SolidColorBrush x:Key="StatusSuccessBorder" Color="#FF2A3D2A" />
+    <SolidColorBrush x:Key="StatusWarningBg"     Color="#FF2A2010" />
+    <SolidColorBrush x:Key="StatusWarningBorder" Color="#FF3D3018" />
+    <SolidColorBrush x:Key="StatusErrorBg"       Color="#FF2A1A1A" />
+    <SolidColorBrush x:Key="StatusErrorBorder"   Color="#FF3D2A2A" />
+    <SolidColorBrush x:Key="StatusInfoBg"        Color="#FF1A1F2A" />
+    <SolidColorBrush x:Key="StatusInfoBorder"    Color="#FF2A3040" />
+    <SolidColorBrush x:Key="StatusUpdatingBg"    Color="#FF1F1A2E" />
+    <SolidColorBrush x:Key="StatusUpdatingBorder" Color="#FF2E2645" />
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- TYPOGRAPHY                                  -->
     <!-- ═══════════════════════════════════════════ -->
 
-    <FontFamily x:Key="FontUI">Segoe UI Variable</FontFamily>
-    <FontFamily x:Key="FontMono">Cascadia Mono, Consolas, Courier New</FontFamily>
+    <FontFamily x:Key="FontUI">Segoe UI Variable, Segoe UI</FontFamily>
+    <FontFamily x:Key="FontUISemibold">Segoe UI Variable Semibold, Segoe UI Semibold, Segoe UI</FontFamily>
+    <FontFamily x:Key="FontMono">Cascadia Mono, Cascadia Code, Consolas, Courier New</FontFamily>
 
     <sys:Double x:Key="FontSizeSmall">11</sys:Double>
     <sys:Double x:Key="FontSizeBody">13</sys:Double>
     <sys:Double x:Key="FontSizeSubheading">14</sys:Double>
     <sys:Double x:Key="FontSizeHeading">18</sys:Double>
     <sys:Double x:Key="FontSizeTitle">22</sys:Double>
+    <sys:Double x:Key="FontSizeDisplay">32</sys:Double>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- CORNER RADII                                -->
@@ -135,6 +198,13 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- TEXTBLOCK STYLES                            -->
     <!-- ═══════════════════════════════════════════ -->
+
+    <Style x:Key="DisplayTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground"  Value="{StaticResource TextPrimary}" />
+        <Setter Property="FontFamily"  Value="{StaticResource FontUISemibold}" />
+        <Setter Property="FontSize"    Value="{StaticResource FontSizeDisplay}" />
+        <Setter Property="FontWeight"  Value="SemiBold" />
+    </Style>
 
     <Style x:Key="PageTitleStyle" TargetType="TextBlock">
         <Setter Property="Foreground"  Value="{StaticResource TextPrimary}" />
@@ -154,6 +224,12 @@
         <Setter Property="FontFamily"  Value="{StaticResource FontUI}" />
         <Setter Property="FontSize"    Value="10" />
         <Setter Property="FontWeight"  Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="MonoLabelStyle" TargetType="TextBlock">
+        <Setter Property="Foreground"  Value="{StaticResource TextMuted}" />
+        <Setter Property="FontFamily"  Value="{StaticResource FontMono}" />
+        <Setter Property="FontSize"    Value="{StaticResource FontSizeSmall}" />
     </Style>
 
     <Style x:Key="CardTitleStyle" TargetType="TextBlock">
@@ -198,7 +274,6 @@
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility"   Value="Auto" />
     </Style>
 
-    <!-- #97 — Icon + label, AccentPrimary icon when selected -->
     <Style x:Key="NavItemStyle" TargetType="ListBoxItem">
         <Setter Property="Padding"  Value="0" />
         <Setter Property="Margin"   Value="8,2" />
@@ -248,10 +323,9 @@
     </Style>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- BUTTON STYLES (#92, #98)                    -->
+    <!-- BUTTON STYLES                               -->
     <!-- ═══════════════════════════════════════════ -->
 
-    <!-- Base template — centered content, opacity on hover/disabled -->
     <Style x:Key="BaseButtonStyle" TargetType="Button">
         <Setter Property="Cursor"          Value="Hand" />
         <Setter Property="FontFamily"      Value="{StaticResource FontUI}" />
@@ -281,7 +355,6 @@
         </Setter>
     </Style>
 
-    <!-- Primary — spice orange solid, main CTA -->
     <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
         <Setter Property="Background"  Value="{StaticResource AccentPrimary}" />
         <Setter Property="Foreground"  Value="{StaticResource TextPrimary}" />
@@ -289,14 +362,12 @@
         <Setter Property="FontWeight"  Value="SemiBold" />
     </Style>
 
-    <!-- Teal — secondary / neutral positive actions -->
     <Style x:Key="TealButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
         <Setter Property="Background"  Value="{StaticResource AccentTeal}" />
         <Setter Property="Foreground"  Value="{StaticResource TextPrimary}" />
         <Setter Property="BorderBrush" Value="{StaticResource AccentTeal}" />
     </Style>
 
-    <!-- Success — green outline (Start, confirm-positive) -->
     <Style x:Key="SuccessButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
         <Setter Property="Background"  Value="{StaticResource StatusSuccessBg}" />
         <Setter Property="Foreground"  Value="{StaticResource StatusSuccess}" />
@@ -304,7 +375,6 @@
         <Setter Property="FontWeight"  Value="SemiBold" />
     </Style>
 
-    <!-- Danger — red outline (Stop, delete, destructive) -->
     <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
         <Setter Property="Background"  Value="{StaticResource StatusErrorBg}" />
         <Setter Property="Foreground"  Value="{StaticResource StatusError}" />
@@ -312,7 +382,6 @@
         <Setter Property="FontWeight"  Value="SemiBold" />
     </Style>
 
-    <!-- Info — cyan outline (Restart, informational actions) -->
     <Style x:Key="InfoButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
         <Setter Property="Background"  Value="{StaticResource StatusInfoBg}" />
         <Setter Property="Foreground"  Value="{StaticResource AccentCyan}" />
@@ -320,7 +389,6 @@
         <Setter Property="FontWeight"  Value="SemiBold" />
     </Style>
 
-    <!-- Ghost — field-colored, left-aligned content, background-change hover -->
     <Style x:Key="GhostButtonStyle" TargetType="Button">
         <Setter Property="Cursor"          Value="Hand" />
         <Setter Property="FontFamily"      Value="{StaticResource FontUI}" />
@@ -354,7 +422,6 @@
         </Setter>
     </Style>
 
-    <!-- Cancel — centered field-color, background-change hover -->
     <Style x:Key="CancelButtonStyle" TargetType="Button">
         <Setter Property="Cursor"          Value="Hand" />
         <Setter Property="FontFamily"      Value="{StaticResource FontUI}" />
@@ -389,7 +456,7 @@
     </Style>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- LOADING STATE (#94)                         -->
+    <!-- LOADING STATE                                -->
     <!-- ═══════════════════════════════════════════ -->
 
     <Style x:Key="LoadingBarStyle" TargetType="ProgressBar">
@@ -401,7 +468,7 @@
     </Style>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- EMPTY STATE (#93)                           -->
+    <!-- EMPTY STATE                                  -->
     <!-- ═══════════════════════════════════════════ -->
 
     <Style x:Key="EmptyStateBorderStyle" TargetType="Border">
@@ -430,7 +497,7 @@
     </Style>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- STATUS BANNER STYLES (#95, #98)             -->
+    <!-- STATUS BANNER STYLES                         -->
     <!-- ═══════════════════════════════════════════ -->
 
     <Style x:Key="ErrorBannerStyle" TargetType="Border">
