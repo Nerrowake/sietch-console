@@ -1,6 +1,10 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sietch_Console.ViewModels;
+using SietchConsole.Core.Interfaces;
+using SietchConsole.Data.Database;
+using SietchConsole.Data.Repositories;
 using System.Windows;
 
 namespace Sietch_Console;
@@ -18,6 +22,18 @@ public partial class App : Application
 
     private static void ConfigureServices(IServiceCollection services)
     {
+        // Database
+        var dbPath = DatabasePathProvider.GetDatabasePath();
+        services.AddDbContext<SietchConsoleDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath}"));
+        services.AddScoped<DatabaseInitializerService>();
+
+        // Repositories
+        services.AddScoped<IApplicationSettingsRepository, ApplicationSettingsRepository>();
+        services.AddScoped<IBattlegroupProfileRepository, BattlegroupProfileRepository>();
+        services.AddScoped<IDiagnosticsResultRepository, DiagnosticsResultRepository>();
+        services.AddScoped<IBackupRecordRepository, BackupRecordRepository>();
+
         // ViewModels
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<DashboardViewModel>();
@@ -35,6 +51,12 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         await _host.StartAsync();
+
+        using (var scope = _host.Services.CreateScope())
+        {
+            var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializerService>();
+            await initializer.InitializeAsync();
+        }
 
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
