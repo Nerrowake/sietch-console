@@ -196,6 +196,7 @@
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility"   Value="Auto" />
     </Style>
 
+    <!-- #97 — Icon + label, AccentPrimary icon when selected -->
     <Style x:Key="NavItemStyle" TargetType="ListBoxItem">
         <Setter Property="Padding"  Value="0" />
         <Setter Property="Margin"   Value="8,2" />
@@ -204,21 +205,32 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
                     <Border x:Name="ItemBorder"
-                            Height="36"
+                            Height="40"
                             CornerRadius="{StaticResource CornerSmall}"
                             Background="Transparent">
-                        <TextBlock x:Name="ItemLabel"
-                                   Text="{Binding Label}"
-                                   Foreground="{StaticResource TextSecondary}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   VerticalAlignment="Center"
-                                   Margin="12,0" />
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="ItemIcon"
+                                       Text="{Binding Icon}"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14"
+                                       Foreground="{StaticResource TextMuted}"
+                                       Width="20"
+                                       TextAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,8,0" />
+                            <TextBlock x:Name="ItemLabel"
+                                       Text="{Binding Label}"
+                                       Foreground="{StaticResource TextSecondary}"
+                                       FontFamily="{StaticResource FontUI}"
+                                       FontSize="{StaticResource FontSizeBody}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource SelectionBackground}" />
                             <Setter TargetName="ItemLabel"  Property="Foreground" Value="{StaticResource TextPrimary}" />
+                            <Setter TargetName="ItemIcon"   Property="Foreground" Value="{StaticResource AccentPrimary}" />
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
@@ -231,6 +243,224 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- BUTTON STYLES (#92, #98)                    -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- Base template — centered content, opacity on hover/disabled -->
+    <Style x:Key="BaseButtonStyle" TargetType="Button">
+        <Setter Property="Cursor"          Value="Hand" />
+        <Setter Property="FontFamily"      Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"        Value="{StaticResource FontSizeBody}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource CornerMedium}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.35" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Opacity" Value="0.85" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Primary — spice orange solid, main CTA -->
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="Background"  Value="{StaticResource AccentPrimary}" />
+        <Setter Property="Foreground"  Value="{StaticResource TextPrimary}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AccentPrimary}" />
+        <Setter Property="FontWeight"  Value="SemiBold" />
+    </Style>
+
+    <!-- Teal — secondary / neutral positive actions -->
+    <Style x:Key="TealButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="Background"  Value="{StaticResource AccentTeal}" />
+        <Setter Property="Foreground"  Value="{StaticResource TextPrimary}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AccentTeal}" />
+    </Style>
+
+    <!-- Success — green outline (Start, confirm-positive) -->
+    <Style x:Key="SuccessButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="Background"  Value="{StaticResource StatusSuccessBg}" />
+        <Setter Property="Foreground"  Value="{StaticResource StatusSuccess}" />
+        <Setter Property="BorderBrush" Value="{StaticResource StatusSuccessBorder}" />
+        <Setter Property="FontWeight"  Value="SemiBold" />
+    </Style>
+
+    <!-- Danger — red outline (Stop, delete, destructive) -->
+    <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="Background"  Value="{StaticResource StatusErrorBg}" />
+        <Setter Property="Foreground"  Value="{StaticResource StatusError}" />
+        <Setter Property="BorderBrush" Value="{StaticResource StatusErrorBorder}" />
+        <Setter Property="FontWeight"  Value="SemiBold" />
+    </Style>
+
+    <!-- Info — cyan outline (Restart, informational actions) -->
+    <Style x:Key="InfoButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="Background"  Value="{StaticResource StatusInfoBg}" />
+        <Setter Property="Foreground"  Value="{StaticResource AccentCyan}" />
+        <Setter Property="BorderBrush" Value="{StaticResource StatusInfoBorder}" />
+        <Setter Property="FontWeight"  Value="SemiBold" />
+    </Style>
+
+    <!-- Ghost — field-colored, left-aligned content, background-change hover -->
+    <Style x:Key="GhostButtonStyle" TargetType="Button">
+        <Setter Property="Cursor"          Value="Hand" />
+        <Setter Property="FontFamily"      Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"        Value="{StaticResource FontSizeBody}" />
+        <Setter Property="Background"      Value="{StaticResource FieldBackground}" />
+        <Setter Property="Foreground"      Value="{StaticResource TextSecondary}" />
+        <Setter Property="BorderBrush"     Value="{StaticResource BorderDefault}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource CornerMedium}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Left"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.35" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource OverlayBackground}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Cancel — centered field-color, background-change hover -->
+    <Style x:Key="CancelButtonStyle" TargetType="Button">
+        <Setter Property="Cursor"          Value="Hand" />
+        <Setter Property="FontFamily"      Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"        Value="{StaticResource FontSizeBody}" />
+        <Setter Property="Background"      Value="{StaticResource FieldBackground}" />
+        <Setter Property="Foreground"      Value="{StaticResource TextSecondary}" />
+        <Setter Property="BorderBrush"     Value="{StaticResource BorderDefault}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource CornerMedium}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.35" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource OverlayBackground}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- LOADING STATE (#94)                         -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <Style x:Key="LoadingBarStyle" TargetType="ProgressBar">
+        <Setter Property="IsIndeterminate" Value="True" />
+        <Setter Property="Height"          Value="2" />
+        <Setter Property="Background"      Value="Transparent" />
+        <Setter Property="Foreground"      Value="{StaticResource AccentPrimary}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- EMPTY STATE (#93)                           -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <Style x:Key="EmptyStateBorderStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource FieldBackground}" />
+        <Setter Property="BorderBrush"     Value="{StaticResource BorderDefault}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius"    Value="{StaticResource CornerMedium}" />
+        <Setter Property="Padding"         Value="24,20" />
+    </Style>
+
+    <Style x:Key="EmptyStateHeadingStyle" TargetType="TextBlock">
+        <Setter Property="Foreground"          Value="{StaticResource TextMuted}" />
+        <Setter Property="FontFamily"          Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"            Value="{StaticResource FontSizeBody}" />
+        <Setter Property="TextAlignment"       Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="EmptyStateSubtextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground"          Value="{StaticResource TextDisabled}" />
+        <Setter Property="FontFamily"          Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"            Value="{StaticResource FontSizeSmall}" />
+        <Setter Property="TextAlignment"       Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="TextWrapping"        Value="Wrap" />
+    </Style>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- STATUS BANNER STYLES (#95, #98)             -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <Style x:Key="ErrorBannerStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource StatusErrorBg}" />
+        <Setter Property="BorderBrush"     Value="{StaticResource StatusErrorBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius"    Value="{StaticResource CornerMedium}" />
+        <Setter Property="Padding"         Value="14,10" />
+    </Style>
+
+    <Style x:Key="SuccessBannerStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource StatusSuccessBg}" />
+        <Setter Property="BorderBrush"     Value="{StaticResource StatusSuccessBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius"    Value="{StaticResource CornerMedium}" />
+        <Setter Property="Padding"         Value="14,10" />
+    </Style>
+
+    <Style x:Key="WarningBannerStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource StatusWarningBg}" />
+        <Setter Property="BorderBrush"     Value="{StaticResource StatusWarningBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius"    Value="{StaticResource CornerMedium}" />
+        <Setter Property="Padding"         Value="14,10" />
+    </Style>
+
+    <Style x:Key="InfoBannerStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource StatusInfoBg}" />
+        <Setter Property="BorderBrush"     Value="{StaticResource StatusInfoBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius"    Value="{StaticResource CornerMedium}" />
+        <Setter Property="Padding"         Value="14,10" />
     </Style>
 
 </ResourceDictionary>
