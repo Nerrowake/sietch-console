@@ -7,6 +7,7 @@ using Sietch_Console.Services.Diagnostics;
 using Sietch_Console.Services.Installation;
 using Sietch_Console.Services.Backups;
 using Sietch_Console.Services.Logs;
+using Sietch_Console.Services.Networking;
 using Sietch_Console.ViewModels;
 using Sietch_Console.ViewModels.Steps;
 using SietchConsole.Core.Interfaces;
@@ -47,6 +48,7 @@ public partial class App : Application
         services.AddSingleton<ILogFileService, LogFileService>();
         services.AddSingleton<ILogAnalysisService, LogAnalysisService>();
         services.AddSingleton<IBackupService, BackupService>();
+        services.AddSingleton<INetworkingService, NetworkingService>();
 
         // Repositories
         services.AddScoped<IApplicationSettingsRepository, ApplicationSettingsRepository>();
@@ -91,6 +93,9 @@ public partial class App : Application
 
         var backupsVm = _host.Services.GetRequiredService<BackupsViewModel>();
         await backupsVm.InitializeAsync();
+
+        var networkingVm = _host.Services.GetRequiredService<NetworkingViewModel>();
+        await networkingVm.InitializeAsync();
 
         var wizardVm = _host.Services.GetRequiredService<SetupWizardViewModel>();
         await wizardVm.InitializeAsync();
