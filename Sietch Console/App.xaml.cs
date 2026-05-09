@@ -5,6 +5,7 @@ using Sietch_Console.Services.Configuration;
 using Sietch_Console.Services.Control;
 using Sietch_Console.Services.Diagnostics;
 using Sietch_Console.Services.Installation;
+using Sietch_Console.Services.Backups;
 using Sietch_Console.Services.Logs;
 using Sietch_Console.ViewModels;
 using Sietch_Console.ViewModels.Steps;
@@ -45,6 +46,7 @@ public partial class App : Application
         services.AddSingleton<IConfigurationService, ConfigurationService>();
         services.AddSingleton<ILogFileService, LogFileService>();
         services.AddSingleton<ILogAnalysisService, LogAnalysisService>();
+        services.AddSingleton<IBackupService, BackupService>();
 
         // Repositories
         services.AddScoped<IApplicationSettingsRepository, ApplicationSettingsRepository>();
@@ -86,6 +88,9 @@ public partial class App : Application
 
         var settingsVm = _host.Services.GetRequiredService<SettingsViewModel>();
         await settingsVm.InitializeAsync();
+
+        var backupsVm = _host.Services.GetRequiredService<BackupsViewModel>();
+        await backupsVm.InitializeAsync();
 
         var wizardVm = _host.Services.GetRequiredService<SetupWizardViewModel>();
         await wizardVm.InitializeAsync();
