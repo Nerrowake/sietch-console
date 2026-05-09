@@ -11,7 +11,47 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [0.1.0-alpha.1] — 2025-05-09
+## [0.1.0-alpha.2] — 2026-05-09
+
+### Added
+
+**Brand identity**
+- Full brand asset integration from Claude Design: multi-resolution app icon (`AppIcon.ico`, 16–256 px), cinematic splash screen (`Splash.png`), and `BrandResources.xaml` containing logo mark geometry, 15 vector nav icons, and the `AppLockupTemplate` lockup
+- `ResourceKeyToGeometryConverter` — runtime resource-key-to-geometry lookup for data-bound icon paths
+
+**Documentation**
+- `README.md` — user- and developer-facing project overview with feature table, requirements, quick start, and architecture summary
+- `CLAUDE.md` — AI development guidance document (auto-loaded by Claude Code)
+- `CONTRIBUTING.md` — branch naming, PR process, and coding standards
+- `docs/architecture.md` — layer diagram, service map, and data flow
+- `docs/user-setup-guide.md` — beginner-friendly Setup Wizard walkthrough
+- `docs/troubleshooting.md` — diagnostics interpretation and recovery workflows
+- `docs/known-limitations.md` — alpha stubs, known bugs, and unsupported configurations
+- `docs/roadmap.md` — Milestones 15–20 and post-MVP plans
+- `docs/release-checklist.md` — pre-release QA checklist
+- `INSTALL.md` — installation and first-launch instructions
+
+**Repository**
+- Repo made public; MIT license confirmed
+- README badges: CI build, release pipeline, version, license, platform, .NET, GitHub Sponsors
+- `.github/FUNDING.yml` — enables GitHub Sponsors button in repo UI
+
+### Changed
+
+- Header logo and wordmark replaced with `AppLockupTemplate` from `BrandResources.xaml` (removes ~120 lines of inline path geometry)
+- Sidebar navigation icons swapped from Segoe MDL2 Assets glyphs to brand vector `Path` elements styled with `BrandIconStyle`
+- `BaseButtonStyle` now sets `Padding="14,8"` — all button variants inherit consistent spacing app-wide
+- `SietchTheme.xaml` updated with full brand-board token pass (new brushes, gradients, typography resources)
+- Inno Setup `SetupIconFile` now points to `Resources\AppIcon.ico`
+
+### Fixed
+
+- Inno Setup `[Registry]` and `[Run]` entries were split across multiple lines, causing "Required parameter not specified" compile errors in CI — collapsed to single lines
+- Release workflow was triggering on a stale tag; tag moved to current HEAD after each fix
+
+---
+
+## [0.1.0-alpha.1] — 2026-05-09
 
 First internal alpha release. Core features are functional; the application is not yet ready for general public use.
 
@@ -72,5 +112,6 @@ First internal alpha release. Core features are functional; the application is n
 
 ---
 
-[Unreleased]: https://github.com/michaelstoffer/sietch-console/compare/v0.1.0-alpha.1...HEAD
-[0.1.0-alpha.1]: https://github.com/michaelstouffer/sietch-console/releases/tag/v0.1.0-alpha.1
+[Unreleased]: https://github.com/michaelstoffer/sietch-console/compare/v0.1.0-alpha.2...HEAD
+[0.1.0-alpha.2]: https://github.com/michaelstoffer/sietch-console/releases/tag/v0.1.0-alpha.2
+[0.1.0-alpha.1]: https://github.com/michaelstoffer/sietch-console/releases/tag/v0.1.0-alpha.1
