@@ -3,345 +3,198 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource AppBackground}">
 
+    <UserControl.Resources>
+
+        <Style x:Key="StepPillStyle" TargetType="Border">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderDefault}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{StaticResource CornerRound}" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource AccentPrimary}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentPrimary}" />
+                    <Setter Property="BorderThickness" Value="0" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource AccentTeal}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentTeal}" />
+                    <Setter Property="BorderThickness" Value="0" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="StepLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextDisabled}" />
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource AccentTeal}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="StepNumberStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextDisabled}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="Text" Value="✓" />
+                    <Setter Property="Foreground" Value="White" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="1" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="72" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Page Header -->
-        <StackPanel Grid.Row="0" Margin="28,24,28,20">
-            <TextBlock Style="{StaticResource PageTitleStyle}"
-                       Text="Setup Wizard"
+        <!-- Page header -->
+        <StackPanel Grid.Row="0" Margin="28,20,28,16">
+            <TextBlock Text="Setup Wizard"
+                       Style="{StaticResource PageTitleStyle}"
                        Margin="0,0,0,4" />
-            <TextBlock Style="{StaticResource PageSubtitleStyle}"
-                       Text="Follow the steps below to configure and launch your battlegroup." />
+            <TextBlock Text="Follow the steps below to configure and launch your battlegroup."
+                       Style="{StaticResource MutedTextStyle}" />
         </StackPanel>
 
-        <!-- ═══════════════════════════════════════ -->
-        <!-- Step Indicator Bar                      -->
-        <!-- ═══════════════════════════════════════ -->
+        <!-- Step indicator bar -->
         <Border Grid.Row="1"
                 Background="{StaticResource PanelBackground}"
                 BorderBrush="{StaticResource BorderDefault}"
                 BorderThickness="0,1,0,1"
-                Padding="28,16">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <!-- Step 1: Welcome (active) -->
-                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                    <Border Width="28" Height="28"
-                            Background="{StaticResource AccentPrimary}"
-                            CornerRadius="{StaticResource CornerRound}"
-                            HorizontalAlignment="Center"
-                            Margin="0,0,0,6">
-                        <TextBlock Text="1"
-                                   Foreground="{StaticResource TextPrimary}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12" FontWeight="SemiBold"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="Welcome"
-                               Foreground="{StaticResource TextPrimary}"
-                               FontFamily="{StaticResource FontUI}"
-                               FontSize="{StaticResource FontSizeSmall}"
-                               FontWeight="SemiBold"
-                               HorizontalAlignment="Center" />
-                </StackPanel>
-
-                <Rectangle Grid.Column="1" Height="1"
-                           Fill="{StaticResource BorderDefault}"
-                           VerticalAlignment="Top" Margin="4,13,4,0" />
-
-                <!-- Step 2: Requirements -->
-                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                    <Border Width="28" Height="28"
-                            Background="{StaticResource OverlayBackground}"
-                            BorderBrush="{StaticResource BorderDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRound}"
-                            HorizontalAlignment="Center"
-                            Margin="0,0,0,6">
-                        <TextBlock Text="2"
-                                   Foreground="{StaticResource TextDisabled}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="Requirements"
-                               Foreground="{StaticResource TextDisabled}"
-                               FontFamily="{StaticResource FontUI}"
-                               FontSize="{StaticResource FontSizeSmall}"
-                               HorizontalAlignment="Center" />
-                </StackPanel>
-
-                <Rectangle Grid.Column="3" Height="1"
-                           Fill="{StaticResource BorderDefault}"
-                           VerticalAlignment="Top" Margin="4,13,4,0" />
-
-                <!-- Step 3: Location -->
-                <StackPanel Grid.Column="4" HorizontalAlignment="Center">
-                    <Border Width="28" Height="28"
-                            Background="{StaticResource OverlayBackground}"
-                            BorderBrush="{StaticResource BorderDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRound}"
-                            HorizontalAlignment="Center"
-                            Margin="0,0,0,6">
-                        <TextBlock Text="3"
-                                   Foreground="{StaticResource TextDisabled}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="Location"
-                               Foreground="{StaticResource TextDisabled}"
-                               FontFamily="{StaticResource FontUI}"
-                               FontSize="{StaticResource FontSizeSmall}"
-                               HorizontalAlignment="Center" />
-                </StackPanel>
-
-                <Rectangle Grid.Column="5" Height="1"
-                           Fill="{StaticResource BorderDefault}"
-                           VerticalAlignment="Top" Margin="4,13,4,0" />
-
-                <!-- Step 4: Token -->
-                <StackPanel Grid.Column="6" HorizontalAlignment="Center">
-                    <Border Width="28" Height="28"
-                            Background="{StaticResource OverlayBackground}"
-                            BorderBrush="{StaticResource BorderDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRound}"
-                            HorizontalAlignment="Center"
-                            Margin="0,0,0,6">
-                        <TextBlock Text="4"
-                                   Foreground="{StaticResource TextDisabled}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="Token"
-                               Foreground="{StaticResource TextDisabled}"
-                               FontFamily="{StaticResource FontUI}"
-                               FontSize="{StaticResource FontSizeSmall}"
-                               HorizontalAlignment="Center" />
-                </StackPanel>
-
-                <Rectangle Grid.Column="7" Height="1"
-                           Fill="{StaticResource BorderDefault}"
-                           VerticalAlignment="Top" Margin="4,13,4,0" />
-
-                <!-- Step 5: VM Setup -->
-                <StackPanel Grid.Column="8" HorizontalAlignment="Center">
-                    <Border Width="28" Height="28"
-                            Background="{StaticResource OverlayBackground}"
-                            BorderBrush="{StaticResource BorderDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRound}"
-                            HorizontalAlignment="Center"
-                            Margin="0,0,0,6">
-                        <TextBlock Text="5"
-                                   Foreground="{StaticResource TextDisabled}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="VM Setup"
-                               Foreground="{StaticResource TextDisabled}"
-                               FontFamily="{StaticResource FontUI}"
-                               FontSize="{StaticResource FontSizeSmall}"
-                               HorizontalAlignment="Center" />
-                </StackPanel>
-
-                <Rectangle Grid.Column="9" Height="1"
-                           Fill="{StaticResource BorderDefault}"
-                           VerticalAlignment="Top" Margin="4,13,4,0" />
-
-                <!-- Step 6: Battlegroup -->
-                <StackPanel Grid.Column="10" HorizontalAlignment="Center">
-                    <Border Width="28" Height="28"
-                            Background="{StaticResource OverlayBackground}"
-                            BorderBrush="{StaticResource BorderDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRound}"
-                            HorizontalAlignment="Center"
-                            Margin="0,0,0,6">
-                        <TextBlock Text="6"
-                                   Foreground="{StaticResource TextDisabled}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="Battlegroup"
-                               Foreground="{StaticResource TextDisabled}"
-                               FontFamily="{StaticResource FontUI}"
-                               FontSize="{StaticResource FontSizeSmall}"
-                               HorizontalAlignment="Center" />
-                </StackPanel>
-
-                <Rectangle Grid.Column="11" Height="1"
-                           Fill="{StaticResource BorderDefault}"
-                           VerticalAlignment="Top" Margin="4,13,4,0" />
-
-                <!-- Step 7: Review -->
-                <StackPanel Grid.Column="12" HorizontalAlignment="Center">
-                    <Border Width="28" Height="28"
-                            Background="{StaticResource OverlayBackground}"
-                            BorderBrush="{StaticResource BorderDefault}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRound}"
-                            HorizontalAlignment="Center"
-                            Margin="0,0,0,6">
-                        <TextBlock Text="7"
-                                   Foreground="{StaticResource TextDisabled}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="12"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="Review"
-                               Foreground="{StaticResource TextDisabled}"
-                               FontFamily="{StaticResource FontUI}"
-                               FontSize="{StaticResource FontSizeSmall}"
-                               HorizontalAlignment="Center" />
-                </StackPanel>
-            </Grid>
+                Padding="28,14">
+            <ItemsControl ItemsSource="{Binding StepIndicators}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel HorizontalAlignment="Center" Margin="4,0">
+                            <Border Style="{StaticResource StepPillStyle}">
+                                <TextBlock Style="{StaticResource StepNumberStyle}" />
+                            </Border>
+                            <TextBlock Text="{Binding Title}"
+                                       Style="{StaticResource StepLabelStyle}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Border>
 
-        <Rectangle Grid.Row="2" Fill="{StaticResource BorderDefault}" />
-
-        <!-- ═══════════════════════════════════════ -->
-        <!-- Step Content: Welcome                   -->
-        <!-- ═══════════════════════════════════════ -->
-        <ScrollViewer Grid.Row="3"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
-            <StackPanel MaxWidth="600"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Margin="40,40">
-
-                <Border Width="56" Height="56"
-                        Background="{StaticResource OverlayBackground}"
-                        BorderBrush="{StaticResource AccentPrimary}"
-                        BorderThickness="2"
-                        CornerRadius="{StaticResource CornerLarge}"
-                        HorizontalAlignment="Center"
-                        Margin="0,0,0,24">
-                    <TextBlock Text="⌂"
-                               Foreground="{StaticResource AccentPrimary}"
-                               FontSize="28"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center" />
-                </Border>
-
-                <TextBlock Text="Welcome to Sietch Console"
-                           Foreground="{StaticResource TextPrimary}"
-                           FontFamily="{StaticResource FontUI}"
-                           FontSize="20"
-                           FontWeight="SemiBold"
-                           HorizontalAlignment="Center"
-                           TextAlignment="Center"
-                           Margin="0,0,0,12" />
-
-                <TextBlock Foreground="{StaticResource TextSecondary}"
-                           FontFamily="{StaticResource FontUI}"
-                           FontSize="{StaticResource FontSizeBody}"
-                           TextAlignment="Center"
-                           TextWrapping="Wrap"
-                           Margin="0,0,0,28"
-                           LineHeight="22">
-                    This wizard will guide you through setting up your Dune: Awakening battlegroup.
-                    It typically takes 10–20 minutes to complete, depending on your internet speed and hardware.
-                </TextBlock>
-
-                <Border Style="{StaticResource CardStyle}" Padding="20,16">
-                    <StackPanel>
-                        <TextBlock Text="This wizard will help you:"
-                                   Foreground="{StaticResource AccentSandstone}"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   FontWeight="SemiBold"
-                                   Margin="0,0,0,12" />
-
-                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6"
-                                     Fill="{StaticResource AccentPrimary}"
-                                     VerticalAlignment="Center" Margin="0,0,10,0" />
-                            <TextBlock Text="Verify your system meets all requirements"
-                                       Style="{StaticResource BodyTextStyle}" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6"
-                                     Fill="{StaticResource AccentPrimary}"
-                                     VerticalAlignment="Center" Margin="0,0,10,0" />
-                            <TextBlock Text="Choose an installation location"
-                                       Style="{StaticResource BodyTextStyle}" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6"
-                                     Fill="{StaticResource AccentPrimary}"
-                                     VerticalAlignment="Center" Margin="0,0,10,0" />
-                            <TextBlock Text="Enter your Dune account token"
-                                       Style="{StaticResource BodyTextStyle}" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6"
-                                     Fill="{StaticResource AccentPrimary}"
-                                     VerticalAlignment="Center" Margin="0,0,10,0" />
-                            <TextBlock Text="Set up the Hyper-V virtual machine"
-                                       Style="{StaticResource BodyTextStyle}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6"
-                                     Fill="{StaticResource AccentPrimary}"
-                                     VerticalAlignment="Center" Margin="0,0,10,0" />
-                            <TextBlock Text="Configure and launch your battlegroup"
-                                       Style="{StaticResource BodyTextStyle}" />
-                        </StackPanel>
+        <!-- Resume offer overlay -->
+        <Grid Grid.Row="2"
+              Visibility="{Binding HasResumeOffer, Converter={StaticResource BoolToVisibleConverter}}">
+            <Border Background="{StaticResource AppBackground}" Opacity="0.9" />
+            <Border MaxWidth="460"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource CardStyle}"
+                    Padding="28,24">
+                <StackPanel>
+                    <TextBlock Text="Resume Previous Setup?"
+                               Style="{StaticResource CardTitleStyle}"
+                               Margin="0,0,0,8" />
+                    <TextBlock Text="A previous setup session was found. Continue where you left off, or start fresh?"
+                               Style="{StaticResource BodyTextStyle}"
+                               Foreground="{StaticResource TextSecondary}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,20" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Command="{Binding StartFreshCommand}"
+                                Padding="16,9"
+                                Margin="0,0,10,0"
+                                Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{StaticResource OverlayBackground}"
+                                                        BorderBrush="{StaticResource BorderDefault}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="{StaticResource CornerMedium}"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource HoverBackground}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <TextBlock Text="Start Fresh" Style="{StaticResource BodyTextStyle}" Foreground="{StaticResource TextSecondary}" />
+                        </Button>
+                        <Button Command="{Binding ResumeCommand}"
+                                Padding="16,9"
+                                Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{StaticResource AccentPrimary}"
+                                                        CornerRadius="{StaticResource CornerMedium}"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource AccentAmber}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <TextBlock Text="Resume" Style="{StaticResource BodyTextStyle}" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" />
+                        </Button>
                     </StackPanel>
-                </Border>
+                </StackPanel>
+            </Border>
+        </Grid>
 
-                <TextBlock Style="{StaticResource MutedTextStyle}"
-                           Text="Click Next to begin. You can return to any step using the Back button."
-                           TextAlignment="Center"
-                           TextWrapping="Wrap"
-                           Margin="0,20,0,0" />
-            </StackPanel>
-        </ScrollViewer>
+        <!-- Current step content -->
+        <ContentControl Grid.Row="2"
+                        Content="{Binding CurrentStep}"
+                        Visibility="{Binding HasResumeOffer, Converter={StaticResource BoolToCollapsedConverter}}" />
 
-        <!-- ═══════════════════════════════════════ -->
-        <!-- Navigation Buttons                      -->
-        <!-- ═══════════════════════════════════════ -->
-        <Border Grid.Row="4"
+        <!-- Navigation buttons -->
+        <Border Grid.Row="3"
                 Background="{StaticResource PanelBackground}"
                 BorderBrush="{StaticResource BorderDefault}"
-                BorderThickness="0,1,0,0">
-            <Grid Margin="28,0">
+                BorderThickness="0,1,0,0"
+                Padding="28,0"
+                Height="64">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -350,39 +203,73 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0"
-                           Text="Step 1 of 7"
-                           Foreground="{StaticResource TextMuted}"
-                           FontFamily="{StaticResource FontUI}"
-                           FontSize="12"
+                           Text="{Binding StepLabel}"
+                           Style="{StaticResource MutedTextStyle}"
                            VerticalAlignment="Center" />
 
-                <Border Grid.Column="1"
+                <Button Grid.Column="1"
+                        Command="{Binding GoBackCommand}"
                         Width="100" Height="36"
-                        Background="{StaticResource OverlayBackground}"
-                        BorderBrush="{StaticResource BorderDefault}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource CornerMedium}"
-                        Opacity="0.4">
-                    <TextBlock Text="← Back"
-                               Foreground="{StaticResource TextSecondary}"
-                               FontFamily="{StaticResource FontUI}"
-                               FontSize="{StaticResource FontSizeBody}"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center" />
-                </Border>
+                        Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{StaticResource OverlayBackground}"
+                                                BorderBrush="{StaticResource BorderDefault}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource CornerMedium}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Opacity" Value="0.35" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource HoverBackground}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock Text="← Back" Style="{StaticResource BodyTextStyle}" Foreground="{StaticResource TextSecondary}" />
+                </Button>
 
-                <Border Grid.Column="3"
-                        Width="120" Height="36"
-                        Background="{StaticResource AccentPrimary}"
-                        CornerRadius="{StaticResource CornerMedium}">
-                    <TextBlock Text="Next →"
+                <Button Grid.Column="3"
+                        Command="{Binding GoNextCommand}"
+                        IsEnabled="{Binding CurrentStepCanProceed}"
+                        Width="140" Height="36"
+                        Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{StaticResource AccentPrimary}"
+                                                CornerRadius="{StaticResource CornerMedium}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource AccentAmber}" />
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Background" Value="{StaticResource BorderDefault}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock Text="{Binding NextLabel}"
+                               Style="{StaticResource BodyTextStyle}"
                                Foreground="{StaticResource TextPrimary}"
-                               FontFamily="{StaticResource FontUI}"
-                               FontSize="{StaticResource FontSizeBody}"
-                               FontWeight="SemiBold"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center" />
-                </Border>
+                               FontWeight="SemiBold" />
+                </Button>
             </Grid>
         </Border>
     </Grid>
