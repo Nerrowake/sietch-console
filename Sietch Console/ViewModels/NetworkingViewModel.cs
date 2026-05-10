@@ -13,6 +13,7 @@ public partial class NetworkingViewModel : ObservableObject
     private readonly INetworkingService    _networkingService;
     private readonly IConfigurationService _configService;
     private readonly IServiceScopeFactory  _scopeFactory;
+    private readonly IActiveProfileService _activeProfileService;
 
     private BattlegroupProfile?            _profile;
     private IReadOnlyList<BattlegroupPort> _ports = [];
@@ -53,25 +54,24 @@ public partial class NetworkingViewModel : ObservableObject
     public NetworkingViewModel(
         INetworkingService    networkingService,
         IConfigurationService configService,
-        IServiceScopeFactory  scopeFactory)
+        IServiceScopeFactory  scopeFactory,
+        IActiveProfileService activeProfileService)
     {
-        _networkingService = networkingService;
-        _configService     = configService;
-        _scopeFactory      = scopeFactory;
+        _networkingService   = networkingService;
+        _configService       = configService;
+        _scopeFactory        = scopeFactory;
+        _activeProfileService = activeProfileService;
+
+        _activeProfileService.ProfileChanged += (_, profile) =>
+        {
+            _profile = profile;
+            _ = LoadAllAsync();
+        };
     }
 
     public async Task InitializeAsync()
     {
-        using var scope = _scopeFactory.CreateScope();
-        var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
-        var profileRepo  = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
-
-        var settings = await settingsRepo.GetAsync();
-        if (int.TryParse(settings.LastOpenedBattlegroupId, out var id))
-            _profile = await profileRepo.GetByIdAsync(id);
-        else
-            _profile = (await profileRepo.GetAllAsync()).FirstOrDefault();
-
+        _profile = _activeProfileService.Current;
         await LoadAllAsync();
     }
 
@@ -87,6 +87,16 @@ public partial class NetworkingViewModel : ObservableObject
             HostAdapter = _networkInfo.HostAdapterName ?? "—";
             VmIp        = _networkInfo.VmIp            ?? "Not detected";
             VmAdapter   = _networkInfo.VmAdapterName   ?? "—";
+
+            // #140 – Persist detected VM IP back to the profile so other views can read it
+            if (_profile is not null && _networkInfo.VmIp is not null
+                && _networkInfo.VmIp != _profile.VmIpAddress)
+            {
+                _profile.VmIpAddress = _networkInfo.VmIp;
+                using var scope2 = _scopeFactory.CreateScope();
+                var profileRepo  = scope2.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
+                await profileRepo.UpdateAsync(_profile);
+            }
 
             // Resolve game port from active config
             int gamePort = 7777;

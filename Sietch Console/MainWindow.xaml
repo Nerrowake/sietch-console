@@ -43,7 +43,7 @@
                                 AutomationProperties.Name="Sietch Console" />
 
                 <TextBlock Grid.Column="2"
-                           Text="v0.1.0-alpha.4"
+                           Text="{Binding AppVersion}"
                            Foreground="{StaticResource TextMuted}"
                            FontFamily="{StaticResource FontUI}"
                            FontSize="{StaticResource FontSizeSmall}"
@@ -65,23 +65,151 @@
                     Background="{StaticResource PanelBackground}"
                     BorderBrush="{StaticResource BorderDefault}"
                     BorderThickness="0,0,1,0">
-                <StackPanel>
-                    <TextBlock Style="{StaticResource SectionLabelStyle}"
-                               Text="NAVIGATION"
-                               Margin="16,12,0,8" />
+                <DockPanel>
 
-                    <ListBox ItemsSource="{Binding NavigationItems}"
-                             SelectedItem="{Binding SelectedNavigationItem, Mode=TwoWay}"
-                             Style="{StaticResource NavListBoxStyle}"
-                             ItemContainerStyle="{StaticResource NavItemStyle}"
-                             AutomationProperties.Name="Main navigation"
-                             KeyboardNavigation.TabNavigation="Once" />
-                </StackPanel>
+                    <!-- ── Profile switcher (#139) ── -->
+                    <StackPanel DockPanel.Dock="Bottom" Margin="12,0,12,12">
+                        <TextBlock Style="{StaticResource SectionLabelStyle}"
+                                   Text="BATTLEGROUP"
+                                   Margin="4,0,0,6" />
+
+                        <!-- Profile ComboBox -->
+                        <ComboBox ItemsSource="{Binding AllProfiles}"
+                                  SelectedItem="{Binding SelectedProfile, Mode=TwoWay}"
+                                  DisplayMemberPath="Name"
+                                  Background="{StaticResource FieldBackground}"
+                                  Foreground="{StaticResource TextPrimary}"
+                                  FontFamily="{StaticResource FontUI}"
+                                  FontSize="{StaticResource FontSizeBody}"
+                                  Margin="0,0,0,8" />
+
+                        <!-- Status message -->
+                        <TextBlock Text="{Binding ProfileStatusMessage}"
+                                   Foreground="{StaticResource AccentTeal}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeSmall}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,6"
+                                   Visibility="{Binding ProfileStatusMessage, Converter={StaticResource NullToCollapsedConverter}}" />
+
+                        <!-- Profile actions -->
+                        <StackPanel Orientation="Horizontal">
+                            <Button Command="{Binding OpenNewProfileOverlayCommand}"
+                                    Style="{StaticResource TealButtonStyle}"
+                                    Padding="10,5"
+                                    Margin="0,0,6,0"
+                                    IsEnabled="{Binding IsProfileSwitching, Converter={StaticResource BoolInverseConverter}}"
+                                    ToolTip="Create a new battlegroup profile">
+                                <TextBlock Text="+ New" />
+                            </Button>
+                            <Button Command="{Binding DeleteProfileCommand}"
+                                    Style="{StaticResource DangerButtonStyle}"
+                                    Padding="10,5"
+                                    IsEnabled="{Binding CanDeleteProfile}"
+                                    ToolTip="Delete the active battlegroup profile">
+                                <TextBlock Text="Delete" />
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- ── Navigation ── -->
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionLabelStyle}"
+                                   Text="NAVIGATION"
+                                   Margin="16,12,0,8" />
+
+                        <ListBox ItemsSource="{Binding NavigationItems}"
+                                 SelectedItem="{Binding SelectedNavigationItem, Mode=TwoWay}"
+                                 Style="{StaticResource NavListBoxStyle}"
+                                 ItemContainerStyle="{StaticResource NavItemStyle}"
+                                 AutomationProperties.Name="Main navigation"
+                                 KeyboardNavigation.TabNavigation="Once" />
+                    </StackPanel>
+
+                </DockPanel>
             </Border>
 
             <!-- Content region -->
             <ContentControl Grid.Column="1"
                             Content="{Binding CurrentViewModel}" />
+
+            <!-- ── New Profile overlay (#139) ── -->
+            <Grid Grid.Column="0" Grid.ColumnSpan="2"
+                  Background="#BB0B0F14"
+                  Visibility="{Binding ShowNewProfileOverlay, Converter={StaticResource BoolToVisibleConverter}}">
+                <Border Background="{StaticResource PanelBackground}"
+                        BorderBrush="{StaticResource BorderDefault}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource CornerLarge}"
+                        Padding="28,24"
+                        MaxWidth="420"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock Text="New Battlegroup Profile"
+                                   Foreground="{StaticResource TextPrimary}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeSubheading}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,16" />
+
+                        <!-- Profile name -->
+                        <TextBlock Text="Profile Name"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeSmall}"
+                                   Margin="0,0,0,4" />
+                        <Border Background="{StaticResource FieldBackground}"
+                                BorderBrush="{StaticResource BorderDefault}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource CornerSmall}"
+                                Padding="10,8"
+                                Margin="0,0,0,14">
+                            <TextBox Text="{Binding NewProfileName, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Foreground="{StaticResource TextPrimary}"
+                                     FontFamily="{StaticResource FontUI}"
+                                     FontSize="{StaticResource FontSizeBody}" />
+                        </Border>
+
+                        <!-- Install path -->
+                        <TextBlock Text="Server Install Path"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeSmall}"
+                                   Margin="0,0,0,4" />
+                        <Border Background="{StaticResource FieldBackground}"
+                                BorderBrush="{StaticResource BorderDefault}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource CornerSmall}"
+                                Padding="10,8"
+                                Margin="0,0,0,20">
+                            <TextBox Text="{Binding NewProfileInstallPath, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Foreground="{StaticResource TextPrimary}"
+                                     FontFamily="{StaticResource FontUI}"
+                                     FontSize="{StaticResource FontSizeBody}" />
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Command="{Binding CloseNewProfileOverlayCommand}"
+                                    Style="{StaticResource CancelButtonStyle}"
+                                    Margin="0,0,8,0"
+                                    Padding="16,8">
+                                <TextBlock Text="Cancel" />
+                            </Button>
+                            <Button Command="{Binding CreateProfileCommand}"
+                                    Style="{StaticResource TealButtonStyle}"
+                                    Padding="16,8">
+                                <TextBlock Text="Create" />
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
         </Grid>
 
         <!-- ═══════════════════════════════════════ -->

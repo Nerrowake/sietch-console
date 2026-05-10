@@ -1,13 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Sietch_Console.Services.Backups;
 using Sietch_Console.Services.Configuration;
 using Sietch_Console.Services.Control;
 using Sietch_Console.Services.Diagnostics;
 using Sietch_Console.Services.Installation;
-using Sietch_Console.Services.Backups;
 using Sietch_Console.Services.Logs;
 using Sietch_Console.Services.Networking;
+using Sietch_Console.Services.Profiles;
 using Sietch_Console.ViewModels;
 using Sietch_Console.ViewModels.Steps;
 using SietchConsole.Core.Interfaces;
@@ -24,6 +26,11 @@ public partial class App : Application
     public App()
     {
         _host = Host.CreateDefaultBuilder()
+            .ConfigureLogging(logging =>
+            {
+                // Keep default providers; our InMemoryAppLogSink is added below via DI
+                logging.SetMinimumLevel(LogLevel.Information);
+            })
             .ConfigureServices(ConfigureServices)
             .Build();
     }
@@ -35,6 +42,16 @@ public partial class App : Application
         services.AddDbContext<SietchConsoleDbContext>(options =>
             options.UseSqlite($"Data Source={dbPath}"));
         services.AddScoped<DatabaseInitializerService>();
+
+        // ── In-memory app log sink (#143) ──────────────────────────────────────
+        // Registered as both IAppLogSink (for the ViewModel) and ILoggerProvider
+        // (hooked into the host's logging pipeline).
+        services.AddSingleton<InMemoryAppLogSink>();
+        services.AddSingleton<IAppLogSink>(sp => sp.GetRequiredService<InMemoryAppLogSink>());
+        services.AddSingleton<ILoggerProvider>(sp => sp.GetRequiredService<InMemoryAppLogSink>());
+
+        // ── Active profile service (#139) ─────────────────────────────────────
+        services.AddSingleton<IActiveProfileService, ActiveProfileService>();
 
         // Infrastructure services
         services.AddSingleton<ISystemReadinessService, SystemReadinessService>();
@@ -70,6 +87,7 @@ public partial class App : Application
         services.AddSingleton<BackupsViewModel>();
         services.AddSingleton<NetworkingViewModel>();
         services.AddSingleton<SettingsViewModel>();
+        services.AddSingleton<AppLogsViewModel>();
 
         // Views
         services.AddSingleton<MainWindow>();
@@ -79,12 +97,22 @@ public partial class App : Application
     {
         await _host.StartAsync();
 
+        // Wire up the in-memory log sink into the live logging pipeline
+        var loggerFactory = _host.Services.GetRequiredService<ILoggerFactory>();
+        var sink          = _host.Services.GetRequiredService<InMemoryAppLogSink>();
+        loggerFactory.AddProvider(sink);
+
         using (var scope = _host.Services.CreateScope())
         {
             var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializerService>();
             await initializer.InitializeAsync();
         }
 
+        // ── #139: ActiveProfileService must initialize first ─────────────────
+        var activeProfileService = _host.Services.GetRequiredService<IActiveProfileService>();
+        await activeProfileService.InitializeAsync();
+
+        // Initialize ViewModels (all now use IActiveProfileService for the active profile)
         var dashboardVm = _host.Services.GetRequiredService<DashboardViewModel>();
         await dashboardVm.InitializeAsync();
 

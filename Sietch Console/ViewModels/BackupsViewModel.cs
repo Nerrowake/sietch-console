@@ -14,6 +14,7 @@ public partial class BackupsViewModel : ObservableObject
 {
     private readonly IBackupService       _backupService;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IActiveProfileService _activeProfileService;
     private readonly DispatcherTimer      _autoBackupTimer;
 
     private BattlegroupProfile? _profile;
@@ -68,28 +69,32 @@ public partial class BackupsViewModel : ObservableObject
 
     // ── Constructor ───────────────────────────────────────────────────────────
 
-    public BackupsViewModel(IBackupService backupService, IServiceScopeFactory scopeFactory)
+    public BackupsViewModel(IBackupService backupService, IServiceScopeFactory scopeFactory,
+                            IActiveProfileService activeProfileService)
     {
-        _backupService = backupService;
-        _scopeFactory  = scopeFactory;
+        _backupService        = backupService;
+        _scopeFactory         = scopeFactory;
+        _activeProfileService = activeProfileService;
 
         _autoBackupTimer = new DispatcherTimer();
         _autoBackupTimer.Tick += async (_, _) => await RunAutoBackupAsync();
+
+        _activeProfileService.ProfileChanged += (_, profile) =>
+        {
+            _profile = profile;
+            _ = LoadBackupsAsync();
+        };
     }
 
     // ── Initialise ────────────────────────────────────────────────────────────
 
     public async Task InitializeAsync()
     {
+        _profile = _activeProfileService.Current;
+
         using var scope      = _scopeFactory.CreateScope();
         var settingsRepo     = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
-        var profileRepo      = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
-
-        var settings = await settingsRepo.GetAsync();
-        if (int.TryParse(settings.LastOpenedBattlegroupId, out var id))
-            _profile = await profileRepo.GetByIdAsync(id);
-        else
-            _profile = (await profileRepo.GetAllAsync()).FirstOrDefault();
+        var settings         = await settingsRepo.GetAsync();
 
         // Load persisted auto-backup settings
         AutoBackupEnabled   = settings.AutoBackupEnabled;

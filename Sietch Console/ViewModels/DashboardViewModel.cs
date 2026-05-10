@@ -16,6 +16,7 @@ public partial class DashboardViewModel : ObservableObject
     private readonly IBattlegroupControlService _controlService;
     private readonly IServerPackageInstaller    _installer;
     private readonly IServiceScopeFactory       _scopeFactory;
+    private readonly IActiveProfileService      _activeProfileService;
     private readonly DispatcherTimer            _refreshTimer;
 
     [ObservableProperty]
@@ -116,14 +117,23 @@ public partial class DashboardViewModel : ObservableObject
         IBattlegroupControlService controlService,
         IServerPackageInstaller    installer,
         IServiceScopeFactory       scopeFactory,
-        IServerProcessService      processService)
+        IServerProcessService      processService,
+        IActiveProfileService      activeProfileService)
     {
-        _controlService = controlService;
-        _installer      = installer;
-        _scopeFactory   = scopeFactory;
+        _controlService       = controlService;
+        _installer            = installer;
+        _scopeFactory         = scopeFactory;
+        _activeProfileService = activeProfileService;
 
         // Subscribe to process exit so unexpected crashes surface immediately (#131)
         processService.ProcessExited += OnServerProcessExited;
+
+        // Refresh when the user switches profiles (#139)
+        _activeProfileService.ProfileChanged += (_, profile) =>
+        {
+            ActiveProfile = profile;
+            _ = RefreshStatusAsync();
+        };
 
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
         _refreshTimer.Tick += async (_, _) => await RefreshStatusAsync();
@@ -146,15 +156,7 @@ public partial class DashboardViewModel : ObservableObject
 
     public async Task InitializeAsync()
     {
-        using var scope  = _scopeFactory.CreateScope();
-        var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
-        var profileRepo  = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
-
-        var settings = await settingsRepo.GetAsync();
-        if (int.TryParse(settings.LastOpenedBattlegroupId, out var id))
-            ActiveProfile = await profileRepo.GetByIdAsync(id);
-        else
-            ActiveProfile = (await profileRepo.GetAllAsync()).FirstOrDefault();
+        ActiveProfile = _activeProfileService.Current;
 
         await RefreshStatusAsync();
 

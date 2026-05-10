@@ -11,6 +11,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IConfigurationService _configService;
     private readonly IBackupService        _backupService;
     private readonly IServiceScopeFactory  _scopeFactory;
+    private readonly IActiveProfileService _activeProfileService;
 
     private BattlegroupProfile? _profile;
     private bool _loaded;
@@ -61,25 +62,25 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string  _rawContent = string.Empty;
     [ObservableProperty] private bool    _rawHasUnsavedChanges;
 
-    public SettingsViewModel(IConfigurationService configService, IBackupService backupService, IServiceScopeFactory scopeFactory)
+    public SettingsViewModel(IConfigurationService configService, IBackupService backupService,
+                             IServiceScopeFactory scopeFactory, IActiveProfileService activeProfileService)
     {
-        _configService = configService;
-        _backupService = backupService;
-        _scopeFactory  = scopeFactory;
+        _configService        = configService;
+        _backupService        = backupService;
+        _scopeFactory         = scopeFactory;
+        _activeProfileService = activeProfileService;
+
+        _activeProfileService.ProfileChanged += (_, profile) =>
+        {
+            _profile = profile;
+            _loaded  = false;
+            _ = LoadConfigAsync();
+        };
     }
 
     public async Task InitializeAsync()
     {
-        using var scope = _scopeFactory.CreateScope();
-        var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
-        var profileRepo  = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
-
-        var settings = await settingsRepo.GetAsync();
-        if (int.TryParse(settings.LastOpenedBattlegroupId, out var id))
-            _profile = await profileRepo.GetByIdAsync(id);
-        else
-            _profile = (await profileRepo.GetAllAsync()).FirstOrDefault();
-
+        _profile = _activeProfileService.Current;
         await LoadConfigAsync();
     }
 

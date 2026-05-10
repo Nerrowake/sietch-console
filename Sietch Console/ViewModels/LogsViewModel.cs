@@ -17,6 +17,7 @@ public partial class LogsViewModel : ObservableObject, IDisposable
     private readonly ILogAnalysisService   _analysisService;
     private readonly IServiceScopeFactory  _scopeFactory;
     private readonly IServerProcessService _processService;
+    private readonly IActiveProfileService _activeProfileService;
     private readonly DispatcherTimer       _tailTimer;
     private FileSystemWatcher?             _watcher;
 
@@ -73,20 +74,60 @@ public partial class LogsViewModel : ObservableObject, IDisposable
         ILogFileService        logService,
         ILogAnalysisService    analysisService,
         IServiceScopeFactory   scopeFactory,
-        IServerProcessService  processService)
+        IServerProcessService  processService,
+        IActiveProfileService  activeProfileService)
     {
-        _logService      = logService;
-        _analysisService = analysisService;
-        _scopeFactory    = scopeFactory;
-        _processService  = processService;
+        _logService           = logService;
+        _analysisService      = analysisService;
+        _scopeFactory         = scopeFactory;
+        _processService       = processService;
+        _activeProfileService = activeProfileService;
 
         // Subscribe to live process output (#129)
         _processService.OutputLineReceived += OnServerOutputLine;
         _processService.ProcessExited      += OnServerProcessExited;
 
+        // Reload logs when profile switches (#139)
+        _activeProfileService.ProfileChanged += (_, profile) =>
+        {
+            _profile = profile;
+            _ = ReloadForProfileAsync();
+        };
+
         _tailTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
         _tailTimer.Tick += async (_, _) => await PollLogFileAsync();
         _tailTimer.Start();
+    }
+
+    private async Task ReloadForProfileAsync()
+    {
+        _tailTimer.Stop();
+        _watcher?.Dispose();
+        _watcher = null;
+        _allEntries.Clear();
+        FilteredEntries     = [];
+        DetectedIssues      = [];
+        AvailableLogFiles   = [];
+        ActiveLogFile       = null;
+        IsStreaming         = false;
+        _logFileOffset      = 0;
+
+        if (_profile is not null)
+        {
+            AvailableLogFiles = _logService.GetLogFiles(_profile);
+            if (AvailableLogFiles.Count > 0)
+            {
+                ActiveLogFile  = AvailableLogFiles[0];
+                _logFileOffset = 0;
+                IsStreaming    = true;
+            }
+            var logDir = _logService.LocateLogDirectory(_profile);
+            if (logDir is not null && Directory.Exists(logDir))
+                StartWatcher(logDir);
+        }
+
+        _tailTimer.Start();
+        await Task.CompletedTask;
     }
 
     // ── Live process stream (#129) ────────────────────────────────────
@@ -110,15 +151,7 @@ public partial class LogsViewModel : ObservableObject, IDisposable
 
     public async Task InitializeAsync()
     {
-        using var scope = _scopeFactory.CreateScope();
-        var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
-        var profileRepo  = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
-
-        var settings = await settingsRepo.GetAsync();
-        if (int.TryParse(settings.LastOpenedBattlegroupId, out var id))
-            _profile = await profileRepo.GetByIdAsync(id);
-        else
-            _profile = (await profileRepo.GetAllAsync()).FirstOrDefault();
+        _profile = _activeProfileService.Current;
 
         if (_profile is not null)
         {
