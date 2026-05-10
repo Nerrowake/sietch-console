@@ -6,7 +6,7 @@ This document lists known bugs, unimplemented features, and unsupported configur
 
 ## Alpha Scope
 
-Sietch Console `0.4.0-alpha.1` is an **internal alpha**. The application shell, UI, and all views are implemented. Hyper-V VM control (start, stop, restart, provisioning, live resource display), SteamCMD server file download and update, live server process management (stdout/stderr streaming, server-ready detection, crash surfacing, graceful shutdown), full + scheduled backups with retention, multiple battleground profiles, in-app application log viewer, VM IP auto-detection, and GitHub Releases auto-update are all fully implemented.
+Sietch Console `0.5.0-alpha.1` is an **internal alpha**. The following features are fully implemented: application shell and all views, Hyper-V VM control (start, stop, restart, provisioning, live resource display), SteamCMD server file download and update, live server process management (stdout/stderr streaming, server-ready detection, crash surfacing, graceful shutdown), full + scheduled backups with retention, multiple battleground profiles, in-app application log viewer, VM IP auto-detection, GitHub Releases auto-update, and remote management (embedded Kestrel web server, REST + SSE API, built-in web dashboard, Bearer token auth with rate limiting).
 
 ---
 
