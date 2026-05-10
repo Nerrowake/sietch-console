@@ -73,8 +73,6 @@ This is a WPF application targeting `net8.0-windows`. It does not run on Linux o
 These features are not present in the alpha and are planned for future milestones:
 
 - Code-signed installer (removes the SmartScreen warning -- deferred, requires a real certificate)
-- Application icon (`.ico`) -- the installer and taskbar currently use a placeholder
-- Splash screen on startup
 - Server process inside the Hyper-V guest via PowerShell Direct
 - Player management (kick, ban, allowlist)
 - Mod management (listing, enable/disable, updates)

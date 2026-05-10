@@ -42,9 +42,12 @@ Sietch Console.sln
 | `Services/Control/` | Start/stop/restart the Hyper-V VM and server process |
 | `Services/Configuration/` | Read and write INI files; auto-backup before save |
 | `Services/Diagnostics/` | System readiness checks (Hyper-V, memory, disk, network, firewall) |
-| `Services/Logs/` | Tail log files; analyze entries for detected issues |
+| `Services/Logs/` | Tail log files; analyze entries for detected issues; in-memory app log sink |
 | `Services/Backups/` | Create, restore, and delete backup records |
 | `Services/Networking/` | Detect IPs, check firewall rules, test ports |
+| `Services/Profiles/` | Active battleground profile ownership and ProfileChanged event |
+| `Services/Update/` | GitHub Releases update check and installer download |
+| `Services/Remote/` | Embedded Kestrel web server, REST/SSE API, auth middleware, SSE hub |
 | `Services/Installation/` | Setup wizard orchestration (Steam detection, package download, script execution) |
 
 ---
@@ -197,7 +200,6 @@ To release: update `<Version>` in `Directory.Build.props`, update `CHANGELOG.md`
 All core infrastructure is implemented as of `0.5.0-alpha.1`. The remaining gaps are:
 
 - No code signing — SmartScreen will warn on the installer (deferred; requires a purchased certificate)
-- The `.ico` app icon uses a placeholder — not yet replaced with final artwork
 - Server process runs on the **host machine**, not inside the Hyper-V guest — PowerShell Direct integration is not yet implemented
 - Player count in the remote dashboard is always `0` — requires a server query API that Funcom has not exposed
 - Uptime tracking in the remote dashboard is not yet implemented — server start time is not persisted
