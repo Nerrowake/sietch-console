@@ -11,6 +11,36 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.1.0-alpha.3] — 2026-05-10
+
+### Added
+
+- **Toast notification overlay** — all async operations (save, backup, restore, firewall) now surface success, warning, and error toasts via a central `NotificationService`; success/warning auto-dismiss after 5 s, errors persist until dismissed
+- **Install path validation in Setup Wizard** — inline error messages flag drive roots and system-protected directories before the user can advance
+- **Token validation in Setup Wizard** — account token is auto-trimmed of whitespace, capped at 2048 chars, and flagged with a hint if it looks too short
+- **Adapter picker in Networking view** — when the host has more than one network adapter, a dropdown lets the user choose which IP is advertised to players
+- **Log file auto-refresh** — a `FileSystemWatcher` detects new `.log` files in the log directory and refreshes the file list without a manual page reload
+- **"Copy Logs" toolbar button** — copies the currently filtered log lines to the clipboard
+- **Progress step cancel + timeout** — the installation step now exposes a Cancel button; a 30-minute `CancellationToken` auto-cancels and surfaces a timeout banner
+- **Raw editor sync warning** — Settings warns when both structured form fields and the raw INI editor have unsaved changes, with an actionable Dismiss button
+
+### Changed
+
+- **`IActiveProfileService` singleton** — the active battlegroup profile is resolved once and cached for the session, eliminating a redundant DB query on every view navigation
+- **Dashboard shortcuts conditional** — "Open File Browser" is disabled when the install path does not exist on disk
+- **UAC cancel feedback in Networking** — cancelling the firewall UAC prompt now shows an explicit retry message instead of leaving the button in a silent failed state
+- **Restore progress message** — Backups view now shows "Restoring backup…" as intermediate state before the final success/failure notification
+
+### Security
+
+- **DPAPI encryption at rest** — the Dune account token and admin password stored in the local SQLite database are now encrypted with Windows Data Protection API (`DataProtectionScope.CurrentUser`) via `SecureStorageService`
+
+### Performance
+
+- `LogsViewModel` internal buffer changed from `List<LogEntry>` to `Queue<LogEntry>` — cap eviction is now O(1) instead of O(n); `DispatcherTimer` and `FileSystemWatcher` are properly disposed via `IDisposable`
+
+---
+
 ## [0.1.0-alpha.2] — 2026-05-09
 
 ### Added
