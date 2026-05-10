@@ -10,7 +10,7 @@
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![GitHub Sponsors](https://img.shields.io/badge/sponsor-%E2%9D%A4-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/michaelstoffer)
 
-Sietch Console is a Windows-native desktop application that replaces the manual scripts, terminal windows, and raw INI editing required to host a Dune: Awakening dedicated server. It provides a single, modern UI for setup, configuration, monitoring, diagnostics, backups, and networking — designed for both non-technical players and advanced server hosts.
+Sietch Console is a Windows-native desktop application that replaces the manual scripts, terminal windows, and raw INI editing required to host a Dune: Awakening dedicated server. It provides a single, modern UI for automated server download via SteamCMD, Hyper-V VM management, live server process control, log streaming, configuration, diagnostics, backups, and networking — designed for both non-technical players and advanced server hosts.
 
 ---
 
@@ -18,10 +18,10 @@ Sietch Console is a Windows-native desktop application that replaces the manual 
 
 | Area | What it does |
 |------|-------------|
-| **Setup Wizard** | Guided multi-step onboarding — validates requirements, configures the Hyper-V VM, and saves your battlegroup profile |
-| **Dashboard** | One-click Start / Stop / Restart with real Hyper-V VM control, live status indicator, and CPU/RAM utilization display |
+| **Setup Wizard** | Guided multi-step onboarding — validates requirements, downloads server files via SteamCMD, configures the Hyper-V VM, and saves your battlegroup profile |
+| **Dashboard** | One-click Start / Stop / Restart with real Hyper-V VM control and server process management; live status, CPU/RAM display, update-available indicator, and one-click server update |
 | **Configuration** | Structured INI editor for server identity, gameplay settings, and network options; auto-backup before every save |
-| **Logs** | Live log streaming with search, severity filtering, and detected-issue explanations |
+| **Logs** | Live stdout/stderr stream from the running server process (with a LIVE badge) plus file-based tail; search, severity filtering, and detected-issue explanations |
 | **Diagnostics** | On-demand system readiness checks with friendly pass/warning/failure results and remediation guidance |
 | **Backups** | Create and restore configuration and save-data backups with a full history |
 | **Networking** | Host and VM IP detection, Windows Firewall rule checker and auto-creator, port forwarding guide, local port test, copyable connection summary |
@@ -57,8 +57,8 @@ Full installation and first-launch instructions: [INSTALL.md](INSTALL.md)
 
 1. Install and launch Sietch Console.
 2. The **Setup Wizard** opens automatically on first launch.
-3. Work through each step — the wizard checks your system, asks for your install path and Funcom token, and configures your battlegroup.
-4. Once setup is complete, use the **Dashboard** to start your server.
+3. Work through each step — the wizard checks your system, downloads the Dune: Awakening server files via SteamCMD, configures your Hyper-V VM, and saves your battlegroup profile.
+4. Once setup is complete, use the **Dashboard** to start your server. The Logs tab shows live output; the Dashboard transitions to Running once the server is ready.
 5. Share your connection details from the **Networking** tab.
 
 ---
