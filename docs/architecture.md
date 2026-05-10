@@ -59,6 +59,8 @@ Sealed records representing domain objects. They carry no behavior.
 | `LogSeverity` | Enum: `Info`, `Warning`, `Error` |
 | `VmResourceSnapshot` | Point-in-time CPU% and RAM reading from `Msvm_SummaryInformation` |
 | `ServerProcessExitEventArgs` | Exit code, human-readable description, and `WasExpected` flag from a server process exit |
+| `AppLogEntry` | A single in-memory application log entry: timestamp, level, category, message, optional exception |
+| `AppUpdateInfo` | Metadata from a GitHub Release: tag name, release name, HTML URL, installer download URL, release notes |
 
 ### Interfaces (`Core/Interfaces/`)
 
@@ -80,6 +82,9 @@ Service contracts that the WPF app depends on, with implementations in the app p
 | `ISteamCmdService` | `SteamCmdService` |
 | `IServerPackageInstaller` | `ServerPackageInstaller` |
 | `ISetupScriptService` | `SetupScriptService` |
+| `IActiveProfileService` | `ActiveProfileService` — owns active profile, fires `ProfileChanged` event |
+| `IAppLogSink` | `InMemoryAppLogSink` — ring-buffer log sink for the App Logs view |
+| `IAppUpdateService` | `AppUpdateService` — GitHub Releases update check and installer download |
 
 Repository interfaces (implemented in `SietchConsole.Data`):
 
@@ -128,12 +133,13 @@ Navigation items and their target ViewModels:
 | Label | ViewModel |
 |-------|-----------|
 | Dashboard | `DashboardViewModel` |
-| Setup | `SetupWizardViewModel` |
+| Setup Wizard | `SetupWizardViewModel` |
 | Logs | `LogsViewModel` |
 | Diagnostics | `DiagnosticsViewModel` |
 | Backups | `BackupsViewModel` |
 | Networking | `NetworkingViewModel` |
 | Settings | `SettingsViewModel` |
+| App Logs | `AppLogsViewModel` |
 
 ### Views (`Views/`)
 

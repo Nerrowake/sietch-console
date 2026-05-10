@@ -23,9 +23,12 @@ Sietch Console is a Windows-native desktop application that replaces the manual 
 | **Configuration** | Structured INI editor for server identity, gameplay settings, and network options; auto-backup before every save |
 | **Logs** | Live stdout/stderr stream from the running server process (with a LIVE badge) plus file-based tail; search, severity filtering, and detected-issue explanations |
 | **Diagnostics** | On-demand system readiness checks with friendly pass/warning/failure results and remediation guidance |
-| **Backups** | Create and restore configuration and save-data backups with a full history |
-| **Networking** | Host and VM IP detection, Windows Firewall rule checker and auto-creator, port forwarding guide, local port test, copyable connection summary |
+| **Backups** | Config, save-data, and full (config + save-data) backups with full history, one-click restore, scheduled auto-backups, and configurable retention |
+| **Networking** | Host and VM IP detection (auto-persisted to profile), Windows Firewall rule checker and auto-creator, port forwarding guide, local port test, copyable connection summary |
 | **Settings** | Structured settings editor and raw INI editor with per-file selection |
+| **Multiple profiles** | Create, switch, and delete battleground profiles from the sidebar; all views update instantly when you switch |
+| **App Logs** | In-app viewer for Sietch Console's own log stream — filter by level or keyword to diagnose service issues without opening external files |
+| **Auto-Update** | On-startup check against GitHub Releases; banner notification when a new version is available; one-click download and install |
 
 ---
 

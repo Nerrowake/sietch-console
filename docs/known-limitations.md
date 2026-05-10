@@ -6,7 +6,7 @@ This document lists known bugs, unimplemented features, and unsupported configur
 
 ## Alpha Scope
 
-Sietch Console `0.2.0-alpha.1` is an **internal alpha**. The application shell, UI, and all views are implemented. Hyper-V VM control (start, stop, restart, provisioning, live resource display), SteamCMD server file download and update, and live server process management (stdout/stderr streaming, server-ready detection, crash surfacing, graceful shutdown) are all fully implemented.
+Sietch Console `0.4.0-alpha.1` is an **internal alpha**. The application shell, UI, and all views are implemented. Hyper-V VM control (start, stop, restart, provisioning, live resource display), SteamCMD server file download and update, live server process management (stdout/stderr streaming, server-ready detection, crash surfacing, graceful shutdown), full + scheduled backups with retention, multiple battleground profiles, in-app application log viewer, VM IP auto-detection, and GitHub Releases auto-update are all fully implemented.
 
 ---
 
@@ -14,9 +14,9 @@ Sietch Console `0.2.0-alpha.1` is an **internal alpha**. The application shell, 
 
 ### Setup Wizard re-opens if database was partially written
 
-If the Setup Wizard is interrupted mid-way and you relaunch, it may either skip the wizard (if a partial profile record was written) or show the wizard from the beginning (if nothing was committed). There is no resume-from-step capability.
+If the Setup Wizard is interrupted mid-way and you relaunch, it may either skip the wizard (if a partial profile record was written) or show the wizard from the beginning (if nothing was committed). The "Resume Previous Setup?" overlay offers to pick up where you left off, but intermediate step state may be incomplete if the write was interrupted before the last step was committed.
 
-**Workaround:** Delete `%LOCALAPPDATA%\SietchConsole\sietch.db` and relaunch to restart cleanly.
+**Workaround:** Use "Start Fresh" in the resume overlay, or delete `%LOCALAPPDATA%\SietchConsole\sietch.db` and relaunch to start completely clean.
 
 ### Settings view shows "no config" if the INI path doesn't exist
 
@@ -32,7 +32,7 @@ The host IP detection enumerates Windows network interfaces and picks the first 
 
 The Dashboard transitions to "Running" once `ServerProcessService` detects a server-ready phrase in stdout (e.g. "listening on port"). If the Dune: Awakening server uses different log output, the Dashboard may remain in "Starting" even after the server is accepting connections.
 
-**Workaround:** If the server is accepting connections but the status shows Starting, it is functional — the pattern match simply hasn't fired. This will be tuned as the server's log output becomes known.
+**Workaround:** If the server is accepting connections but the status shows Starting, it is functional -- the pattern match simply hasn't fired. This will be tuned as the server's log output becomes known.
 
 ### Dune: Awakening dedicated server App ID is unverified
 
@@ -44,7 +44,7 @@ The Dashboard transitions to "Running" once `ServerProcessService` detects a ser
 
 ### Windows Home
 
-Hyper-V is not available on Windows Home. Sietch Console cannot run on Windows Home. There is no planned workaround — the application is architecturally dependent on Hyper-V.
+Hyper-V is not available on Windows Home. Sietch Console cannot run on Windows Home. There is no planned workaround -- the application is architecturally dependent on Hyper-V.
 
 ### Non-x64 hardware
 
@@ -53,10 +53,6 @@ The application is published as a single-file self-contained win-x64 binary. It 
 ### Running the VM on a separate machine
 
 Sietch Console assumes the Hyper-V host and the user's desktop are the same machine. Running the VM on a remote Hyper-V host is not supported and is not planned for the current phase.
-
-### Multiple battlegroup profiles
-
-Only one battlegroup profile is supported at a time in the current alpha. Multi-profile support is planned for Milestone 19.
 
 ### Server process inside the VM (PowerShell Direct)
 
@@ -72,14 +68,16 @@ This is a WPF application targeting `net8.0-windows`. It does not run on Linux o
 
 These features are not present in the alpha and are planned for future milestones:
 
-- Save-data backup (config backup works; save-data backup is scaffolded but not wired to a real path — Milestone 18)
-- Scheduled automatic backups (Milestone 18)
-- Auto-update mechanism for Sietch Console itself (Milestone 20)
-- Code-signed installer (removes the SmartScreen warning — Milestone 19)
-- Application icon (`.ico`) — the installer and taskbar currently use a placeholder (Milestone 19)
-- Splash screen on startup (Milestone 19)
-- Multiple battlegroup profiles (Milestone 19)
-- In-app log viewing for the Sietch Console application log (Milestone 19)
+- Code-signed installer (removes the SmartScreen warning -- deferred, requires a real certificate)
+- Application icon (`.ico`) -- the installer and taskbar currently use a placeholder
+- Splash screen on startup
+- Server process inside the Hyper-V guest via PowerShell Direct
+- Player management (kick, ban, allowlist)
+- Mod management (listing, enable/disable, updates)
+- Server metrics history charts (CPU/memory over time, player count history)
+- Webhook / notification integrations (server lifecycle events)
+- Remote management dashboard (embedded web server)
+- Cloud backup destinations (S3, OneDrive, MinIO)
 
 ---
 
@@ -94,3 +92,4 @@ Please include:
 - Steps to reproduce
 - Expected vs. actual behavior
 - Diagnostics output (from the Diagnostics tab)
+- App Logs output (from the App Logs tab -- helps diagnose service-layer failures)

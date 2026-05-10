@@ -11,6 +11,40 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.0-alpha.1] — 2026-05-10
+
+### Added
+
+- **Multiple battleground profiles — create, switch, delete (#139)** — `IActiveProfileService` / `ActiveProfileService` singleton owns the active profile, persists the selection to `ApplicationSettings.LastOpenedBattlegroupId`, and fires `ProfileChanged` on the UI thread; all ViewModels (Dashboard, Logs, Settings, Backups, Networking) react instantly when the user switches; sidebar profile switcher (ComboBox + New + Delete) added to `MainWindow.xaml`; new-profile creation overlay (name + install path)
+- **In-app application log viewer (#143)** — `InMemoryAppLogSink` implements both `ILoggerProvider` (receives all `Microsoft.Extensions.Logging` events) and `IAppLogSink` (exposes a ring-buffer of up to 500 entries); `AppLogsViewModel` with level and keyword filter; `AppLogsView.xaml` with level badge, category, message, and timestamp columns; registered as "App Logs" nav item
+- **VM IP auto-detection save-back (#140)** — `NetworkingViewModel` now persists the detected `VmIp` back to `BattlegroupProfile.VmIpAddress` via the profile repository when the value changes
+- **Auto-update from GitHub Releases (#145–#148)** — `AppUpdateService` queries the GitHub Releases API on startup, compares tag name with the running `InformationalVersion` (numeric + pre-release label), and sets `MainWindowViewModel.PendingUpdate` when a new version is available; update banner appears at the top of all views; one-click download streams the installer binary to `%TEMP%\SietchConsole_Update\` with progress reporting; installer is launched and the app shuts down automatically
+- **Dynamic version string** — `MainWindowViewModel.AppVersion` reads `AssemblyInformationalVersionAttribute` at runtime, replacing the formerly hardcoded `v0.1.0-alpha.4`
+
+### Changed
+
+- All ViewModels now inject `IActiveProfileService` instead of manually querying `ApplicationSettingsRepository.LastOpenedBattlegroupId`; `InitializeAsync` is significantly simplified
+- `MainWindowViewModel` now accepts `AppLogsViewModel` and `IAppUpdateService` via DI and includes all profile-management state
+
+---
+
+## [0.3.0-alpha.1] — 2026-05-10
+
+### Added
+
+- **Full backup (#135)** — `CreateFullBackupAsync` creates a `{stamp}_Full/` directory containing a `Config/` subdirectory (INI files) and a `SaveData/` subdirectory (full directory tree); `RestoreAsync` reads the manifest's `ConfigDirectory` and `SaveDirectory` fields to restore each part to its original location
+- **Automatic backup scheduling (#138)** — `DispatcherTimer` fires at the configured interval (1/3/6/12/24 h) and calls `CreateFullBackupAsync`; the interval and the enabled flag are persisted via `IApplicationSettingsRepository`; auto-backup settings card (enable toggle, interval ComboBox, retention count, Save button) added to `BackupsView.xaml`
+- **Backup retention pruning (#136)** — `PruneOldBackupsAsync` removes the oldest backups beyond `BackupRetainCount` after every manual or scheduled backup; pruning is also called from `BackupsViewModel.RunBackupAsync`
+- **Setup Wizard resume (#141)** — `HasResumeOffer`, `ResumeCommand`, and `StartFreshCommand` already fully implemented in `SetupWizardViewModel`; `SetupWizardView.xaml` shows the resume-offer overlay automatically on re-open
+
+### Changed
+
+- `BackupsViewModel` now includes `AutoBackupEnabled`, `BackupIntervalHours`, `BackupRetainCount`, `IntervalChoices`, `SaveAutoBackupSettingsCommand`, and `BackupFullCommand`
+- `ApplicationSettings` extended with `AutoBackupEnabled`, `BackupIntervalHours`, `BackupRetainCount`; existing databases updated via `ALTER TABLE ADD COLUMN` in `DatabaseInitializerService`
+- `BackupManifest` (private) extended with `ConfigDirectory` and `SaveDirectory` fields; `CreateSaveDataBackupAsync` now sets `SaveDirectory`
+
+---
+
 ## [0.2.0-alpha.1] — 2026-05-10
 
 ### Added
