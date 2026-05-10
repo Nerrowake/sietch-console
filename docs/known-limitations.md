@@ -75,7 +75,6 @@ These features are not present in the alpha and are planned for future milestone
 - Code-signed installer (removes the SmartScreen warning -- deferred, requires a real certificate)
 - Server process inside the Hyper-V guest via PowerShell Direct
 - Player management (kick, ban, allowlist)
-- Mod management (listing, enable/disable, updates)
 - Server metrics history charts (CPU/memory over time, player count history)
 - Webhook / notification integrations (server lifecycle events)
 - Remote management player count and uptime (requires server-side API from Funcom)

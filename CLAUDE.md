@@ -204,7 +204,6 @@ All core infrastructure is implemented as of `0.5.0-alpha.1`. The remaining gaps
 - Player count in the remote dashboard is always `0` — requires a server query API that Funcom has not exposed
 - Uptime tracking in the remote dashboard is not yet implemented — server start time is not persisted
 - No player management (kick, ban, allowlist)
-- No mod management
 - No server metrics history (CPU/memory/player count over time)
 - No webhook/notification integrations
 - No cloud backup destinations

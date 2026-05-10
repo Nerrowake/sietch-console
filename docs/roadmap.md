@@ -104,7 +104,6 @@ These are ideas that may or may not be implemented, depending on community feedb
 - **Multi-host support** — manage a VM running on a separate Hyper-V host on the local network
 - **Player management** — in-game admin commands (kick, ban, allowlist) surfaced in the UI
 - **Server metrics dashboard** — player count history, uptime graph, memory and CPU over time
-- **Mod management** — list, enable, and update server-side mods if Funcom exposes a mod API
 - **Discord webhook integration** — notify a Discord channel when the server starts, stops, or detects errors
 - **Backup cloud sync** — optional sync of backups to OneDrive, Google Drive, or S3-compatible storage
 
