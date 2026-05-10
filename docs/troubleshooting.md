@@ -121,7 +121,7 @@ Restore overwrites the current server configuration files. If the files are lock
 
 ### Old backups are taking up a lot of disk space
 
-Backups are stored in `%LOCALAPPDATA%\SietchConsole\Backups\`. Select old records in the Backups view and delete them using the **Delete** button. There is no automatic pruning in the current alpha.
+Backups are stored in `%LOCALAPPDATA%\SietchConsole\Backups\`. Sietch Console automatically prunes the oldest backups after every manual or scheduled backup, keeping no more than the **Keep backups** count configured in the Backups view (default: 10). You can also delete individual records at any time using the **Delete** button.
 
 ---
 
@@ -188,6 +188,6 @@ When opening an issue, include:
 2. Your Windows version (`winver` output).
 3. The full diagnostics output (copy the text from the Diagnostics tab).
 4. Any error messages shown in the application.
-5. The application log file, if one was written (check `%LOCALAPPDATA%\SietchConsole\Logs\`).
+5. The **App Logs** tab output — this shows internal Sietch Console service messages and is the fastest way to capture a service-layer error without digging into files.
 
-Open issues at [github.com/michaelstoffer/sietch-console/issues](https://github.com/michaelstouffer/sietch-console/issues).
+Open issues at [github.com/michaelstoffer/sietch-console/issues](https://github.com/michaelstoffer/sietch-console/issues).

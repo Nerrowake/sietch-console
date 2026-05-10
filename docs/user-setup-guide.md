@@ -152,7 +152,7 @@ After saving any setting that requires a server restart, stop and restart the se
 Not without re-running the wizard. The install path is baked into the battlegroup profile and the VM configuration.
 
 **Can I run multiple battlegroups?**
-Not in the current alpha. Only one battlegroup profile is supported at a time.
+Yes. Use the profile switcher in the left sidebar to create, switch between, and delete battleground profiles. Each profile has its own name, install path, and backup history. All views update instantly when you switch.
 
 **My server shows as Offline even after clicking Start.**
 Check the error banner at the top of the Dashboard — it will explain the specific failure (e.g., access denied, VM not found). The most common causes are: Sietch Console not running as Administrator, the configured VM name not matching what exists in Hyper-V, or Hyper-V not enabled.
@@ -168,4 +168,5 @@ If you run into a problem not covered here:
 
 1. Check the **Diagnostics** tab — click **Run Diagnostics** to see a full system readiness report.
 2. Check the **Logs** tab for error messages from the server process.
-3. Open an issue at [github.com/michaelstoffer/sietch-console/issues](https://github.com/michaelstoffer/sietch-console/issues).
+3. Check the **App Logs** tab for internal Sietch Console service messages — useful for diagnosing setup or configuration failures.
+4. Open an issue at [github.com/michaelstoffer/sietch-console/issues](https://github.com/michaelstoffer/sietch-console/issues).
