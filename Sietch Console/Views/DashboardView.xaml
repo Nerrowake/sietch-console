@@ -26,6 +26,37 @@
                              Visibility="{Binding IsTransitioning, Converter={StaticResource BoolToVisibleConverter}}"
                              Margin="0,0,0,16" />
 
+                <!-- Error banner — shown when a Hyper-V operation fails -->
+                <Border Background="{StaticResource AccentAmber}"
+                        CornerRadius="{StaticResource CornerSmall}"
+                        Visibility="{Binding HasError, Converter={StaticResource BoolToVisibleConverter}}"
+                        Padding="16,10"
+                        Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding LastError}"
+                                   Foreground="#0B0F14"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center" />
+                        <Button Grid.Column="1"
+                                Command="{Binding DismissErrorCommand}"
+                                Style="{StaticResource CancelButtonStyle}"
+                                Padding="10,4"
+                                Margin="12,0,0,0"
+                                ToolTip="Dismiss this error"
+                                AutomationProperties.Name="Dismiss error">
+                            <TextBlock Text="Dismiss" />
+                        </Button>
+                    </Grid>
+                </Border>
+
                 <!-- ══════════════════════════════════════════ -->
                 <!-- Battlegroup Status + Controls Card         -->
                 <!-- ══════════════════════════════════════════ -->
@@ -60,7 +91,7 @@
                             </StackPanel>
 
                             <!-- Live status dot + text -->
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <Ellipse Width="10" Height="10"
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0">
@@ -89,6 +120,26 @@
                                            FontSize="{StaticResource FontSizeBody}"
                                            Text="{Binding StatusText}"
                                            VerticalAlignment="Center" />
+                            </StackPanel>
+
+                            <!-- Resource utilization — visible only while Running with data -->
+                            <StackPanel Orientation="Horizontal"
+                                        Visibility="{Binding HasResourceData, Converter={StaticResource BoolToVisibleConverter}}">
+                                <TextBlock Style="{StaticResource MutedTextStyle}"
+                                           Text="CPU"
+                                           Margin="0,0,4,0" />
+                                <TextBlock Foreground="{StaticResource TextSecondary}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           Text="{Binding CpuPercent, StringFormat={}{0}%}"
+                                           Margin="0,0,16,0" />
+                                <TextBlock Style="{StaticResource MutedTextStyle}"
+                                           Text="RAM"
+                                           Margin="0,0,4,0" />
+                                <TextBlock Foreground="{StaticResource TextSecondary}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           Text="{Binding MemoryGbText}" />
                             </StackPanel>
                         </StackPanel>
 

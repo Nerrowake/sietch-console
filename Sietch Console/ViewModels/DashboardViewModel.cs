@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
+using SietchConsole.Core.Exceptions;
 using SietchConsole.Core.Interfaces;
 using SietchConsole.Core.Models;
 using System.Windows.Threading;
@@ -12,8 +13,8 @@ public enum PendingDashboardAction { None, Stop, Restart }
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly IBattlegroupControlService _controlService;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly DispatcherTimer _refreshTimer;
+    private readonly IServiceScopeFactory       _scopeFactory;
+    private readonly DispatcherTimer            _refreshTimer;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasProfile))]
@@ -26,17 +27,37 @@ public partial class DashboardViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(StatusDotBrush))]
     [NotifyPropertyChangedFor(nameof(IsRunning))]
     [NotifyPropertyChangedFor(nameof(IsStopped))]
+    [NotifyPropertyChangedFor(nameof(HasResourceData))]
     private BattlegroupRuntimeStatus _status = BattlegroupRuntimeStatus.Unknown;
 
     [ObservableProperty] private bool _isTransitioning;
     [ObservableProperty] private PendingDashboardAction _pendingAction = PendingDashboardAction.None;
 
-    public bool HasProfile => ActiveProfile is not null;
-    public string ProfileName => ActiveProfile?.Name ?? "No battlegroup configured";
-    public string VmName => ActiveProfile?.VmName ?? "—";
-    public bool IsRunning => Status == BattlegroupRuntimeStatus.Running;
-    public bool IsStopped => Status is BattlegroupRuntimeStatus.Offline or BattlegroupRuntimeStatus.Unknown;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasError))]
+    private string? _lastError;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasResourceData))]
+    private int _cpuPercent;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasResourceData))]
+    [NotifyPropertyChangedFor(nameof(MemoryGbText))]
+    private long _memoryMb;
+
+    public bool HasProfile      => ActiveProfile is not null;
+    public string ProfileName   => ActiveProfile?.Name ?? "No battlegroup configured";
+    public string VmName        => ActiveProfile?.VmName ?? "—";
+    public bool IsRunning       => Status == BattlegroupRuntimeStatus.Running;
+    public bool IsStopped       => Status is BattlegroupRuntimeStatus.Offline or BattlegroupRuntimeStatus.Unknown;
     public bool ShowConfirmation => PendingAction != PendingDashboardAction.None;
+    public bool HasError         => LastError is not null;
+    public bool HasResourceData  => IsRunning && (CpuPercent > 0 || MemoryMb > 0);
+
+    public string MemoryGbText => MemoryMb >= 1024
+        ? $"{MemoryMb / 1024.0:F1} GB"
+        : $"{MemoryMb} MB";
 
     public string StatusText => Status switch
     {
@@ -66,10 +87,10 @@ public partial class DashboardViewModel : ObservableObject
 
     public DashboardViewModel(
         IBattlegroupControlService controlService,
-        IServiceScopeFactory scopeFactory)
+        IServiceScopeFactory       scopeFactory)
     {
         _controlService = controlService;
-        _scopeFactory = scopeFactory;
+        _scopeFactory   = scopeFactory;
 
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
         _refreshTimer.Tick += async (_, _) => await RefreshStatusAsync();
@@ -78,9 +99,9 @@ public partial class DashboardViewModel : ObservableObject
 
     public async Task InitializeAsync()
     {
-        using var scope = _scopeFactory.CreateScope();
-        var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
-        var profileRepo = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
+        using var scope       = _scopeFactory.CreateScope();
+        var settingsRepo      = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
+        var profileRepo       = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
 
         var settings = await settingsRepo.GetAsync();
         if (int.TryParse(settings.LastOpenedBattlegroupId, out var id))
@@ -94,7 +115,34 @@ public partial class DashboardViewModel : ObservableObject
     private async Task RefreshStatusAsync()
     {
         if (ActiveProfile is null) return;
-        Status = await _controlService.GetStatusAsync(ActiveProfile);
+
+        try
+        {
+            Status    = await _controlService.GetStatusAsync(ActiveProfile);
+            LastError = null;
+        }
+        catch (HyperVException ex)
+        {
+            Status    = BattlegroupRuntimeStatus.Error;
+            LastError = ex.UserFacingMessage;
+            return;
+        }
+
+        // Fetch resource utilization only while Running (avoids unnecessary WMI queries)
+        if (Status == BattlegroupRuntimeStatus.Running)
+        {
+            var resources = await _controlService.GetVmResourcesAsync(ActiveProfile);
+            if (resources is not null)
+            {
+                CpuPercent = resources.CpuPercent;
+                MemoryMb   = resources.MemoryMb;
+            }
+        }
+        else
+        {
+            CpuPercent = 0;
+            MemoryMb   = 0;
+        }
     }
 
     // #51 – Start
@@ -103,8 +151,14 @@ public partial class DashboardViewModel : ObservableObject
     {
         if (ActiveProfile is null) return;
         IsTransitioning = true;
-        Status = BattlegroupRuntimeStatus.Starting;
-        try { await _controlService.StartAsync(ActiveProfile); }
+        LastError       = null;
+        Status          = BattlegroupRuntimeStatus.Starting;
+        try
+        {
+            await _controlService.StartAsync(ActiveProfile);
+        }
+        catch (HyperVException ex) { LastError = ex.UserFacingMessage; }
+        catch (Exception ex)        { LastError = ex.Message; }
         finally { IsTransitioning = false; await RefreshStatusAsync(); }
     }
     private bool CanStart() => HasProfile && IsStopped && !IsTransitioning;
@@ -140,9 +194,8 @@ public partial class DashboardViewModel : ObservableObject
 
         if (ActiveProfile is null) return;
         IsTransitioning = true;
-        Status = action == PendingDashboardAction.Stop
-            ? BattlegroupRuntimeStatus.Stopping
-            : BattlegroupRuntimeStatus.Stopping;
+        LastError       = null;
+        Status          = BattlegroupRuntimeStatus.Stopping;
         try
         {
             if (action == PendingDashboardAction.Stop)
@@ -150,6 +203,8 @@ public partial class DashboardViewModel : ObservableObject
             else
                 await _controlService.RestartAsync(ActiveProfile);
         }
+        catch (HyperVException ex) { LastError = ex.UserFacingMessage; }
+        catch (Exception ex)        { LastError = ex.Message; }
         finally { IsTransitioning = false; await RefreshStatusAsync(); }
     }
 
@@ -159,6 +214,9 @@ public partial class DashboardViewModel : ObservableObject
         PendingAction = PendingDashboardAction.None;
         OnPropertyChanged(nameof(ShowConfirmation));
     }
+
+    [RelayCommand]
+    private void DismissError() => LastError = null;
 
     // #54 – Control interface
     [RelayCommand(CanExecute = nameof(HasProfile))]
