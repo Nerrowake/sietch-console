@@ -38,6 +38,10 @@ The Dashboard transitions to "Running" once `ServerProcessService` detects a ser
 
 `ServerPackageInstaller` uses App ID `2369390` for the Dune: Awakening dedicated server. This ID has not been officially confirmed by Funcom. If SteamCMD downloads the wrong app or reports an error, the App ID may need to be updated.
 
+### Remote dashboard player count is always 0 and uptime is always —
+
+The remote dashboard's player count and uptime fields are not yet populated. Player count requires a server query API that Funcom has not made available. Uptime would require persisting the server start time — this is planned but not yet implemented. Both fields display placeholder values in the current release.
+
 ---
 
 ## Unsupported Configurations
@@ -76,7 +80,7 @@ These features are not present in the alpha and are planned for future milestone
 - Mod management (listing, enable/disable, updates)
 - Server metrics history charts (CPU/memory over time, player count history)
 - Webhook / notification integrations (server lifecycle events)
-- Remote management dashboard (embedded web server)
+- Remote management player count and uptime (requires server-side API from Funcom)
 - Cloud backup destinations (S3, OneDrive, MinIO)
 
 ---

@@ -125,6 +125,48 @@ Backups are stored in `%LOCALAPPDATA%\SietchConsole\Backups\`. Sietch Console au
 
 ---
 
+## Remote Management Problems
+
+### The remote dashboard URL shown in Settings doesn't load in a browser
+
+The URL is constructed from the first non-loopback IPv4 address on the host. On machines with multiple adapters (VPN, Hyper-V virtual switch, Docker) it may show the wrong IP.
+
+1. Run `ipconfig` in a terminal and find your actual LAN IP (e.g. `192.168.1.10`).
+2. Navigate to `http://<your-LAN-IP>:<port>` manually. The port is shown in Settings (default: 5151).
+
+### The remote dashboard page loads but all API calls return 401
+
+You entered the correct URL but the token prompt is failing. Common causes:
+
+- You copied extra whitespace around the token when pasting — the token must match exactly.
+- The token was regenerated and saved after you last connected — enter the new token.
+- A browser extension is stripping the `Authorization` header — try a different browser or incognito mode.
+
+### A device on my network can't reach the remote dashboard
+
+Windows Firewall is the most common cause. The Networking Assistant only creates rules for game ports — the remote management port needs its own rule:
+
+1. Open **Windows Defender Firewall with Advanced Security**.
+2. Click **Inbound Rules** → **New Rule**.
+3. Select **Port** → **TCP**.
+4. Enter the remote management port (default: 5151).
+5. Select **Allow the connection** and apply to all profiles (Domain, Private, Public).
+
+After creating the rule, confirm the Settings view still shows the web server as **Running** and try again from the other device.
+
+### My browser shows "Reconnecting…" in the live indicator even after loading
+
+The SSE (live update) connection dropped. This usually self-recovers — the browser's `EventSource` retries automatically every few seconds. If it stays disconnected:
+
+- The remote web server may have been stopped and restarted (e.g. you clicked Apply in Settings).
+- Reload the dashboard page to re-establish the connection.
+
+### Player count always shows 0 / Uptime always shows —
+
+These fields are not yet populated. Player count requires a server-side query API that Funcom has not exposed yet. Uptime tracking is planned for a future release. See [Known Limitations](known-limitations.md).
+
+---
+
 ## Networking Problems
 
 ### Firewall check fails — rule missing
