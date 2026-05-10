@@ -61,18 +61,130 @@
                                     Margin="0,0,8,0"
                                     Padding="16,8"
                                     IsEnabled="{Binding IsLoading, Converter={StaticResource BoolInverseConverter}}">
-                                <TextBlock Text="Backup Configuration" />
+                                <TextBlock Text="Backup Config" />
                             </Button>
 
                             <!-- Backup Save Data -->
                             <Button Command="{Binding BackupSaveDataCommand}"
                                     Style="{StaticResource SuccessButtonStyle}"
+                                    Margin="0,0,8,0"
                                     Padding="16,8"
                                     IsEnabled="{Binding IsLoading, Converter={StaticResource BoolInverseConverter}}">
                                 <TextBlock Text="Backup Save Data" />
                             </Button>
+
+                            <!-- Full Backup (#135) -->
+                            <Button Command="{Binding BackupFullCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Padding="16,8"
+                                    IsEnabled="{Binding IsLoading, Converter={StaticResource BoolInverseConverter}}">
+                                <TextBlock Text="Full Backup" />
+                            </Button>
                         </StackPanel>
                     </Grid>
+                </Border>
+
+                <!-- ── Auto-backup settings (#136, #138) ── -->
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="20,16"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource CardTitleStyle}"
+                                   Text="Automatic Backups"
+                                   Margin="0,0,0,4" />
+                        <TextBlock Style="{StaticResource MutedTextStyle}"
+                                   Text="Schedule a full backup at regular intervals. Older backups are pruned automatically."
+                                   Margin="0,0,0,14" />
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Enable toggle -->
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <CheckBox IsChecked="{Binding AutoBackupEnabled}"
+                                          Foreground="{StaticResource TextPrimary}"
+                                          FontFamily="{StaticResource FontUI}"
+                                          FontSize="{StaticResource FontSizeBody}"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,8,0" />
+                                <TextBlock Text="Enable automatic backups"
+                                           Foreground="{StaticResource TextPrimary}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+
+                            <!-- Interval picker -->
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="Every"
+                                           Foreground="{StaticResource TextSecondary}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0" />
+                                <ComboBox ItemsSource="{Binding IntervalChoices}"
+                                          SelectedItem="{Binding BackupIntervalHours}"
+                                          Width="70"
+                                          IsEnabled="{Binding AutoBackupEnabled}"
+                                          Background="{StaticResource FieldBackground}"
+                                          Foreground="{StaticResource TextPrimary}"
+                                          FontFamily="{StaticResource FontUI}"
+                                          FontSize="{StaticResource FontSizeBody}" />
+                                <TextBlock Text="hours"
+                                           Foreground="{StaticResource TextSecondary}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0" />
+                            </StackPanel>
+
+                            <!-- Retention -->
+                            <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="Keep"
+                                           Foreground="{StaticResource TextSecondary}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0" />
+                                <Border Background="{StaticResource FieldBackground}"
+                                        BorderBrush="{StaticResource BorderDefault}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource CornerSmall}"
+                                        Width="52" Height="30">
+                                    <TextBox Text="{Binding BackupRetainCount, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             FontFamily="{StaticResource FontUI}"
+                                             FontSize="{StaticResource FontSizeBody}"
+                                             VerticalAlignment="Center"
+                                             HorizontalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="backups"
+                                           Foreground="{StaticResource TextSecondary}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0" />
+                            </StackPanel>
+
+                            <!-- Save button -->
+                            <Button Grid.Column="6"
+                                    Command="{Binding SaveAutoBackupSettingsCommand}"
+                                    Style="{StaticResource TealButtonStyle}"
+                                    Padding="16,8">
+                                <TextBlock Text="Save" />
+                            </Button>
+                        </Grid>
+                    </StackPanel>
                 </Border>
 
                 <!-- #79 – Backup listing -->
@@ -123,6 +235,10 @@
                                                     <DataTrigger Binding="{Binding BackupType}" Value="SaveData">
                                                         <Setter Property="Background"  Value="{StaticResource StatusSuccessBg}" />
                                                         <Setter Property="BorderBrush" Value="{StaticResource StatusSuccessBorder}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding BackupType}" Value="Full">
+                                                        <Setter Property="Background"  Value="{StaticResource StatusWarningBg}" />
+                                                        <Setter Property="BorderBrush" Value="{StaticResource StatusWarningBorder}" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>

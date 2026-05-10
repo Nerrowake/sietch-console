@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,9 +14,12 @@ public partial class BackupsViewModel : ObservableObject
 {
     private readonly IBackupService       _backupService;
     private readonly IServiceScopeFactory _scopeFactory;
-    private BattlegroupProfile?           _profile;
+    private readonly DispatcherTimer      _autoBackupTimer;
 
-    // ── State ─────────────────────────────────────────────────────────
+    private BattlegroupProfile? _profile;
+
+    // ── Backup list ───────────────────────────────────────────────────────────
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasBackups))]
     private ObservableCollection<BackupRecord> _backups = [];
@@ -25,7 +29,8 @@ public partial class BackupsViewModel : ObservableObject
 
     public bool HasBackups => Backups.Count > 0;
 
-    // ── Confirmation flow ─────────────────────────────────────────────
+    // ── Confirmation flow ─────────────────────────────────────────────────────
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowConfirmation))]
     [NotifyPropertyChangedFor(nameof(ConfirmationTitle))]
@@ -44,17 +49,41 @@ public partial class BackupsViewModel : ObservableObject
         ? "This will permanently delete the backup files from disk. This cannot be undone."
         : "This will overwrite the current configuration or save data with the selected backup. The server should be stopped first.";
 
+    // ── Auto-backup settings (#136, #138) ────────────────────────────────────
+
+    [ObservableProperty]
+    private bool _autoBackupEnabled;
+
+    [ObservableProperty]
+    private int _backupIntervalHours = 6;
+
+    [ObservableProperty]
+    private int _backupRetainCount = 10;
+
+    // Interval choices shown in the ComboBox (hours)
+    public IReadOnlyList<int> IntervalChoices { get; } = [1, 3, 6, 12, 24];
+
+    partial void OnAutoBackupEnabledChanged(bool value)   => ReconfigureTimer();
+    partial void OnBackupIntervalHoursChanged(int value)  => ReconfigureTimer();
+
+    // ── Constructor ───────────────────────────────────────────────────────────
+
     public BackupsViewModel(IBackupService backupService, IServiceScopeFactory scopeFactory)
     {
         _backupService = backupService;
         _scopeFactory  = scopeFactory;
+
+        _autoBackupTimer = new DispatcherTimer();
+        _autoBackupTimer.Tick += async (_, _) => await RunAutoBackupAsync();
     }
+
+    // ── Initialise ────────────────────────────────────────────────────────────
 
     public async Task InitializeAsync()
     {
-        using var scope = _scopeFactory.CreateScope();
-        var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
-        var profileRepo  = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
+        using var scope      = _scopeFactory.CreateScope();
+        var settingsRepo     = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
+        var profileRepo      = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
 
         var settings = await settingsRepo.GetAsync();
         if (int.TryParse(settings.LastOpenedBattlegroupId, out var id))
@@ -62,57 +91,74 @@ public partial class BackupsViewModel : ObservableObject
         else
             _profile = (await profileRepo.GetAllAsync()).FirstOrDefault();
 
+        // Load persisted auto-backup settings
+        AutoBackupEnabled   = settings.AutoBackupEnabled;
+        BackupIntervalHours = settings.BackupIntervalHours > 0 ? settings.BackupIntervalHours : 6;
+        BackupRetainCount   = settings.BackupRetainCount   > 0 ? settings.BackupRetainCount   : 10;
+
         await LoadBackupsAsync();
+        ReconfigureTimer();
     }
 
-    // #79 – Load all backups from DB
+    // ── Load backups (#79) ────────────────────────────────────────────────────
+
     private async Task LoadBackupsAsync()
     {
         using var scope = _scopeFactory.CreateScope();
         var repo = scope.ServiceProvider.GetRequiredService<IBackupRecordRepository>();
         var all  = await repo.GetAllAsync();
         Backups  = new ObservableCollection<BackupRecord>(
-            all.Where(b => b.BattlegroupProfileId == _profile?.Id ||
-                           _profile is null));
+            all.Where(b => b.BattlegroupProfileId == _profile?.Id || _profile is null)
+               .OrderByDescending(b => b.CreatedAt));
         OnPropertyChanged(nameof(HasBackups));
     }
 
-    // #77 – Manual config backup
+    // ── Manual backups ────────────────────────────────────────────────────────
+
+    // #77 – Config backup
     [RelayCommand]
     private async Task BackupConfigAsync()
     {
         if (_profile is null) { StatusMessage = "No battlegroup profile configured."; return; }
-        IsLoading     = true;
-        StatusMessage = string.Empty;
-        try
-        {
-            var record = await _backupService.CreateConfigBackupAsync(_profile,
-                notes: $"Manual config backup");
-            Backups.Insert(0, record);
-            OnPropertyChanged(nameof(HasBackups));
-            StatusMessage = $"Configuration backup created successfully.";
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Backup failed: {ex.Message}";
-        }
-        finally { IsLoading = false; }
+        await RunBackupAsync(() => _backupService.CreateConfigBackupAsync(_profile, "Manual config backup"),
+            "Configuration backup created.");
     }
 
-    // #78 – Manual save data backup
+    // #78 – Save data backup (#134)
     [RelayCommand]
     private async Task BackupSaveDataAsync()
     {
         if (_profile is null) { StatusMessage = "No battlegroup profile configured."; return; }
+        await RunBackupAsync(() => _backupService.CreateSaveDataBackupAsync(_profile, "Manual save data backup"),
+            "Save data backup created.");
+    }
+
+    // #135 – Full backup
+    [RelayCommand]
+    private async Task BackupFullAsync()
+    {
+        if (_profile is null) { StatusMessage = "No battlegroup profile configured."; return; }
+        await RunBackupAsync(() => _backupService.CreateFullBackupAsync(_profile, "Manual full backup"),
+            "Full backup created.");
+    }
+
+    private async Task RunBackupAsync(Func<Task<BackupRecord>> createFn, string successMessage)
+    {
         IsLoading     = true;
         StatusMessage = string.Empty;
         try
         {
-            var record = await _backupService.CreateSaveDataBackupAsync(_profile,
-                notes: "Manual save data backup");
+            var record = await createFn();
             Backups.Insert(0, record);
             OnPropertyChanged(nameof(HasBackups));
-            StatusMessage = "Save data backup created successfully.";
+            StatusMessage = successMessage;
+
+            // Prune after each backup to stay within the retention limit (#136)
+            if (_profile is not null && BackupRetainCount > 0)
+            {
+                await _backupService.PruneOldBackupsAsync(_profile, BackupRetainCount);
+                await LoadBackupsAsync();   // refresh list after pruning
+            }
         }
         catch (Exception ex)
         {
@@ -121,7 +167,43 @@ public partial class BackupsViewModel : ObservableObject
         finally { IsLoading = false; }
     }
 
-    // #80 – Request restore (shows confirmation)
+    // ── Auto-backup (#138) ────────────────────────────────────────────────────
+
+    private void ReconfigureTimer()
+    {
+        _autoBackupTimer.Stop();
+        if (!AutoBackupEnabled || BackupIntervalHours <= 0) return;
+        _autoBackupTimer.Interval = TimeSpan.FromHours(BackupIntervalHours);
+        _autoBackupTimer.Start();
+    }
+
+    private async Task RunAutoBackupAsync()
+    {
+        if (_profile is null) return;
+        await RunBackupAsync(
+            () => _backupService.CreateFullBackupAsync(_profile, "Automatic scheduled backup"),
+            "Auto-backup completed.");
+    }
+
+    // #138 – Save auto-backup settings to the database
+    [RelayCommand]
+    private async Task SaveAutoBackupSettingsAsync()
+    {
+        using var scope  = _scopeFactory.CreateScope();
+        var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
+        var settings     = await settingsRepo.GetAsync();
+
+        settings.AutoBackupEnabled   = AutoBackupEnabled;
+        settings.BackupIntervalHours = BackupIntervalHours;
+        settings.BackupRetainCount   = BackupRetainCount;
+        await settingsRepo.SaveAsync(settings);
+
+        StatusMessage = "Auto-backup settings saved.";
+        ReconfigureTimer();
+    }
+
+    // ── Restore (#80) ─────────────────────────────────────────────────────────
+
     [RelayCommand]
     private void RequestRestore(BackupRecord record)
     {
@@ -129,7 +211,8 @@ public partial class BackupsViewModel : ObservableObject
         PendingAction = PendingBackupAction.Restore;
     }
 
-    // #81 – Request delete (shows confirmation)
+    // ── Delete (#81) ──────────────────────────────────────────────────────────
+
     [RelayCommand]
     private void RequestDelete(BackupRecord record)
     {
@@ -159,8 +242,9 @@ public partial class BackupsViewModel : ObservableObject
             }
             else
             {
+                StatusMessage = "Restoring backup…";
                 await _backupService.RestoreAsync(record);
-                StatusMessage = $"Backup restored successfully. Restart the battlegroup to apply changes.";
+                StatusMessage = "Backup restored. Restart the battlegroup to apply changes.";
             }
         }
         catch (Exception ex)

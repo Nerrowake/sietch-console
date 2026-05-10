@@ -64,7 +64,7 @@ public class BackupService : IBackupService
         return await RecordAsync(profile, "Config", backupDir, notes);
     }
 
-    // #78 – Save data backup
+    // #78 – Save data backup (#134)
     public async Task<BackupRecord> CreateSaveDataBackupAsync(BattlegroupProfile profile, string? notes = null)
     {
         var saveDir = LocateSaveDirectory(profile)
@@ -82,13 +82,60 @@ public class BackupService : IBackupService
             ProfileId       = profile.Id,
             ProfileName     = profile.Name,
             SourceDirectory = saveDir,
+            SaveDirectory   = saveDir,
             Files           = [],
         });
 
         return await RecordAsync(profile, "SaveData", backupDir, notes);
     }
 
-    // #80 – Restore
+    // #135 – Full backup (config + save data in one operation)
+    public async Task<BackupRecord> CreateFullBackupAsync(BattlegroupProfile profile, string? notes = null)
+    {
+        var configDir = _configService.LocateConfigDirectory(profile);
+        var saveDir   = LocateSaveDirectory(profile);
+
+        if (configDir is null && saveDir is null)
+            throw new InvalidOperationException(
+                "Neither a config directory nor a save data directory was found for this profile.");
+
+        var stamp     = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
+        var backupDir = Path.Combine(GetProfileBackupPath(profile), $"{stamp}_Full");
+        Directory.CreateDirectory(backupDir);
+
+        // Back up config files into a Config/ subdirectory
+        var configFiles = new List<string>();
+        if (configDir is not null)
+        {
+            var configBackupDir = Path.Combine(backupDir, "Config");
+            Directory.CreateDirectory(configBackupDir);
+            foreach (var src in Directory.GetFiles(configDir, "*.ini", SearchOption.TopDirectoryOnly))
+            {
+                var name = Path.GetFileName(src);
+                File.Copy(src, Path.Combine(configBackupDir, name), overwrite: true);
+                configFiles.Add(name);
+            }
+        }
+
+        // Back up save data into a SaveData/ subdirectory
+        if (saveDir is not null)
+            await Task.Run(() => CopyDirectory(saveDir, Path.Combine(backupDir, "SaveData")));
+
+        await WriteManifestAsync(backupDir, new BackupManifest
+        {
+            Type            = "Full",
+            ProfileId       = profile.Id,
+            ProfileName     = profile.Name,
+            SourceDirectory = profile.InstallPath,
+            ConfigDirectory = configDir,
+            SaveDirectory   = saveDir,
+            Files           = configFiles,
+        });
+
+        return await RecordAsync(profile, "Full", backupDir, notes);
+    }
+
+    // #80 – Restore (#137)
     public async Task RestoreAsync(BackupRecord record)
     {
         if (!Directory.Exists(record.BackupPath))
@@ -100,12 +147,40 @@ public class BackupService : IBackupService
 
         await Task.Run(() =>
         {
-            if (!Directory.Exists(manifest.SourceDirectory))
-                Directory.CreateDirectory(manifest.SourceDirectory);
-
-            if (manifest.Files.Count > 0)
+            if (manifest.Type == "Full")
             {
-                // Config restore — copy individual files
+                // Full restore: config files from Config/ subdirectory, save data from SaveData/
+                if (manifest.ConfigDirectory is not null)
+                {
+                    var configBackupDir = Path.Combine(record.BackupPath, "Config");
+                    if (Directory.Exists(configBackupDir))
+                    {
+                        Directory.CreateDirectory(manifest.ConfigDirectory);
+                        foreach (var file in manifest.Files)
+                        {
+                            var src  = Path.Combine(configBackupDir, file);
+                            var dest = Path.Combine(manifest.ConfigDirectory, file);
+                            if (File.Exists(src)) File.Copy(src, dest, overwrite: true);
+                        }
+                    }
+                }
+
+                if (manifest.SaveDirectory is not null)
+                {
+                    var saveBackupDir = Path.Combine(record.BackupPath, "SaveData");
+                    if (Directory.Exists(saveBackupDir))
+                    {
+                        Directory.CreateDirectory(manifest.SaveDirectory);
+                        CopyDirectory(saveBackupDir, manifest.SaveDirectory, skipManifest: true);
+                    }
+                }
+            }
+            else if (manifest.Files.Count > 0)
+            {
+                // Config restore — copy individual INI files back to their source directory
+                if (!Directory.Exists(manifest.SourceDirectory))
+                    Directory.CreateDirectory(manifest.SourceDirectory);
+
                 foreach (var file in manifest.Files)
                 {
                     var src  = Path.Combine(record.BackupPath, file);
@@ -115,11 +190,32 @@ public class BackupService : IBackupService
             }
             else
             {
-                // Directory restore — copy entire tree
-                CopyDirectory(record.BackupPath, manifest.SourceDirectory,
-                    skipManifest: true);
+                // SaveData restore — copy entire directory tree
+                var target = manifest.SaveDirectory ?? manifest.SourceDirectory;
+                if (!Directory.Exists(target))
+                    Directory.CreateDirectory(target);
+                CopyDirectory(record.BackupPath, target, skipManifest: true);
             }
         });
+    }
+
+    // #136 – Prune old backups, keeping at most <keepCount> per profile
+    public async Task PruneOldBackupsAsync(BattlegroupProfile profile, int keepCount)
+    {
+        if (keepCount <= 0) return;
+
+        using var scope = _scopeFactory.CreateScope();
+        var repo = scope.ServiceProvider.GetRequiredService<IBackupRecordRepository>();
+        var all  = await repo.GetAllAsync();
+
+        var toDelete = all
+            .Where(b => b.BattlegroupProfileId == profile.Id)
+            .OrderByDescending(b => b.CreatedAt)
+            .Skip(keepCount)
+            .ToList();
+
+        foreach (var old in toDelete)
+            await DeleteAsync(old);
     }
 
     // #81 – Delete
@@ -223,6 +319,10 @@ public class BackupService : IBackupService
         public string       ProfileName     { get; set; } = string.Empty;
         public DateTime     CreatedAt       { get; set; }
         public string       SourceDirectory { get; set; } = string.Empty;
+        /// <summary>For Full backups: original config directory path (restored to Config/ subdir).</summary>
+        public string?      ConfigDirectory { get; set; }
+        /// <summary>For SaveData and Full backups: original save data directory path.</summary>
+        public string?      SaveDirectory   { get; set; }
         public List<string> Files           { get; set; } = [];
     }
 }
