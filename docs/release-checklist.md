@@ -24,12 +24,15 @@ Use this checklist before promoting a draft GitHub Release to published. Complet
 
 ## 3. Functional Smoke Test
 
-Run these manually on a machine with a real Hyper-V environment where possible.
+Run these manually on a machine with a real Hyper-V environment. VM control is now fully implemented — test against a real VM, not just UI flow.
 
 **Dashboard**
 - [ ] App opens and shows the Dashboard
-- [ ] Start / Stop / Restart buttons are present and confirmation overlay works
-- [ ] Status dot updates correctly (Running / Stopped)
+- [ ] Start button provisions (if needed) and starts the VM; status transitions to Starting → Running
+- [ ] Stop button shows confirmation overlay, then stops the VM; status transitions to Stopping → Offline
+- [ ] Restart button stops then starts the VM; status transitions correctly end-to-end
+- [ ] CPU% and RAM figures appear on the Dashboard card while the VM is Running
+- [ ] Error banner appears if Hyper-V raises an error (e.g., access denied); Dismiss clears it
 - [ ] Status bar at the bottom shows profile name and live status
 
 **Setup Wizard**

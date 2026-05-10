@@ -63,7 +63,7 @@ The server VM requires at least 4 GB of RAM, plus RAM for Windows itself. If you
 
 ### Setup Wizard stalls on the Progress step
 
-The progress step in the current alpha is a stub — it simulates progress without performing real operations. If it appears to freeze, wait 10–15 seconds and it should complete. If the application becomes unresponsive, close and relaunch it. No data is lost.
+The VM configuration portion of the progress step is real — Sietch Console will attempt to provision the Hyper-V VM if it does not exist. The server file download step is still a stub and completes immediately. If the wizard appears to freeze during VM provisioning, check Hyper-V Manager for error events. If the application becomes unresponsive, close and relaunch — no data is lost and the wizard can be re-run.
 
 ---
 
@@ -71,11 +71,16 @@ The progress step in the current alpha is a stub — it simulates progress witho
 
 ### The server shows "Offline" immediately after clicking Start
 
-Server control (Hyper-V integration) is not yet implemented in the alpha. The Start/Stop/Restart buttons show the UI interaction but do not control a real VM or process. This is a known alpha limitation.
+Check the **error banner** at the top of the Dashboard for a specific message. Common causes:
+
+- **Access denied** — Sietch Console must run as Administrator to manage Hyper-V. Right-click the shortcut → **Run as administrator**.
+- **VM not found** — the VM Name in your battlegroup profile must exactly match the name in Hyper-V Manager. Open Hyper-V Manager to confirm.
+- **Hyper-V not enabled** — run the Diagnostics tab and check the Hyper-V readiness result.
+- **VM starts but server shows Offline** — the VM may have powered on, but the game server process inside it is not yet running. Server process management is not automated in this alpha build; you must start the server process manually inside the VM for now.
 
 ### The status indicator never leaves "Starting"
 
-Same cause — the status polling mechanism expects a real server process to respond. Without the Hyper-V integration, the status remains in a transitional state until the implementation is complete.
+Sietch Console polls VM state every 2 seconds for up to 90 seconds. If it does not reach Running within that window, it will time out and show an error. This usually means the VM is stuck booting (check Hyper-V Manager for the VM's state) or the VM was started from outside the app and is in an unexpected state.
 
 ---
 
@@ -142,7 +147,7 @@ The Networking tab detects your IP by inspecting Windows network interfaces. If 
 
 ### Log view shows no entries
 
-The Logs view reads from the log file path configured in your battlegroup profile. In the current alpha, the server is not running a real process, so no log file is produced. The empty state is expected.
+The Logs view reads from the log file path configured in your battlegroup profile. If the Dune: Awakening server process has not been started inside the VM, no log file is produced yet. Server process management is not yet automated — start the server process manually inside the VM to generate logs.
 
 ### Log file selector is empty
 

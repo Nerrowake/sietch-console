@@ -93,7 +93,7 @@ Repository interfaces (implemented in `SietchConsole.Data`):
 The persistence layer. It implements repository interfaces using EF Core 8 against a SQLite database.
 
 - **Database location:** `%LOCALAPPDATA%\SietchConsole\sietch.db`
-- **Migrations:** In `Data/Migrations/` — run automatically at startup via `DbContext.Database.Migrate()`
+- **Schema evolution:** `DatabaseInitializerService.InitializeAsync()` calls `EnsureCreated` (creates schema on first run) then `ApplySchemaUpdatesAsync`, which runs `ALTER TABLE … ADD COLUMN` statements for any columns added after initial release. This lets existing user databases upgrade automatically on next launch without EF Core migrations.
 - **Lifetime:** Repositories are registered as **scoped** services. ViewModels access them via `IServiceScopeFactory` to avoid holding an open connection for the lifetime of the application.
 
 ### Entities (`Data/Entities/`)
@@ -214,9 +214,19 @@ The application never writes to the directory it was installed into. All mutable
 
 ---
 
-## Hyper-V Integration (Alpha Status)
+## Hyper-V Integration
 
-In the current alpha, VM control (`BattlegroupControlService`) and server package management (`ServerPackageService`, `SetupScriptService`) are stubs. They return placeholder state rather than making real Hyper-V or SteamCMD calls. The interfaces and method signatures are finalized; the implementations will be filled in as later milestones target Hyper-V integration.
+`BattlegroupControlService` performs real Hyper-V operations via WMI (`System.Management`) and PowerShell:
+
+- **VM state queries** — `Msvm_ComputerSystem.EnabledState` via `root\virtualization\v2`
+- **Start / Stop / Restart** — `Start-VM` / `Stop-VM` PowerShell cmdlets, invoked via `-EncodedCommand` (Base64 UTF-16) to eliminate all shell-quoting issues
+- **VM provisioning** — `New-VM`, `Set-VMProcessor`, `Set-VMMemory` when the configured VM does not yet exist
+- **Graceful stop** — ACPI shutdown signal first, then `Stop-VM -Force` if the guest does not shut down within 30 s
+- **State-transition polling** — WMI polled every 2 s until the target state is reached or a timeout fires (90 s for Start)
+- **Resource utilisation** — CPU% and RAM read from `Msvm_SummaryInformation.ProcessorLoad` / `MemoryUsage` while the VM is Running
+- **Typed errors** — `HyperVException` with `HyperVErrorCode` maps WMI and PowerShell failures to user-readable messages
+
+Server package management (`ServerPackageService`, `SetupScriptService`) and server process management remain stubs pending Milestones 16–17.
 
 ---
 

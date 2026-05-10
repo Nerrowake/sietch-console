@@ -2,19 +2,21 @@
 
 This document describes the planned feature trajectory for Sietch Console. Items are grouped by milestone. Ordering and scope are subject to change as the project evolves.
 
-The current release is `0.1.0-alpha.1`. All items listed below are unimplemented as of this writing.
+The current release is `0.1.0-alpha.4`. Milestone 15 is complete. Milestones 16 and above are unimplemented as of this writing.
 
 ---
 
-## Milestone 15 — Hyper-V Integration
+## Milestone 15 — Hyper-V Integration ✓ Complete (`0.1.0-alpha.4`)
 
-Replace the stub server control layer with real Hyper-V operations.
+Replaced the stub server control layer with real Hyper-V operations.
 
 - Provision a new Hyper-V VM (generation, memory, CPU, virtual switch) from within the app
-- Start, stop, and restart the VM using PowerShell cmdlets via `System.Management.Automation`
-- Poll VM state and surface live status on the Dashboard
-- Display VM memory and CPU utilization in the Dashboard access shortcuts area
-- Handle common Hyper-V errors with friendly messages (VM not found, insufficient resources, access denied)
+- Start, stop, and restart the VM using PowerShell cmdlets (`Start-VM`, `Stop-VM`)
+- Graceful ACPI shutdown with a 30-second timeout before force-stopping
+- Poll VM state every 2 s until the target state is reached (90-second timeout for Start)
+- Display live CPU% and RAM on the Dashboard while the VM is Running
+- `HyperVException` with `HyperVErrorCode` surfaces friendly messages for access denied, VM not found, timeouts, and WMI failures
+- Automatic SQLite schema migration for new profile fields (`CpuCount`, `MemoryMb`, `VirtualSwitchName`)
 
 ---
 

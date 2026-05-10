@@ -151,10 +151,10 @@ Not without re-running the wizard. The install path is baked into the battlegrou
 Not in the current alpha. Only one battlegroup profile is supported at a time.
 
 **The Setup Wizard skipped the download step — did something go wrong?**
-The download step is currently a stub in the alpha build. The wizard completes successfully, but you will need to install the server files manually. Future builds will automate this.
+The server file download (SteamCMD) step is not yet implemented. The wizard completes successfully and the VM is configured, but you will need to install the Dune: Awakening dedicated server files manually inside the VM for now. Future builds will automate this.
 
 **My server shows as Offline even after clicking Start.**
-This is expected behavior in the alpha — the Hyper-V and process control integration is not yet complete. The Dashboard shows the UI for server control but the underlying VM management is not hooked up yet.
+Check the error banner at the top of the Dashboard — it will explain the specific failure (e.g., access denied, VM not found). The most common causes are: Sietch Console not running as Administrator, the configured VM name not matching what exists in Hyper-V, or Hyper-V not enabled. If no error is shown, the VM may have started but the server process is not yet running inside it (server process management is not yet automated).
 
 ---
 

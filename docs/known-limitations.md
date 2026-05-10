@@ -6,19 +6,11 @@ This document lists known bugs, unimplemented features, and unsupported configur
 
 ## Alpha Scope
 
-Sietch Console `0.1.0-alpha.1` is an **internal alpha**. The application shell, UI, and all views are implemented, but several core integrations are stubs that return placeholder data rather than performing real operations. This is expected — the alpha is a UI and architecture foundation, not a functional server manager.
+Sietch Console `0.1.0-alpha.4` is an **internal alpha**. The application shell, UI, and all views are implemented. Hyper-V VM control (start, stop, restart, provisioning, and live resource display) is fully implemented. Server file download and server process management remain stubs — the application cannot yet automatically install server files or spawn the game server process inside the VM.
 
 ---
 
 ## Stub / Not-Yet-Implemented
-
-### Hyper-V VM Control
-
-**Status:** Stub  
-`BattlegroupControlService` does not interact with Hyper-V. The Start, Stop, and Restart buttons show the UI flow (confirmation overlay, status transitions) but do not actually start, stop, or restart a virtual machine. The server status displayed on the Dashboard is not real.
-
-**Impact:** The server cannot be started or stopped via the application.  
-**Planned:** A later milestone will implement real Hyper-V PowerShell cmdlet integration.
 
 ### Server Process Management
 
@@ -93,7 +85,6 @@ This is a WPF application targeting `net8.0-windows`. It does not run on Linux o
 
 These features are not present in the alpha and are planned for future milestones:
 
-- Real Hyper-V VM provisioning and management
 - SteamCMD integration for automated server file download and updates
 - Auto-update mechanism for Sietch Console itself
 - Code-signed installer (removes the SmartScreen warning)
