@@ -3,15 +3,18 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using SietchConsole.Core.Interfaces;
 using SietchConsole.Core.Models;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Sietch_Console.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
-    private readonly IConfigurationService _configService;
-    private readonly IBackupService        _backupService;
-    private readonly IServiceScopeFactory  _scopeFactory;
-    private readonly IActiveProfileService _activeProfileService;
+    private readonly IConfigurationService    _configService;
+    private readonly IBackupService           _backupService;
+    private readonly IServiceScopeFactory     _scopeFactory;
+    private readonly IActiveProfileService    _activeProfileService;
+    private readonly IRemoteManagementService _remoteService;
 
     private BattlegroupProfile? _profile;
     private bool _loaded;
@@ -62,13 +65,35 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string  _rawContent = string.Empty;
     [ObservableProperty] private bool    _rawHasUnsavedChanges;
 
+    // ── Remote management (#152, #151) ────────────────────────────────
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSaveRemote))]
+    private bool _remoteEnabled;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSaveRemote))]
+    private int _remotePort = 5151;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSaveRemote))]
+    private string _remoteToken = string.Empty;
+
+    [ObservableProperty] private bool    _remoteIsRunning;
+    [ObservableProperty] private string? _remoteLiveUrl;
+    [ObservableProperty] private string  _remoteStatusMessage = string.Empty;
+    [ObservableProperty] private bool    _remoteIsBusy;
+
+    public bool CanSaveRemote => !RemoteIsBusy && RemotePort is >= 1024 and <= 65535;
+
     public SettingsViewModel(IConfigurationService configService, IBackupService backupService,
-                             IServiceScopeFactory scopeFactory, IActiveProfileService activeProfileService)
+                             IServiceScopeFactory scopeFactory, IActiveProfileService activeProfileService,
+                             IRemoteManagementService remoteService)
     {
         _configService        = configService;
         _backupService        = backupService;
         _scopeFactory         = scopeFactory;
         _activeProfileService = activeProfileService;
+        _remoteService        = remoteService;
 
         _activeProfileService.ProfileChanged += (_, profile) =>
         {
@@ -76,12 +101,15 @@ public partial class SettingsViewModel : ObservableObject
             _loaded  = false;
             _ = LoadConfigAsync();
         };
+
+        _remoteService.StatusChanged += (_, _) => SyncRemoteRunningState();
     }
 
     public async Task InitializeAsync()
     {
         _profile = _activeProfileService.Current;
         await LoadConfigAsync();
+        await LoadRemoteSettingsAsync();
     }
 
     private async Task LoadConfigAsync()
@@ -231,6 +259,81 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnRawContentChanged(string value)
     {
         if (SelectedFile is not null) RawHasUnsavedChanges = true;
+    }
+
+    // ── Remote management commands (#152, #151) ──────────────────────
+
+    [RelayCommand]
+    private void GenerateToken()
+    {
+        var bytes = new byte[24];
+        RandomNumberGenerator.Fill(bytes);
+        RemoteToken = Convert.ToBase64String(bytes);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSaveRemote))]
+    private async Task SaveRemoteSettingsAsync()
+    {
+        if (RemoteToken.Length < 16)
+        {
+            RemoteStatusMessage = "Token must be at least 16 characters. Use Generate to create one.";
+            return;
+        }
+
+        RemoteIsBusy = true;
+        RemoteStatusMessage = string.Empty;
+
+        try
+        {
+            using var scope    = _scopeFactory.CreateScope();
+            var settingsRepo   = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
+            var settings       = await settingsRepo.GetAsync();
+
+            settings.RemoteManagementEnabled = RemoteEnabled;
+            settings.RemoteManagementPort    = RemotePort;
+            settings.RemoteManagementToken   = RemoteToken;
+            await settingsRepo.SaveAsync(settings);
+
+            // Apply change: start or stop the web server as needed.
+            if (RemoteEnabled)
+            {
+                await _remoteService.StopAsync();
+                await _remoteService.StartAsync(RemotePort, RemoteToken);
+                RemoteStatusMessage = _remoteService.IsRunning
+                    ? $"Web server started — {_remoteService.ListenUrl}"
+                    : "Failed to start web server. Check App Logs for details.";
+            }
+            else
+            {
+                await _remoteService.StopAsync();
+                RemoteStatusMessage = "Remote management disabled.";
+            }
+
+            SyncRemoteRunningState();
+        }
+        finally
+        {
+            RemoteIsBusy = false;
+        }
+    }
+
+    private async Task LoadRemoteSettingsAsync()
+    {
+        using var scope  = _scopeFactory.CreateScope();
+        var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
+        var settings     = await settingsRepo.GetAsync();
+
+        RemoteEnabled = settings.RemoteManagementEnabled;
+        RemotePort    = settings.RemoteManagementPort;
+        RemoteToken   = settings.RemoteManagementToken ?? string.Empty;
+
+        SyncRemoteRunningState();
+    }
+
+    private void SyncRemoteRunningState()
+    {
+        RemoteIsRunning = _remoteService.IsRunning;
+        RemoteLiveUrl   = _remoteService.ListenUrl;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────

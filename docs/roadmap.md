@@ -2,7 +2,7 @@
 
 This document describes the planned feature trajectory for Sietch Console. Items are grouped by milestone. Ordering and scope are subject to change as the project evolves.
 
-The current release is `0.2.0-alpha.1`. Milestones 15–17 are complete. Milestone 18 and above are unimplemented as of this writing.
+The current release is `0.5.0-alpha.1`. Milestones 15–21 are complete.
 
 ---
 
@@ -72,7 +72,7 @@ Address quality-of-life gaps and reliability issues from alpha feedback.
 
 ---
 
-## Milestone 20 — Auto-Update
+## Milestone 20 — Auto-Update ✓ Complete (`0.4.0-alpha.1`)
 
 Keep Sietch Console itself up to date.
 
@@ -80,6 +80,19 @@ Keep Sietch Console itself up to date.
 - Display an "Update Available" banner with release notes summary
 - One-click download and install of the new version (installer variant) or portable ZIP extraction
 - Silent update option: download in the background, prompt to restart when ready
+
+---
+
+## Milestone 21 — Remote Management ✓ Complete (`0.5.0-alpha.1`)
+
+Monitor and control the server from any device on the local network.
+
+- Embedded Kestrel web server that starts inside the WPF app and listens on a configurable LAN port (default 5151)
+- REST API: `GET /api/status`, `POST /api/control/{start,stop,restart}`, `GET /api/logs`, `GET /api/events` (SSE)
+- Bearer token authentication with IP-based rate limiting (5 failures → 5-minute block)
+- Built-in single-page dashboard: status badge, uptime, controls, live log tail — dark-themed, mobile-responsive
+- Settings UI with enable toggle, port, token (with random Generate button), live status indicator
+- API documentation in `docs/remote-api.md` for community integrators
 
 ---
 
@@ -103,8 +116,10 @@ These are ideas that may or may not be implemented, depending on community feedb
 |-------|-------|
 | `0.1.x-alpha.N` | Internal alpha — UI foundation, stub integrations ✓ |
 | `0.2.x-alpha.N` | Hyper-V + server process integration complete ✓ |
-| `0.3.x-beta.N` | Save data backups, polish, broader testing |
-| `0.4.x-beta.N` | Auto-update, code signing, public beta |
+| `0.3.x-alpha.N` | Save data backups, polish, app log viewer ✓ |
+| `0.4.x-alpha.N` | Auto-update, multiple profiles ✓ |
+| `0.5.x-alpha.N` | Remote management web dashboard ✓ |
+| `0.6.x-beta.N` | Server metrics, player management, code signing |
 | `1.0.0` | First stable release |
 
 ---

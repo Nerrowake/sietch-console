@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sietch Console — Remote</title>
+<style>
+:root {
+  --bg:       #0B0F14;
+  --panel:    #141A22;
+  --card:     #1A212B;
+  --field:    #0F151C;
+  --accent:   #C46A2B;
+  --sand:     #D6B98C;
+  --text:     #F3EBDD;
+  --text2:    #B8AA92;
+  --muted:    #7B6F5D;
+  --border:   #2A3344;
+  --success:  #4CAF82;
+  --error:    #E05252;
+  --warning:  #E0A64B;
+  --cyan:     #4FB3B8;
+  --rad:      8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI Variable',Segoe UI,system-ui,sans-serif;min-height:100vh;font-size:14px}
+
+/* ── Login ── */
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:36px 32px;width:100%;max-width:380px}
+.login-logo{font-size:20px;font-weight:700;color:var(--sand);margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.err-msg{background:#2A1010;border:1px solid #5C2020;color:var(--error);border-radius:6px;padding:8px 12px;font-size:13px;margin-bottom:12px;display:none}
+input[type=password],input[type=text]{
+  width:100%;background:var(--field);color:var(--text);border:1px solid var(--border);
+  border-radius:6px;padding:9px 12px;font-size:14px;font-family:inherit;margin-bottom:12px;outline:none}
+input:focus{border-color:var(--accent)}
+.btn{font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:none;border-radius:var(--rad);padding:9px 18px;transition:opacity .15s}
+.btn:hover:not(:disabled){opacity:.85}
+.btn:disabled{opacity:.35;cursor:default}
+.btn-full{width:100%}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-stop{background:#2A1010;color:var(--error);border:1px solid #5C2020}
+.btn-restart{background:var(--field);color:var(--text2);border:1px solid var(--border)}
+.btn-logout{background:transparent;color:var(--muted);border:1px solid var(--border);font-size:12px;padding:5px 12px;border-radius:6px}
+
+/* ── Dashboard ── */
+#dashboard{display:none;max-width:920px;margin:0 auto;padding:24px 16px 40px}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap}
+.header-logo{font-size:18px;font-weight:700;color:var(--sand)}
+.header-logo span{color:var(--text2);font-weight:400}
+
+/* ── Cards ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--rad);padding:20px;margin-bottom:16px}
+.card-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:16px}
+
+/* ── Status ── */
+.status-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;font-size:14px;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+.badge-Running  {background:#1B3A2A;color:var(--success);border:1px solid #2D5C40}
+.badge-Starting {background:#1E2A3A;color:var(--cyan);   border:1px solid #2D4A5C}
+.badge-Stopping {background:#2A1E10;color:var(--warning); border:1px solid #5C3D14}
+.badge-Error    {background:#2A1010;color:var(--error);   border:1px solid #5C2020}
+.badge-Offline  {background:#1A1D22;color:var(--muted);   border:1px solid var(--border)}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat-value{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.stat-label{font-size:11px;color:var(--muted)}
+.spacer{flex:1}
+.live-pill{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--success)}
+.live-dot.off{background:var(--error)}
+
+/* ── Controls ── */
+.controls{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ── Log tail ── */
+.log-wrap{background:var(--field);border:1px solid var(--border);border-radius:6px;
+  font-family:'Cascadia Code',Consolas,monospace;font-size:12px;line-height:1.5;
+  max-height:340px;overflow-y:auto;padding:12px}
+.log-line{display:flex;gap:12px;padding:1px 0}
+.log-ts{color:var(--muted);white-space:nowrap;flex-shrink:0}
+.log-msg{color:var(--text2);word-break:break-word}
+.log-msg.E{color:var(--error)}
+.log-msg.W{color:var(--warning)}
+.log-empty{color:var(--muted);font-style:italic}
+
+@media(max-width:600px){
+  .status-row,.controls{flex-direction:column;align-items:flex-start}
+  .controls .btn{width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ Login ══ -->
+<div id="login">
+  <div class="login-card">
+    <div class="login-logo">Sietch Console</div>
+    <div class="login-sub">Remote Management — enter your access token to connect.</div>
+    <div id="err" class="err-msg"></div>
+    <input id="tok" type="password" placeholder="Access token" autocomplete="off" />
+    <button class="btn btn-primary btn-full" onclick="doLogin()">Connect</button>
+  </div>
+</div>
+
+<!-- ══ Dashboard ══ -->
+<div id="dashboard">
+  <div class="header">
+    <div class="header-logo">Sietch Console <span>— Remote</span></div>
+    <button class="btn-logout" onclick="doLogout()">Disconnect</button>
+  </div>
+
+  <!-- Status -->
+  <div class="card">
+    <div class="card-title">Server Status</div>
+    <div class="status-row">
+      <div id="badge" class="badge badge-Offline"><span class="dot"></span><span id="badge-text">Offline</span></div>
+      <div class="stat"><span id="uptime" class="stat-value">—</span><span class="stat-label">Uptime</span></div>
+      <div class="stat"><span id="players" class="stat-value">—</span><span class="stat-label">Players</span></div>
+      <div class="spacer"></div>
+      <div class="live-pill"><span id="ldot" class="live-dot off"></span><span id="llabel">Connecting…</span></div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="card">
+    <div class="card-title">Controls</div>
+    <div class="controls">
+      <button id="b-start"   class="btn btn-primary" onclick="ctl('start')">Start</button>
+      <button id="b-stop"    class="btn btn-stop"    onclick="ctl('stop')">Stop</button>
+      <button id="b-restart" class="btn btn-restart" onclick="ctl('restart')">Restart</button>
+    </div>
+  </div>
+
+  <!-- Log tail -->
+  <div class="card">
+    <div class="card-title">Recent Logs</div>
+    <div id="logwrap" class="log-wrap">
+      <div class="log-empty">Waiting for log output…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+var tok = function(){ return sessionStorage.getItem('sc_tok'); };
+
+/* ── Login ── */
+async function doLogin(){
+  var t = document.getElementById('tok').value.trim();
+  if(!t) return;
+  var errEl = document.getElementById('err');
+  errEl.style.display = 'none';
+  try{
+    var r = await fetch('/api/status',{headers:{'Authorization':'Bearer '+t}});
+    if(r.ok){ sessionStorage.setItem('sc_tok',t); showDash(); }
+    else { errEl.textContent='Invalid token. Try again.'; errEl.style.display='block'; }
+  } catch(e){ errEl.textContent='Connection error — is the server reachable?'; errEl.style.display='block'; }
+}
+document.getElementById('tok').addEventListener('keydown',function(e){if(e.key==='Enter') doLogin();});
+
+function doLogout(){
+  sessionStorage.removeItem('sc_tok');
+  closeSSE();
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('login').style.display='flex';
+  document.getElementById('tok').value='';
+  document.getElementById('err').style.display='none';
+}
+
+/* ── Status helpers ── */
+function applyStatus(status, upSec, pc){
+  var b = document.getElementById('badge');
+  b.className='badge badge-'+(status||'Offline');
+  document.getElementById('badge-text').textContent=status||'Offline';
+  document.getElementById('uptime').textContent=fmtUp(upSec);
+  document.getElementById('players').textContent=(pc!=null)?pc:'—';
+  var run = status==='Running', starting = status==='Starting';
+  document.getElementById('b-start').disabled   = run||starting;
+  document.getElementById('b-stop').disabled    = !run&&!starting;
+  document.getElementById('b-restart').disabled = !run;
+}
+function fmtUp(s){
+  if(s==null||s<0) return '—';
+  var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+  if(h>0) return h+'h '+m+'m';
+  if(m>0) return m+'m '+sec+'s';
+  return sec+'s';
+}
+
+/* ── Controls ── */
+async function ctl(action){
+  await fetch('/api/control/'+action,{method:'POST',headers:{'Authorization':'Bearer '+tok()}});
+}
+
+/* ── Log tail ── */
+var MAX_LINES=200;
+var logInited=false;
+function appendLog(ts,msg,level){
+  var wrap=document.getElementById('logwrap');
+  if(!logInited){wrap.innerHTML='';logInited=true;}
+  var div=document.createElement('div');
+  div.className='log-line';
+  var cls=level==='Error'?'E':level==='Warning'?'W':'';
+  div.innerHTML='<span class="log-ts">'+(ts||'')+'</span><span class="log-msg '+cls+'">'+esc(msg)+'</span>';
+  wrap.appendChild(div);
+  while(wrap.children.length>MAX_LINES) wrap.removeChild(wrap.firstChild);
+  wrap.scrollTop=wrap.scrollHeight;
+}
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function loadLogs(){
+  try{
+    var r=await fetch('/api/logs?lines=50',{headers:{'Authorization':'Bearer '+tok()}});
+    if(!r.ok) return;
+    var list=await r.json();
+    var wrap=document.getElementById('logwrap');
+    wrap.innerHTML='';logInited=true;
+    list.forEach(function(l){appendLog(l.timestamp,l.message,l.level);});
+    if(list.length===0){wrap.innerHTML='<div class="log-empty">No log files found yet.</div>';}
+  } catch(e){}
+}
+
+/* ── SSE ── */
+var es=null;
+function openSSE(){
+  closeSSE();
+  es=new EventSource('/api/events?token='+encodeURIComponent(tok()));
+  es.onopen=function(){
+    document.getElementById('ldot').className='live-dot';
+    document.getElementById('llabel').textContent='Live';
+  };
+  es.onerror=function(){
+    document.getElementById('ldot').className='live-dot off';
+    document.getElementById('llabel').textContent='Reconnecting…';
+  };
+  es.addEventListener('status',function(e){
+    var d=JSON.parse(e.data);
+    applyStatus(d.status,d.uptimeSeconds,d.playerCount);
+  });
+  es.addEventListener('log',function(e){
+    var d=JSON.parse(e.data);
+    appendLog(d.timestamp,d.message,d.level);
+  });
+}
+function closeSSE(){ if(es){es.close();es=null;} }
+
+/* ── Poll fallback ── */
+setInterval(function(){
+  if(tok()&&document.getElementById('dashboard').style.display!=='none')
+    fetch('/api/status',{headers:{'Authorization':'Bearer '+tok()}})
+      .then(function(r){return r.json();})
+      .then(function(d){applyStatus(d.status,d.uptimeSeconds,d.playerCount);})
+      .catch(function(){});
+},10000);
+
+/* ── Init ── */
+function showDash(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  fetch('/api/status',{headers:{'Authorization':'Bearer '+tok()}})
+    .then(function(r){return r.json();}).then(function(d){applyStatus(d.status,d.uptimeSeconds,d.playerCount);}).catch(function(){});
+  loadLogs();
+  openSSE();
+}
+if(tok()) showDash();
+</script>
+</body>
+</html>

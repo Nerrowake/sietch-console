@@ -11,6 +11,7 @@ using Sietch_Console.Services.Installation;
 using Sietch_Console.Services.Logs;
 using Sietch_Console.Services.Networking;
 using Sietch_Console.Services.Profiles;
+using Sietch_Console.Services.Remote;
 using Sietch_Console.ViewModels;
 using Sietch_Console.ViewModels.Steps;
 using SietchConsole.Core.Interfaces;
@@ -56,6 +57,9 @@ public partial class App : Application
 
         // ── App self-update service (#145) ────────────────────────────────────
         services.AddSingleton<IAppUpdateService, AppUpdateService>();
+
+        // ── Remote management service (#152) ──────────────────────────────────
+        services.AddSingleton<IRemoteManagementService, RemoteManagementService>();
 
         // Infrastructure services
         services.AddSingleton<ISystemReadinessService, SystemReadinessService>();
@@ -135,6 +139,20 @@ public partial class App : Application
         var wizardVm = _host.Services.GetRequiredService<SetupWizardViewModel>();
         await wizardVm.InitializeAsync();
 
+        // ── #152: Auto-start remote management if previously enabled ─────────
+        using (var scope = _host.Services.CreateScope())
+        {
+            var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
+            var appSettings  = await settingsRepo.GetAsync();
+            if (appSettings.RemoteManagementEnabled &&
+                !string.IsNullOrWhiteSpace(appSettings.RemoteManagementToken))
+            {
+                var remoteService = _host.Services.GetRequiredService<IRemoteManagementService>();
+                await remoteService.StartAsync(appSettings.RemoteManagementPort,
+                                               appSettings.RemoteManagementToken);
+            }
+        }
+
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
 
@@ -143,6 +161,10 @@ public partial class App : Application
 
     protected override async void OnExit(ExitEventArgs e)
     {
+        // Stop the remote web server before the host shuts down.
+        var remoteService = _host.Services.GetRequiredService<IRemoteManagementService>();
+        await remoteService.StopAsync();
+
         await _host.StopAsync();
         _host.Dispose();
         base.OnExit(e);

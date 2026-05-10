@@ -11,6 +11,26 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.5.0-alpha.1] — 2026-05-10
+
+### Added
+
+- **Embedded remote management web server (#152)** — `IRemoteManagementService` / `RemoteManagementService` wraps an ASP.NET Core Kestrel web host that starts inside the existing WPF `IHost`; configures to listen on `0.0.0.0:{port}` (default 5151) so LAN devices can reach it; shuts down cleanly with the app; auto-starts on launch when previously enabled
+- **Remote management authentication (#151)** — `RemoteAuthMiddleware` enforces `Authorization: Bearer <token>` on all `/api/*` routes; SSE endpoint also accepts `?token=` query param because `EventSource` cannot send headers; IP-based rate limiting: 5 failures within 60 s blocks for 5 minutes with `429 Too Many Requests` and `Retry-After`; auth failures logged with source IP
+- **REST and SSE API (#149)** — `RemoteApiEndpoints` maps minimal APIs: `GET /api/status` (status, uptimeSeconds, playerCount), `POST /api/control/{start,stop,restart}` (202 Accepted, dispatches to `IBattlegroupControlService`), `GET /api/logs?lines=50` (last N lines from the most recent log file), `GET /api/events` (SSE stream that pushes `status` and `log` events in real time); `SseHub` broadcasts to all connected clients via per-client `Channel<string>`
+- **Remote dashboard web UI (#150)** — single-page dashboard compiled into the binary as `EmbeddedResource`; served at `GET /`; features status badge, uptime, player count, Start/Stop/Restart controls, scrolling 200-line log tail, live SSE updates; dark theme matching WPF palette (`#0B0F14` bg, `#C46A2B` accent); mobile-responsive layout; login screen stores token in `sessionStorage` (cleared on tab close)
+- **Remote management settings in Settings view** — Remote Management card: enable toggle, port field, token field with one-click Generate button (`RandomNumberGenerator`, base64), live status indicator showing URL when running, Apply button; settings persisted to `ApplicationSettings` (`RemoteManagementEnabled`, `RemoteManagementPort`, `RemoteManagementToken`); web server starts/stops immediately when settings are saved
+- **`docs/remote-api.md`** — full API reference for community integrators (all endpoints, SSE event shapes, auth model, curl examples)
+
+### Changed
+
+- `SettingsViewModel` injects `IRemoteManagementService` and exposes remote management observable properties and commands; subscribes to `IRemoteManagementService.StatusChanged` to keep the UI indicator in sync
+- `App.xaml.cs` registers `IRemoteManagementService` / `RemoteManagementService` as singleton; auto-starts on launch when `RemoteManagementEnabled = true` in `ApplicationSettings`; stops the web server cleanly in `OnExit`
+- `ApplicationSettings` extended with `RemoteManagementEnabled`, `RemoteManagementPort`, `RemoteManagementToken`; existing databases upgraded via `ALTER TABLE ADD COLUMN` in `DatabaseInitializerService`
+- WPF project file adds `<FrameworkReference Include="Microsoft.AspNetCore.App" />` and embeds `Resources/dashboard.html`
+
+---
+
 ## [0.4.0-alpha.1] — 2026-05-10
 
 ### Added

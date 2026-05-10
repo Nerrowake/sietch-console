@@ -28,6 +28,17 @@ public class ApplicationSettings
     /// <summary>Maximum number of backups to keep per profile. Older ones are pruned automatically.</summary>
     public int BackupRetainCount { get; set; } = 10;
 
+    // ── Remote management settings (#152, #151) ──────────────────────────────
+
+    /// <summary>Whether the embedded Kestrel web server is enabled.</summary>
+    public bool RemoteManagementEnabled { get; set; } = false;
+
+    /// <summary>Port the embedded web server listens on (default 5151).</summary>
+    public int RemoteManagementPort { get; set; } = 5151;
+
+    /// <summary>Bearer access token for the remote management API (DPAPI-encrypted at rest).</summary>
+    public string? RemoteManagementToken { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

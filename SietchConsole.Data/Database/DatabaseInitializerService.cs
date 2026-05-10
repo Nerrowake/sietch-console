@@ -23,9 +23,12 @@ public class DatabaseInitializerService
         await AddColumnIfMissingAsync("BattlegroupProfiles",  "MemoryMb",            "INTEGER NOT NULL DEFAULT 8192");
         await AddColumnIfMissingAsync("BattlegroupProfiles",  "VirtualSwitchName",   "TEXT NULL");
         await AddColumnIfMissingAsync("ApplicationSettings",  "InstalledBuildId",    "TEXT NULL");
-        await AddColumnIfMissingAsync("ApplicationSettings",  "AutoBackupEnabled",   "INTEGER NOT NULL DEFAULT 0");
-        await AddColumnIfMissingAsync("ApplicationSettings",  "BackupIntervalHours", "INTEGER NOT NULL DEFAULT 6");
-        await AddColumnIfMissingAsync("ApplicationSettings",  "BackupRetainCount",   "INTEGER NOT NULL DEFAULT 10");
+        await AddColumnIfMissingAsync("ApplicationSettings",  "AutoBackupEnabled",       "INTEGER NOT NULL DEFAULT 0");
+        await AddColumnIfMissingAsync("ApplicationSettings",  "BackupIntervalHours",     "INTEGER NOT NULL DEFAULT 6");
+        await AddColumnIfMissingAsync("ApplicationSettings",  "BackupRetainCount",       "INTEGER NOT NULL DEFAULT 10");
+        await AddColumnIfMissingAsync("ApplicationSettings",  "RemoteManagementEnabled", "INTEGER NOT NULL DEFAULT 0");
+        await AddColumnIfMissingAsync("ApplicationSettings",  "RemoteManagementPort",    "INTEGER NOT NULL DEFAULT 5151");
+        await AddColumnIfMissingAsync("ApplicationSettings",  "RemoteManagementToken",   "TEXT NULL");
     }
 
     private async Task AddColumnIfMissingAsync(string table, string column, string definition)

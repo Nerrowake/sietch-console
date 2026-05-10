@@ -29,9 +29,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- ASP.NET Core framework reference for embedded Kestrel web server (#152) -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
     <PackageReference Include="System.Management" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Embedded remote management dashboard HTML (#150) -->
+    <EmbeddedResource Include="Resources\dashboard.html" />
   </ItemGroup>
 
   <ItemGroup>
