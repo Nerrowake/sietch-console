@@ -63,7 +63,9 @@ The server VM requires at least 4 GB of RAM, plus RAM for Windows itself. If you
 
 ### Setup Wizard stalls on the Progress step
 
-The VM configuration portion of the progress step is real — Sietch Console will attempt to provision the Hyper-V VM if it does not exist. The server file download step is still a stub and completes immediately. If the wizard appears to freeze during VM provisioning, check Hyper-V Manager for error events. If the application becomes unresponsive, close and relaunch — no data is lost and the wizard can be re-run.
+The Progress step performs three real operations: downloading server files via SteamCMD (the longest stage — allow 5–20 minutes depending on connection speed), recording the build ID, and running `initial-setup.bat` if present. The log output panel shows what is happening in real time.
+
+If SteamCMD hangs indefinitely, it may be blocked by a firewall or the download URL may be unreachable. Cancel the wizard, check your internet connection, and relaunch. If the application becomes unresponsive, close and relaunch — the wizard can be re-run from the beginning.
 
 ---
 
@@ -76,11 +78,22 @@ Check the **error banner** at the top of the Dashboard for a specific message. C
 - **Access denied** — Sietch Console must run as Administrator to manage Hyper-V. Right-click the shortcut → **Run as administrator**.
 - **VM not found** — the VM Name in your battlegroup profile must exactly match the name in Hyper-V Manager. Open Hyper-V Manager to confirm.
 - **Hyper-V not enabled** — run the Diagnostics tab and check the Hyper-V readiness result.
-- **VM starts but server shows Offline** — the VM may have powered on, but the game server process inside it is not yet running. Server process management is not automated in this alpha build; you must start the server process manually inside the VM for now.
+- **Server executable not found** — if no known server executable is found in `InstallPath`, the error banner will say so. Complete the Setup Wizard or verify the install path in Settings.
 
 ### The status indicator never leaves "Starting"
 
-Sietch Console polls VM state every 2 seconds for up to 90 seconds. If it does not reach Running within that window, it will time out and show an error. This usually means the VM is stuck booting (check Hyper-V Manager for the VM's state) or the VM was started from outside the app and is in an unexpected state.
+The Dashboard reaches Running once the server logs a server-ready phrase (e.g. "listening on port"). Two things can keep it on Starting:
+
+1. **VM timeout** — Sietch Console polls Hyper-V state every 2 s for up to 90 s. If the VM does not reach Running in that window, a timeout error is shown.
+2. **Server-ready pattern not matched** — the server exe started but has not yet logged a recognised ready phrase. Check the Logs tab for live output. The server may still be loading, or its log format may differ from the expected patterns.
+
+### The server crashed — how do I find out why?
+
+When the server process exits unexpectedly, the Dashboard immediately shows an Error state with a description (e.g. "Server crashed: access violation (0xC0000005)"). For more detail:
+
+1. Check the **Logs** tab — the live output captured before the crash is preserved in the buffer.
+2. Look for `.log` files in the server's `Saved/Logs` directory — the file selector populates automatically when new files appear.
+3. Look for crash dump files in the server's install directory (typically in `Saved/Crashes/`).
 
 ---
 
@@ -147,7 +160,7 @@ The Networking tab detects your IP by inspecting Windows network interfaces. If 
 
 ### Log view shows no entries
 
-The Logs view reads from the log file path configured in your battlegroup profile. If the Dune: Awakening server process has not been started inside the VM, no log file is produced yet. Server process management is not yet automated — start the server process manually inside the VM to generate logs.
+The Logs view populates from two sources: live stdout/stderr streamed directly from the server process (shown with a `● LIVE` badge while running), and log files in the server's `Saved/Logs` directory (polled every 2 seconds). If the server has not been started yet, both sources will be empty. Click **Start** on the Dashboard to launch the server.
 
 ### Log file selector is empty
 

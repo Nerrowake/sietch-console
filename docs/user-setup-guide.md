@@ -101,9 +101,13 @@ A summary of everything you configured. Read through it and confirm the details 
 
 ### Progress
 
-Sietch Console performs the initial setup: configuring the Hyper-V VM, downloading the server files, and writing the configuration. This may take several minutes depending on your internet connection.
+Sietch Console performs the initial setup in three stages:
 
-A progress bar and status messages show what is happening. Do not close the window during this step.
+1. **Downloading server files** — SteamCMD is downloaded automatically if not already installed, then used to download the Dune: Awakening dedicated server. This is the longest step and may take several minutes depending on your internet connection.
+2. **Recording metadata** — the installed build ID is saved so Sietch Console can detect future updates.
+3. **Post-install configuration** — if the server provides an `initial-setup.bat` script, it is run automatically.
+
+A progress bar and live log output show what is happening. Do not close the window during this step.
 
 When the progress bar completes and the status shows **Setup complete**, click **Finish**. You are taken to the Dashboard.
 
@@ -150,11 +154,11 @@ Not without re-running the wizard. The install path is baked into the battlegrou
 **Can I run multiple battlegroups?**
 Not in the current alpha. Only one battlegroup profile is supported at a time.
 
-**The Setup Wizard skipped the download step — did something go wrong?**
-The server file download (SteamCMD) step is not yet implemented. The wizard completes successfully and the VM is configured, but you will need to install the Dune: Awakening dedicated server files manually inside the VM for now. Future builds will automate this.
-
 **My server shows as Offline even after clicking Start.**
-Check the error banner at the top of the Dashboard — it will explain the specific failure (e.g., access denied, VM not found). The most common causes are: Sietch Console not running as Administrator, the configured VM name not matching what exists in Hyper-V, or Hyper-V not enabled. If no error is shown, the VM may have started but the server process is not yet running inside it (server process management is not yet automated).
+Check the error banner at the top of the Dashboard — it will explain the specific failure (e.g., access denied, VM not found). The most common causes are: Sietch Console not running as Administrator, the configured VM name not matching what exists in Hyper-V, or Hyper-V not enabled.
+
+**The Dashboard stays on "Starting" for a long time.**
+The Dashboard transitions to Running once the server logs a "listening on port" line (or similar). If the server is slow to start or uses different log output, this may take longer than expected or not trigger automatically. The server is still functional — check the Logs tab for live output to confirm it is running.
 
 ---
 

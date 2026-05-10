@@ -57,6 +57,8 @@ Sealed records representing domain objects. They carry no behavior.
 | `FirewallRuleStatus` | Whether a firewall rule exists and its current state |
 | `ConnectivityResult` | Result of a local port-open test |
 | `LogSeverity` | Enum: `Info`, `Warning`, `Error` |
+| `VmResourceSnapshot` | Point-in-time CPU% and RAM reading from `Msvm_SummaryInformation` |
+| `ServerProcessExitEventArgs` | Exit code, human-readable description, and `WasExpected` flag from a server process exit |
 
 ### Interfaces (`Core/Interfaces/`)
 
@@ -66,6 +68,7 @@ Service contracts that the WPF app depends on, with implementations in the app p
 |-----------|---------------|
 | `ISystemReadinessService` | `SystemReadinessService` |
 | `IBattlegroupControlService` | `BattlegroupControlService` |
+| `IServerProcessService` | `ServerProcessService` |
 | `IConfigurationService` | `ConfigurationService` |
 | `IIniParserService` | `IniParserService` |
 | `ILogFileService` | `LogFileService` |
@@ -74,6 +77,8 @@ Service contracts that the WPF app depends on, with implementations in the app p
 | `INetworkingService` | `NetworkingService` |
 | `ISteamDetectionService` | `SteamDetectionService` |
 | `IServerPackageService` | `ServerPackageService` |
+| `ISteamCmdService` | `SteamCmdService` |
+| `IServerPackageInstaller` | `ServerPackageInstaller` |
 | `ISetupScriptService` | `SetupScriptService` |
 
 Repository interfaces (implemented in `SietchConsole.Data`):
@@ -151,12 +156,14 @@ Application-layer implementations of the Core interfaces, organized by feature:
 ```
 Services/
 ├── Control/        BattlegroupControlService — VM power, process management
+│                   ServerProcessService — spawn/monitor/stop the server exe
 ├── Configuration/  ConfigurationService, IniParserService
 ├── Diagnostics/    SystemReadinessService + individual Check classes
 ├── Logs/           LogFileService, LogAnalysisService
 ├── Backups/        BackupService
 ├── Networking/     NetworkingService
-└── Installation/   SteamDetectionService, ServerPackageService, SetupScriptService,
+└── Installation/   SteamDetectionService, SteamCmdService, ServerPackageService,
+│                   ServerPackageInstaller, SetupScriptService,
                     InstallationOrchestrator
 ```
 
@@ -226,7 +233,43 @@ The application never writes to the directory it was installed into. All mutable
 - **Resource utilisation** — CPU% and RAM read from `Msvm_SummaryInformation.ProcessorLoad` / `MemoryUsage` while the VM is Running
 - **Typed errors** — `HyperVException` with `HyperVErrorCode` maps WMI and PowerShell failures to user-readable messages
 
-Server package management (`ServerPackageService`, `SetupScriptService`) and server process management remain stubs pending Milestones 16–17.
+Server package management and server process management are fully implemented as of `0.2.0-alpha.1`.
+
+---
+
+## SteamCMD and Server Package Management
+
+`SteamCmdService` manages the SteamCMD binary lifecycle:
+
+- **Discovery** — searches `%LOCALAPPDATA%\SietchConsole\steamcmd\`, then `C:\steamcmd\`, then the Steam client directory
+- **Auto-download** — if not found, downloads `steamcmd.zip` from Valve's CDN, extracts it, and runs `+quit` to self-initialize
+- **Command execution** — spawns SteamCMD as a child process with redirected stdout/stderr and streams output via a callback
+
+`ServerPackageInstaller` handles server file operations:
+
+- **Install / Update** — `+login anonymous +force_install_dir ... +app_update {appid} validate +quit`; SteamCMD is idempotent so both operations use the same command
+- **Integrity verification** — checks for known server executables (`DedicatedServer.exe`, `DuneServer.exe`)
+- **Update check** — reads the installed build ID from `steamapps/appmanifest_{appid}.acf` and compares it against the current build ID from `+app_info_print`; returns `bool?` (true = update available, false = up to date, null = indeterminate)
+- **Build ID persistence** — the installed build ID is written to `ApplicationSettings.InstalledBuildId` in SQLite after each install or update
+
+---
+
+## Server Process Integration
+
+`ServerProcessService` manages the dedicated server process on the host machine:
+
+- **Executable discovery** — searches `InstallPath` and common subdirectories (`Binaries\Win64`, `bin`, etc.) for known exe names
+- **Process spawn** — `System.Diagnostics.Process` with `RedirectStandardOutput`, `RedirectStandardError`, and `RedirectStandardInput`; `CreateNoWindow = true`
+- **Live output streaming** — `OutputDataReceived` / `ErrorDataReceived` callbacks fire `OutputLineReceived` events; `LogsViewModel` subscribes and routes each line through `ILogFileService.ParseLine` into its buffer, displaying a `● LIVE` badge while streaming
+- **Server-ready detection** — regex patterns scan stdout for UE5 listener phrases (e.g. `"listening on port"`, `"accepting connections"`); once matched, `IsServerReady = true` and `BattlegroupControlService.GetStatusAsync` returns `Running`
+- **Exit handling** — `ProcessExited` fires with `WasExpected` (true for explicit stops) and a description mapping common Windows crash codes (0xC0000005, 0xC0000FD, etc.) to plain English; `DashboardViewModel` subscribes and immediately updates the Dashboard to Error state on unexpected exits
+- **Graceful shutdown** — writes `"quit"` to stdin → `CloseMainWindow()` → waits the timeout → `Kill(entireProcessTree: true)`
+
+`BattlegroupControlService` coordinates the two layers:
+
+- `GetStatusAsync` — checks live process state (`IsRunning`, `IsServerReady`) first; falls back to VM WMI queries and host-process enumeration
+- `StartAsync` — starts the Hyper-V VM (if configured), then calls `ServerProcessService.StartAsync`
+- `StopAsync` — calls `ServerProcessService.StopAsync` (10 s graceful window) before issuing the ACPI VM shutdown
 
 ---
 
