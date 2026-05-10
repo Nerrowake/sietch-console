@@ -29,6 +29,7 @@ Sietch Console is a Windows-native desktop application that replaces the manual 
 | **Multiple profiles** | Create, switch, and delete battleground profiles from the sidebar; all views update instantly when you switch |
 | **App Logs** | In-app viewer for Sietch Console's own log stream — filter by level or keyword to diagnose service issues without opening external files |
 | **Auto-Update** | On-startup check against GitHub Releases; banner notification when a new version is available; one-click download and install |
+| **Remote Management** | Embedded web dashboard accessible from any browser on the LAN — status, controls, and live log tail; REST + SSE API for custom integrations; Bearer token auth with rate limiting |
 
 ---
 

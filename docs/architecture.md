@@ -85,6 +85,7 @@ Service contracts that the WPF app depends on, with implementations in the app p
 | `IActiveProfileService` | `ActiveProfileService` — owns active profile, fires `ProfileChanged` event |
 | `IAppLogSink` | `InMemoryAppLogSink` — ring-buffer log sink for the App Logs view |
 | `IAppUpdateService` | `AppUpdateService` — GitHub Releases update check and installer download |
+| `IRemoteManagementService` | `RemoteManagementService` — embedded Kestrel web server lifecycle |
 
 Repository interfaces (implemented in `SietchConsole.Data`):
 
@@ -165,12 +166,17 @@ Services/
 │                   ServerProcessService — spawn/monitor/stop the server exe
 ├── Configuration/  ConfigurationService, IniParserService
 ├── Diagnostics/    SystemReadinessService + individual Check classes
-├── Logs/           LogFileService, LogAnalysisService
+├── Logs/           LogFileService, LogAnalysisService, InMemoryAppLogSink
 ├── Backups/        BackupService
 ├── Networking/     NetworkingService
+├── Profiles/       ActiveProfileService — active profile ownership + ProfileChanged event
+├── Update/         AppUpdateService — GitHub Releases update check and installer download
+├── Remote/         RemoteManagementService — embedded Kestrel web server lifecycle
+│                   RemoteApiEndpoints — minimal API route registration
+│                   RemoteAuthMiddleware — Bearer token auth + IP rate limiting
+│                   SseHub — per-client Channel<string> SSE broadcast hub
 └── Installation/   SteamDetectionService, SteamCmdService, ServerPackageService,
-│                   ServerPackageInstaller, SetupScriptService,
-                    InstallationOrchestrator
+                    ServerPackageInstaller, SetupScriptService, InstallationOrchestrator
 ```
 
 Each check in `Services/Diagnostics/Checks/` implements a common check interface and is executed by `SystemReadinessService`. Adding a new diagnostic check means creating a new class in that folder and registering it.

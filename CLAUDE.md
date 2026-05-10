@@ -194,11 +194,17 @@ To release: update `<Version>` in `Directory.Build.props`, update `CHANGELOG.md`
 
 ## What Does Not Exist Yet (Alpha Gaps)
 
-- No real Hyper-V integration — VM control stubs return mock state
-- No actual server process management — `BattlegroupControlService` is a shell
-- No SteamCMD integration — `ServerPackageService` is a stub
-- The `.ico` app icon (`assets/sietch-console.ico`) has not been created yet
-- No code signing — SmartScreen will warn on the installer
-- No auto-update mechanism
+All core infrastructure is implemented as of `0.5.0-alpha.1`. The remaining gaps are:
 
-Do not add production-quality implementations of these unless the corresponding issue is in scope for the current milestone.
+- No code signing — SmartScreen will warn on the installer (deferred; requires a purchased certificate)
+- The `.ico` app icon uses a placeholder — not yet replaced with final artwork
+- Server process runs on the **host machine**, not inside the Hyper-V guest — PowerShell Direct integration is not yet implemented
+- Player count in the remote dashboard is always `0` — requires a server query API that Funcom has not exposed
+- Uptime tracking in the remote dashboard is not yet implemented — server start time is not persisted
+- No player management (kick, ban, allowlist)
+- No mod management
+- No server metrics history (CPU/memory/player count over time)
+- No webhook/notification integrations
+- No cloud backup destinations
+
+Do not implement any of the above unless the corresponding issue is explicitly in scope for the current milestone.
