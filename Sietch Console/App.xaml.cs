@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Sietch_Console.Services.Backups;
+using Sietch_Console.Services.Update;
 using Sietch_Console.Services.Configuration;
 using Sietch_Console.Services.Control;
 using Sietch_Console.Services.Diagnostics;
@@ -52,6 +53,9 @@ public partial class App : Application
 
         // ── Active profile service (#139) ─────────────────────────────────────
         services.AddSingleton<IActiveProfileService, ActiveProfileService>();
+
+        // ── App self-update service (#145) ────────────────────────────────────
+        services.AddSingleton<IAppUpdateService, AppUpdateService>();
 
         // Infrastructure services
         services.AddSingleton<ISystemReadinessService, SystemReadinessService>();

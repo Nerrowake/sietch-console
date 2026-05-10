@@ -18,6 +18,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="48" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="28" />
         </Grid.RowDefinitions>
@@ -51,10 +52,80 @@
             </Grid>
         </Border>
 
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- Update banner (#146) — visible when available  -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <Border Grid.Row="1"
+                Background="{StaticResource StatusWarningBg}"
+                BorderBrush="{StaticResource StatusWarningBorder}"
+                BorderThickness="0,0,0,1"
+                Padding="16,8"
+                Visibility="{Binding ShowUpdateBanner, Converter={StaticResource BoolToVisibleConverter}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Banner text -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="⬆ Update available: "
+                               Foreground="{StaticResource AccentAmber}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeBody}"
+                               FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding PendingUpdate.ReleaseName}"
+                               Foreground="{StaticResource TextPrimary}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeBody}" />
+                    <TextBlock Text="{Binding UpdateStatusMessage}"
+                               Foreground="{StaticResource TextSecondary}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeSmall}"
+                               VerticalAlignment="Center"
+                               Margin="12,0,0,0"
+                               Visibility="{Binding UpdateStatusMessage, Converter={StaticResource NullToCollapsedConverter}}" />
+                </StackPanel>
+
+                <!-- Download progress bar -->
+                <ProgressBar Grid.Column="1"
+                             Value="{Binding UpdateDownloadProgress}"
+                             Minimum="0" Maximum="1"
+                             Width="120" Height="6"
+                             Background="{StaticResource OverlayBackground}"
+                             Foreground="{StaticResource AccentAmber}"
+                             VerticalAlignment="Center"
+                             Visibility="{Binding IsDownloadingUpdate, Converter={StaticResource BoolToVisibleConverter}}" />
+
+                <!-- Download & Install button -->
+                <Button Grid.Column="3"
+                        Command="{Binding DownloadAndInstallUpdateCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Padding="12,4"
+                        IsEnabled="{Binding IsDownloadingUpdate, Converter={StaticResource BoolInverseConverter}}"
+                        Visibility="{Binding PendingUpdate.InstallerDownloadUrl, Converter={StaticResource NullToCollapsedConverter}}">
+                    <TextBlock Text="Download &amp; Install" />
+                </Button>
+
+                <!-- Dismiss -->
+                <Button Grid.Column="5"
+                        Command="{Binding DismissUpdateCommand}"
+                        Style="{StaticResource CancelButtonStyle}"
+                        Padding="10,4"
+                        IsEnabled="{Binding IsDownloadingUpdate, Converter={StaticResource BoolInverseConverter}}">
+                    <TextBlock Text="Later" />
+                </Button>
+            </Grid>
+        </Border>
+
         <!-- ═══════════════════════════════════════ -->
         <!-- Main area                               -->
         <!-- ═══════════════════════════════════════ -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="*" />
@@ -215,7 +286,7 @@
         <!-- ═══════════════════════════════════════ -->
         <!-- Status bar                              -->
         <!-- ═══════════════════════════════════════ -->
-        <Border Grid.Row="2"
+        <Border Grid.Row="3"
                 Background="{StaticResource PanelBackground}"
                 BorderBrush="{StaticResource BorderDefault}"
                 BorderThickness="0,1,0,0">

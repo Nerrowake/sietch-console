@@ -4,12 +4,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SietchConsole.Core.Interfaces;
 using SietchConsole.Core.Models;
+using System.Windows;
 
 namespace Sietch_Console.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {
     private readonly IActiveProfileService _activeProfileService;
+    private readonly IAppUpdateService     _appUpdateService;
 
     public ObservableCollection<NavigationItem> NavigationItems { get; }
 
@@ -60,6 +62,18 @@ public partial class MainWindowViewModel : ObservableObject
         !string.IsNullOrWhiteSpace(NewProfileName) &&
         !string.IsNullOrWhiteSpace(NewProfileInstallPath);
 
+    // ── App self-update (#145–#148) ───────────────────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowUpdateBanner))]
+    private AppUpdateInfo? _pendingUpdate;
+
+    [ObservableProperty] private bool   _isDownloadingUpdate;
+    [ObservableProperty] private double _updateDownloadProgress;
+    [ObservableProperty] private string _updateStatusMessage = string.Empty;
+
+    public bool ShowUpdateBanner => PendingUpdate is not null;
+
     // ── Constructor ───────────────────────────────────────────────────
 
     public MainWindowViewModel(
@@ -71,10 +85,12 @@ public partial class MainWindowViewModel : ObservableObject
         NetworkingViewModel   networking,
         SettingsViewModel     settings,
         AppLogsViewModel      appLogs,
-        IActiveProfileService activeProfileService)
+        IActiveProfileService activeProfileService,
+        IAppUpdateService     appUpdateService)
     {
         Dashboard             = dashboard;
         _activeProfileService = activeProfileService;
+        _appUpdateService     = appUpdateService;
 
         NavigationItems = new ObservableCollection<NavigationItem>
         {
@@ -97,6 +113,57 @@ public partial class MainWindowViewModel : ObservableObject
         SelectedProfile = _activeProfileService.Current;
 
         _activeProfileService.ProfileChanged += OnActiveProfileChanged;
+
+        // #145 – Check for updates in the background after startup
+        _ = Task.Run(CheckForAppUpdateAsync);
+    }
+
+    // ── App update methods (#145–#148) ────────────────────────────────────────
+
+    private async Task CheckForAppUpdateAsync()
+    {
+        var info = await _appUpdateService.CheckForUpdateAsync();
+        if (info is not null)
+        {
+            _ = Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                PendingUpdate       = info;
+                UpdateStatusMessage = $"{info.TagName} is available.";
+            });
+        }
+    }
+
+    [RelayCommand]
+    private async Task DownloadAndInstallUpdateAsync()
+    {
+        if (PendingUpdate is null) return;
+
+        IsDownloadingUpdate   = true;
+        UpdateStatusMessage   = "Downloading installer…";
+        UpdateDownloadProgress = 0;
+        try
+        {
+            var progress = new Progress<double>(p =>
+                Application.Current.Dispatcher.InvokeAsync(
+                    () => UpdateDownloadProgress = p));
+
+            var path = await _appUpdateService.DownloadInstallerAsync(PendingUpdate, progress);
+            UpdateStatusMessage = "Download complete. Launching installer…";
+            await Task.Delay(600); // let the message show
+            _appUpdateService.LaunchInstallerAndExit(path);
+        }
+        catch (Exception ex)
+        {
+            UpdateStatusMessage   = $"Download failed: {ex.Message}";
+            IsDownloadingUpdate   = false;
+        }
+    }
+
+    [RelayCommand]
+    private void DismissUpdate()
+    {
+        PendingUpdate       = null;
+        UpdateStatusMessage = string.Empty;
     }
 
     partial void OnSelectedNavigationItemChanged(NavigationItem? value)
