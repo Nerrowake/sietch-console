@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -7,19 +8,19 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using SietchConsole.Core.Interfaces;
 using SietchConsole.Core.Models;
-using System.IO;
 
 namespace Sietch_Console.ViewModels;
 
-public partial class LogsViewModel : ObservableObject
+public partial class LogsViewModel : ObservableObject, IDisposable
 {
-    private readonly ILogFileService    _logService;
+    private readonly ILogFileService     _logService;
     private readonly ILogAnalysisService _analysisService;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly DispatcherTimer    _tailTimer;
+    private readonly DispatcherTimer     _tailTimer;
+    private FileSystemWatcher?           _watcher;
 
     private BattlegroupProfile? _profile;
-    private readonly List<LogEntry> _allEntries = [];
+    private readonly Queue<LogEntry> _allEntries = new();
     private long _logFileOffset;
     private const int MaxEntries = 5_000;
 
@@ -51,7 +52,7 @@ public partial class LogsViewModel : ObservableObject
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private LogSeverity? _severityFilter; // null = All
 
-    partial void OnSearchTextChanged(string value)    => ApplyFilter();
+    partial void OnSearchTextChanged(string value)         => ApplyFilter();
     partial void OnSeverityFilterChanged(LogSeverity? value) => ApplyFilter();
 
     public LogsViewModel(
@@ -85,11 +86,38 @@ public partial class LogsViewModel : ObservableObject
             AvailableLogFiles = _logService.GetLogFiles(_profile);
             if (AvailableLogFiles.Count > 0)
             {
-                ActiveLogFile   = AvailableLogFiles[0];
-                _logFileOffset  = 0;
-                IsStreaming     = true;
+                ActiveLogFile  = AvailableLogFiles[0];
+                _logFileOffset = 0;
+                IsStreaming    = true;
             }
+
+            // #183 — Watch the log directory for new files appearing
+            var logDir = _logService.LocateLogDirectory(_profile);
+            if (logDir is not null && Directory.Exists(logDir))
+                StartWatcher(logDir);
         }
+    }
+
+    // ── #183 – FileSystemWatcher for new log files ────────────────────
+    private void StartWatcher(string logDir)
+    {
+        _watcher = new FileSystemWatcher(logDir, "*.log")
+        {
+            NotifyFilter         = NotifyFilters.FileName | NotifyFilters.CreationTime,
+            IncludeSubdirectories = false,
+            EnableRaisingEvents   = true,
+        };
+        _watcher.Created += OnLogFileCreated;
+        _watcher.Renamed += OnLogFileCreated;
+    }
+
+    private void OnLogFileCreated(object sender, FileSystemEventArgs e)
+    {
+        if (_profile is null) return;
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            AvailableLogFiles = _logService.GetLogFiles(_profile);
+        });
     }
 
     // ── Log file selection ────────────────────────────────────────────
@@ -102,10 +130,7 @@ public partial class LogsViewModel : ObservableObject
         FilteredEntries = [];
         DetectedIssues  = [];
 
-        // Load existing content once, then tail for new entries
         var all = await _logService.ReadAllAsync(filePath);
-        _logFileOffset = 0;
-        // Fast-forward offset without re-adding entries; let tail pick up from end
         var (_, newOffset) = await _logService.ReadFromOffsetAsync(filePath, 0);
         _logFileOffset = newOffset;
 
@@ -129,16 +154,14 @@ public partial class LogsViewModel : ObservableObject
     {
         foreach (var entry in entries)
         {
-            _allEntries.Add(entry);
+            _allEntries.Enqueue(entry);
             if (MatchesFilter(entry))
                 FilteredEntries.Add(entry);
         }
 
-        // Cap collection
         while (_allEntries.Count > MaxEntries)
         {
-            var removed = _allEntries[0];
-            _allEntries.RemoveAt(0);
+            var removed = _allEntries.Dequeue();
             if (FilteredEntries.Count > 0 && FilteredEntries[0] == removed)
                 FilteredEntries.RemoveAt(0);
         }
@@ -165,10 +188,10 @@ public partial class LogsViewModel : ObservableObject
     }
 
     // ── Severity filter commands ──────────────────────────────────────
-    [RelayCommand] private void FilterAll()     => SeverityFilter = null;
-    [RelayCommand] private void FilterErrors()  => SeverityFilter = LogSeverity.Error;
-    [RelayCommand] private void FilterWarnings()=> SeverityFilter = LogSeverity.Warning;
-    [RelayCommand] private void FilterInfo()    => SeverityFilter = LogSeverity.Info;
+    [RelayCommand] private void FilterAll()      => SeverityFilter = null;
+    [RelayCommand] private void FilterErrors()   => SeverityFilter = LogSeverity.Error;
+    [RelayCommand] private void FilterWarnings() => SeverityFilter = LogSeverity.Warning;
+    [RelayCommand] private void FilterInfo()     => SeverityFilter = LogSeverity.Info;
 
     [RelayCommand] private void ClearLog()
     {
@@ -179,10 +202,20 @@ public partial class LogsViewModel : ObservableObject
         OnPropertyChanged(nameof(HasEntries));
     }
 
+    // ── #188 — Copy visible (filtered) log lines to clipboard ─────────
+    [RelayCommand]
+    private void CopyVisibleLogs()
+    {
+        if (FilteredEntries.Count == 0) return;
+        var text = string.Join(Environment.NewLine,
+            FilteredEntries.Select(e => $"{e.TimestampLabel} {e.SeverityLabel}  {e.Message}"));
+        Clipboard.SetText(text);
+    }
+
     // ── Issue detection (#71) ─────────────────────────────────────────
     private void RefreshIssues()
     {
-        var issues = _analysisService.Analyze(_allEntries);
+        var issues = _analysisService.Analyze(_allEntries.ToList());
         DetectedIssues = new ObservableCollection<DetectedIssue>(issues);
         OnPropertyChanged(nameof(HasDetectedIssues));
         OnPropertyChanged(nameof(IssueCountLabel));
@@ -192,7 +225,7 @@ public partial class LogsViewModel : ObservableObject
     [RelayCommand]
     private void CopyReport()
     {
-        var report = _analysisService.GenerateReport(_profile, ActiveLogFile, _allEntries, DetectedIssues);
+        var report = _analysisService.GenerateReport(_profile, ActiveLogFile, _allEntries.ToList(), DetectedIssues);
         Clipboard.SetText(report);
     }
 
@@ -202,15 +235,21 @@ public partial class LogsViewModel : ObservableObject
     {
         var dialog = new SaveFileDialog
         {
-            Title            = "Export Logs",
-            Filter           = "Log files (*.log)|*.log|Text files (*.txt)|*.txt|All files (*.*)|*.*",
-            DefaultExt       = ".log",
-            FileName         = $"battlegroup_{DateTime.Now:yyyyMMdd_HHmmss}.log",
+            Title      = "Export Logs",
+            Filter     = "Log files (*.log)|*.log|Text files (*.txt)|*.txt|All files (*.*)|*.*",
+            DefaultExt = ".log",
+            FileName   = $"battlegroup_{DateTime.Now:yyyyMMdd_HHmmss}.log",
         };
 
         if (dialog.ShowDialog() != true) return;
 
-        var report = _analysisService.GenerateReport(_profile, ActiveLogFile, _allEntries, DetectedIssues);
+        var report = _analysisService.GenerateReport(_profile, ActiveLogFile, _allEntries.ToList(), DetectedIssues);
         File.WriteAllText(dialog.FileName, report);
+    }
+
+    public void Dispose()
+    {
+        _tailTimer.Stop();
+        _watcher?.Dispose();
     }
 }

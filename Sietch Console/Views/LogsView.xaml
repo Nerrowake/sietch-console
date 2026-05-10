@@ -261,8 +261,43 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>
 
-                <!-- Action buttons (#74, #75) -->
+                <!-- Action buttons (#74, #75, #188) -->
                 <StackPanel Grid.Column="6" Orientation="Horizontal">
+                    <!-- #188 – Copy visible (filtered) log lines -->
+                    <Button Command="{Binding CopyVisibleLogsCommand}"
+                            Margin="0,0,6,0" Padding="14,0" Height="34" Cursor="Hand"
+                            ToolTip="Copy visible log lines to clipboard">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
+                                <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
+                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
+                                <Setter Property="FontSize"       Value="12" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="{StaticResource CornerMedium}"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="Copy Logs" />
+                    </Button>
+
                     <Button Command="{Binding CopyReportCommand}"
                             Margin="0,0,6,0" Padding="14,0" Height="34" Cursor="Hand">
                         <Button.Style>

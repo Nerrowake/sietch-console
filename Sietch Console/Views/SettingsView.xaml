@@ -448,6 +448,60 @@
                                            TextWrapping="Wrap"
                                            Margin="0,0,0,10" />
 
+                                <!-- #184 – Sync warning: both raw and structured have unsaved changes -->
+                                <Border Grid.Row="1"
+                                        Background="{StaticResource StatusWarningBg}"
+                                        BorderBrush="{StaticResource StatusWarningBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource CornerMedium}"
+                                        Padding="12,10"
+                                        Margin="0,0,0,10"
+                                        Visibility="{Binding ShowRawSyncWarning, Converter={StaticResource BoolToVisibleConverter}}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Foreground="{StaticResource StatusWarning}"
+                                                   FontFamily="{StaticResource FontUI}"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap"
+                                                   VerticalAlignment="Center"
+                                                   Text="You have unsaved changes in both the form fields and the raw editor. Saving one will overwrite the other. Save the structured form first, then reopen the Raw Editor." />
+                                        <Button Grid.Column="1"
+                                                Command="{Binding DismissRawSyncWarningCommand}"
+                                                Margin="12,0,0,0"
+                                                Padding="10,5"
+                                                Cursor="Hand">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Background"     Value="Transparent" />
+                                                    <Setter Property="Foreground"     Value="{StaticResource StatusWarning}" />
+                                                    <Setter Property="BorderBrush"    Value="{StaticResource StatusWarningBorder}" />
+                                                    <Setter Property="BorderThickness" Value="1" />
+                                                    <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
+                                                    <Setter Property="FontSize"       Value="12" />
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}"
+                                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                                        CornerRadius="{StaticResource CornerSmall}"
+                                                                        Padding="{TemplateBinding Padding}">
+                                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </Button.Style>
+                                            <TextBlock Text="Dismiss" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+
                                 <!-- Text editor -->
                                 <TextBox Grid.Row="2"
                                          Text="{Binding RawContent, UpdateSourceTrigger=PropertyChanged}"

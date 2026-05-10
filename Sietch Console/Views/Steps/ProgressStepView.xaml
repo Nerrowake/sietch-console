@@ -6,6 +6,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -28,6 +29,9 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="12" />
+                        <!-- #186 – Cancel button -->
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0"
                                Text="Overall Progress"
@@ -39,6 +43,14 @@
                             <Binding Path="ProgressPercent" StringFormat="{}{0:F0}%" />
                         </TextBlock.Text>
                     </TextBlock>
+                    <Button Grid.Column="3"
+                            Command="{Binding CancelCommand}"
+                            Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibleConverter}}"
+                            Padding="10,4"
+                            Cursor="Hand"
+                            Style="{StaticResource DangerButtonStyle}">
+                        <TextBlock Text="Cancel" />
+                    </Button>
                 </Grid>
                 <Border Background="{StaticResource DeepBackground}"
                         CornerRadius="{StaticResource CornerSmall}"
@@ -55,7 +67,7 @@
             </StackPanel>
         </Border>
 
-        <!-- Completion / failure state -->
+        <!-- Completion state -->
         <Border Grid.Row="2"
                 Padding="16,12"
                 Margin="0,0,0,16"
@@ -69,8 +81,35 @@
                        FontWeight="SemiBold" />
         </Border>
 
+        <!-- #186 – Cancelled / timed-out banners -->
+        <Border Grid.Row="3"
+                Padding="16,12"
+                Margin="0,0,0,16"
+                Background="{StaticResource StatusWarningBg}"
+                BorderBrush="{StaticResource StatusWarningBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource CornerMedium}"
+                Visibility="{Binding IsCancelled, Converter={StaticResource BoolToVisibleConverter}}">
+            <TextBlock Text="Installation was cancelled. Go back to try again."
+                       Foreground="{StaticResource StatusWarning}"
+                       FontWeight="SemiBold" />
+        </Border>
+
+        <Border Grid.Row="3"
+                Padding="16,12"
+                Margin="0,0,0,16"
+                Background="{StaticResource StatusErrorBg}"
+                BorderBrush="{StaticResource StatusErrorBorder}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource CornerMedium}"
+                Visibility="{Binding IsTimedOut, Converter={StaticResource BoolToVisibleConverter}}">
+            <TextBlock Text="Installation timed out after 30 minutes. Check your internet connection and try again."
+                       Foreground="{StaticResource StatusError}"
+                       FontWeight="SemiBold" />
+        </Border>
+
         <!-- Log output -->
-        <Border Grid.Row="3" Style="{StaticResource CardStyle}" ClipToBounds="True">
+        <Border Grid.Row="4" Style="{StaticResource CardStyle}" ClipToBounds="True">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />

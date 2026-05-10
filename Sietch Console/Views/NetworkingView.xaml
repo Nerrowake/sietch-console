@@ -298,7 +298,7 @@
                                                FontFamily="{StaticResource FontMono}"
                                                FontSize="{StaticResource FontSizeBody}" />
                                 </StackPanel>
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                     <TextBlock Text="Adapter"
                                                Foreground="{StaticResource TextMuted}"
                                                FontSize="12"
@@ -306,6 +306,36 @@
                                     <TextBlock Text="{Binding HostAdapter}"
                                                Foreground="{StaticResource TextSecondary}"
                                                FontSize="12" />
+                                </StackPanel>
+                                <!-- #181 – Adapter picker (only shown when multiple adapters exist) -->
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,6,0,0"
+                                            Visibility="{Binding HasMultipleAdapters, Converter={StaticResource BoolToVisibleConverter}}">
+                                    <TextBlock Text="Override"
+                                               Foreground="{StaticResource TextMuted}"
+                                               FontSize="12"
+                                               Width="80"
+                                               VerticalAlignment="Center" />
+                                    <ComboBox ItemsSource="{Binding AvailableAdapters}"
+                                              SelectedItem="{Binding SelectedHostAdapter}"
+                                              MinWidth="180"
+                                              Background="{StaticResource FieldBackground}"
+                                              Foreground="{StaticResource TextSecondary}"
+                                              BorderBrush="{StaticResource BorderDefault}"
+                                              FontFamily="{StaticResource FontUI}"
+                                              FontSize="12"
+                                              Padding="6,4">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock>
+                                                    <Run Text="{Binding Name}" />
+                                                    <Run Text=" — " Foreground="{StaticResource TextMuted}" />
+                                                    <Run Text="{Binding IpAddress}"
+                                                         FontFamily="{StaticResource FontMono}" />
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
