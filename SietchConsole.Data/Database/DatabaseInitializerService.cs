@@ -19,9 +19,10 @@ public class DatabaseInitializerService
     // ALTER TABLE so existing user databases get them automatically on next launch.
     private async Task ApplySchemaUpdatesAsync()
     {
-        await AddColumnIfMissingAsync("BattlegroupProfiles", "CpuCount",          "INTEGER NOT NULL DEFAULT 4");
-        await AddColumnIfMissingAsync("BattlegroupProfiles", "MemoryMb",          "INTEGER NOT NULL DEFAULT 8192");
-        await AddColumnIfMissingAsync("BattlegroupProfiles", "VirtualSwitchName", "TEXT NULL");
+        await AddColumnIfMissingAsync("BattlegroupProfiles",  "CpuCount",          "INTEGER NOT NULL DEFAULT 4");
+        await AddColumnIfMissingAsync("BattlegroupProfiles",  "MemoryMb",          "INTEGER NOT NULL DEFAULT 8192");
+        await AddColumnIfMissingAsync("BattlegroupProfiles",  "VirtualSwitchName", "TEXT NULL");
+        await AddColumnIfMissingAsync("ApplicationSettings",  "InstalledBuildId",  "TEXT NULL");
     }
 
     private async Task AddColumnIfMissingAsync(string table, string column, string definition)

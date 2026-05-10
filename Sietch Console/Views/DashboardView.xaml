@@ -26,6 +26,45 @@
                              Visibility="{Binding IsTransitioning, Converter={StaticResource BoolToVisibleConverter}}"
                              Margin="0,0,0,16" />
 
+                <!-- Update available banner -->
+                <Border Background="{StaticResource AccentCyan}"
+                        CornerRadius="{StaticResource CornerSmall}"
+                        Visibility="{Binding HasUpdateAvailable, Converter={StaticResource BoolToVisibleConverter}}"
+                        Padding="16,10"
+                        Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding UpdateBannerText}"
+                                   Foreground="#0B0F14"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="12,0,0,0">
+                            <Button Command="{Binding CheckForUpdatesCommand}"
+                                    Style="{StaticResource CancelButtonStyle}"
+                                    Padding="10,4"
+                                    Margin="0,0,8,0"
+                                    ToolTip="Re-check Steam for a newer server version"
+                                    AutomationProperties.Name="Re-check for updates">
+                                <TextBlock Text="Re-check" />
+                            </Button>
+                            <Button Command="{Binding RequestUpdateCommand}"
+                                    Style="{StaticResource TealButtonStyle}"
+                                    Padding="10,4"
+                                    ToolTip="Stop the server, apply the update, and restart"
+                                    AutomationProperties.Name="Update server">
+                                <TextBlock Text="Update Now" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
                 <!-- Error banner — shown when a Hyper-V operation fails -->
                 <Border Background="{StaticResource AccentAmber}"
                         CornerRadius="{StaticResource CornerSmall}"
@@ -170,13 +209,54 @@
                             <Button Command="{Binding RequestRestartCommand}"
                                     Style="{StaticResource InfoButtonStyle}"
                                     Padding="16,8"
+                                    Margin="0,0,8,0"
                                     ToolTip="Restart the battlegroup — briefly disconnects all players"
                                     AutomationProperties.Name="Restart battlegroup">
                                 <TextBlock Text="Restart" />
                             </Button>
 
+                            <Button Command="{Binding CheckForUpdatesCommand}"
+                                    Style="{StaticResource GhostButtonStyle}"
+                                    Padding="12,8"
+                                    Margin="0,0,8,0"
+                                    ToolTip="Check Steam for a newer server version"
+                                    AutomationProperties.Name="Check for updates">
+                                <TextBlock Text="Check for Updates" />
+                            </Button>
+
                         </StackPanel>
                     </Grid>
+                </Border>
+
+                <!-- Update-in-progress panel -->
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="20,16"
+                        Margin="0,0,0,16"
+                        Visibility="{Binding IsUpdating, Converter={StaticResource BoolToVisibleConverter}}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource CardTitleStyle}"
+                                   Text="Updating Server"
+                                   Margin="0,0,0,12" />
+                        <ProgressBar Minimum="0" Maximum="100"
+                                     Value="{Binding UpdateProgress}"
+                                     Height="6"
+                                     Margin="0,0,0,12">
+                            <ProgressBar.Style>
+                                <Style TargetType="ProgressBar" BasedOn="{StaticResource LoadingBarStyle}">
+                                    <Setter Property="IsIndeterminate" Value="False" />
+                                </Style>
+                            </ProgressBar.Style>
+                        </ProgressBar>
+                        <ScrollViewer MaxHeight="120"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <TextBlock Text="{Binding UpdateLog}"
+                                       Foreground="{StaticResource TextMuted}"
+                                       FontFamily="{StaticResource FontMono}"
+                                       FontSize="11"
+                                       TextWrapping="Wrap" />
+                        </ScrollViewer>
+                    </StackPanel>
                 </Border>
 
                 <!-- ══════════════════════════════════════════ -->

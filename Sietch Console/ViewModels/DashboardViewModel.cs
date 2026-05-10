@@ -8,11 +8,12 @@ using System.Windows.Threading;
 
 namespace Sietch_Console.ViewModels;
 
-public enum PendingDashboardAction { None, Stop, Restart }
+public enum PendingDashboardAction { None, Stop, Restart, Update }
 
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly IBattlegroupControlService _controlService;
+    private readonly IServerPackageInstaller    _installer;
     private readonly IServiceScopeFactory       _scopeFactory;
     private readonly DispatcherTimer            _refreshTimer;
 
@@ -46,6 +47,16 @@ public partial class DashboardViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(MemoryGbText))]
     private long _memoryMb;
 
+    // Update-check state
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasUpdateAvailable))]
+    [NotifyPropertyChangedFor(nameof(UpdateBannerText))]
+    private bool? _isUpdateAvailable;   // null = not yet checked / inconclusive
+
+    [ObservableProperty] private bool   _isUpdating;
+    [ObservableProperty] private double _updateProgress;
+    [ObservableProperty] private string _updateLog = string.Empty;
+
     public bool HasProfile      => ActiveProfile is not null;
     public string ProfileName   => ActiveProfile?.Name ?? "No battlegroup configured";
     public string VmName        => ActiveProfile?.VmName ?? "—";
@@ -54,6 +65,14 @@ public partial class DashboardViewModel : ObservableObject
     public bool ShowConfirmation => PendingAction != PendingDashboardAction.None;
     public bool HasError         => LastError is not null;
     public bool HasResourceData  => IsRunning && (CpuPercent > 0 || MemoryMb > 0);
+    public bool HasUpdateAvailable => IsUpdateAvailable == true;
+
+    public string UpdateBannerText => IsUpdateAvailable switch
+    {
+        true  => "A server update is available. Stop the server and update now.",
+        false => "Server is up to date.",
+        null  => string.Empty,
+    };
 
     public string MemoryGbText => MemoryMb >= 1024
         ? $"{MemoryMb / 1024.0:F1} GB"
@@ -78,18 +97,27 @@ public partial class DashboardViewModel : ObservableObject
         _                                 => "StatusOffline",
     };
 
-    public string ConfirmationTitle => PendingAction == PendingDashboardAction.Stop
-        ? "Stop Battlegroup?" : "Restart Battlegroup?";
+    public string ConfirmationTitle => PendingAction switch
+    {
+        PendingDashboardAction.Stop   => "Stop Battlegroup?",
+        PendingDashboardAction.Update => "Update Server?",
+        _                             => "Restart Battlegroup?",
+    };
 
-    public string ConfirmationBody => PendingAction == PendingDashboardAction.Stop
-        ? "This will shut down the server and disconnect all active players."
-        : "This will restart the server and briefly disconnect all active players.";
+    public string ConfirmationBody => PendingAction switch
+    {
+        PendingDashboardAction.Stop   => "This will shut down the server and disconnect all active players.",
+        PendingDashboardAction.Update => "The server will be stopped, updated via SteamCMD, and then restarted. All players will be disconnected.",
+        _                             => "This will restart the server and briefly disconnect all active players.",
+    };
 
     public DashboardViewModel(
         IBattlegroupControlService controlService,
+        IServerPackageInstaller    installer,
         IServiceScopeFactory       scopeFactory)
     {
         _controlService = controlService;
+        _installer      = installer;
         _scopeFactory   = scopeFactory;
 
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
@@ -99,9 +127,9 @@ public partial class DashboardViewModel : ObservableObject
 
     public async Task InitializeAsync()
     {
-        using var scope       = _scopeFactory.CreateScope();
-        var settingsRepo      = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
-        var profileRepo       = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
+        using var scope  = _scopeFactory.CreateScope();
+        var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
+        var profileRepo  = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
 
         var settings = await settingsRepo.GetAsync();
         if (int.TryParse(settings.LastOpenedBattlegroupId, out var id))
@@ -110,6 +138,10 @@ public partial class DashboardViewModel : ObservableObject
             ActiveProfile = (await profileRepo.GetAllAsync()).FirstOrDefault();
 
         await RefreshStatusAsync();
+
+        // Check for updates in the background after the UI is ready
+        if (ActiveProfile is not null)
+            _ = Task.Run(() => CheckForUpdatesAsync());
     }
 
     private async Task RefreshStatusAsync()
@@ -128,7 +160,6 @@ public partial class DashboardViewModel : ObservableObject
             return;
         }
 
-        // Fetch resource utilization only while Running (avoids unnecessary WMI queries)
         if (Status == BattlegroupRuntimeStatus.Running)
         {
             var resources = await _controlService.GetVmResourcesAsync(ActiveProfile);
@@ -161,7 +192,7 @@ public partial class DashboardViewModel : ObservableObject
         catch (Exception ex)        { LastError = ex.Message; }
         finally { IsTransitioning = false; await RefreshStatusAsync(); }
     }
-    private bool CanStart() => HasProfile && IsStopped && !IsTransitioning;
+    private bool CanStart() => HasProfile && IsStopped && !IsTransitioning && !IsUpdating;
 
     // #52 – Stop (with confirmation)
     [RelayCommand(CanExecute = nameof(CanStop))]
@@ -172,7 +203,7 @@ public partial class DashboardViewModel : ObservableObject
         OnPropertyChanged(nameof(ConfirmationTitle));
         OnPropertyChanged(nameof(ConfirmationBody));
     }
-    private bool CanStop() => HasProfile && IsRunning && !IsTransitioning;
+    private bool CanStop() => HasProfile && IsRunning && !IsTransitioning && !IsUpdating;
 
     // #53 – Restart (with confirmation)
     [RelayCommand(CanExecute = nameof(CanStop))]
@@ -184,6 +215,25 @@ public partial class DashboardViewModel : ObservableObject
         OnPropertyChanged(nameof(ConfirmationBody));
     }
 
+    // Update – request with confirmation overlay
+    [RelayCommand(CanExecute = nameof(CanRequestUpdate))]
+    private void RequestUpdate()
+    {
+        PendingAction = PendingDashboardAction.Update;
+        OnPropertyChanged(nameof(ShowConfirmation));
+        OnPropertyChanged(nameof(ConfirmationTitle));
+        OnPropertyChanged(nameof(ConfirmationBody));
+    }
+    private bool CanRequestUpdate() => HasProfile && !IsTransitioning && !IsUpdating;
+
+    // Check for updates without installing
+    [RelayCommand(CanExecute = nameof(CanRequestUpdate))]
+    private async Task CheckForUpdatesAsync()
+    {
+        if (ActiveProfile is null) return;
+        IsUpdateAvailable = await _installer.CheckForUpdateAsync(ActiveProfile.InstallPath);
+    }
+
     // #57 – Confirm / Cancel
     [RelayCommand]
     private async Task ConfirmActionAsync()
@@ -193,6 +243,13 @@ public partial class DashboardViewModel : ObservableObject
         OnPropertyChanged(nameof(ShowConfirmation));
 
         if (ActiveProfile is null) return;
+
+        if (action == PendingDashboardAction.Update)
+        {
+            await ExecuteUpdateAsync();
+            return;
+        }
+
         IsTransitioning = true;
         LastError       = null;
         Status          = BattlegroupRuntimeStatus.Stopping;
@@ -240,5 +297,87 @@ public partial class DashboardViewModel : ObservableObject
     {
         if (ActiveProfile is not null)
             _controlService.OpenVmShell(ActiveProfile);
+    }
+
+    private async Task ExecuteUpdateAsync()
+    {
+        if (ActiveProfile is null) return;
+
+        IsUpdating      = true;
+        UpdateLog       = string.Empty;
+        UpdateProgress  = 0;
+        LastError       = null;
+
+        var wasRunning = IsRunning;
+
+        try
+        {
+            // Stop the server if it's running
+            if (wasRunning)
+            {
+                AppendUpdateLog("Stopping server before update…");
+                IsTransitioning = true;
+                Status          = BattlegroupRuntimeStatus.Stopping;
+                await _controlService.StopAsync(ActiveProfile);
+                IsTransitioning = false;
+                await RefreshStatusAsync();
+            }
+
+            // Run the update via SteamCMD
+            AppendUpdateLog("Starting update…");
+
+            var progress = new Progress<double>(p => UpdateProgress = p);
+
+            await _installer.UpdateAsync(
+                ActiveProfile.InstallPath,
+                progress,
+                line => AppendUpdateLog(line));
+
+            // Record the new build ID
+            var buildId = _installer.GetInstalledBuildId(ActiveProfile.InstallPath);
+            if (buildId is not null)
+            {
+                using var scope  = _scopeFactory.CreateScope();
+                var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
+                var settings     = await settingsRepo.GetAsync();
+                settings.InstalledBuildId = buildId;
+                await settingsRepo.SaveAsync(settings);
+            }
+
+            IsUpdateAvailable = false;
+            AppendUpdateLog("Update complete.");
+
+            // Restart if the server was running before the update
+            if (wasRunning)
+            {
+                AppendUpdateLog("Restarting server…");
+                IsTransitioning = true;
+                Status          = BattlegroupRuntimeStatus.Starting;
+                await _controlService.StartAsync(ActiveProfile);
+                IsTransitioning = false;
+            }
+        }
+        catch (HyperVException ex)
+        {
+            LastError = ex.UserFacingMessage;
+            AppendUpdateLog($"[error] {ex.UserFacingMessage}");
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+            AppendUpdateLog($"[error] {ex.Message}");
+        }
+        finally
+        {
+            IsUpdating      = false;
+            IsTransitioning = false;
+            await RefreshStatusAsync();
+        }
+    }
+
+    private void AppendUpdateLog(string line)
+    {
+        var current = UpdateLog;
+        UpdateLog = string.IsNullOrEmpty(current) ? line : $"{current}\n{line}";
     }
 }
