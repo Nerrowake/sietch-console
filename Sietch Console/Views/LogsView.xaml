@@ -14,11 +14,25 @@
 
         <!-- ── Page Header ── -->
         <StackPanel Grid.Row="0" Margin="28,24,28,16">
-            <TextBlock Style="{StaticResource PageTitleStyle}"
-                       Text="Logs"
-                       Margin="0,0,0,4" />
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,4">
+                <TextBlock Style="{StaticResource PageTitleStyle}" Text="Logs" />
+
+                <!-- Live stream indicator pill (#129) -->
+                <Border Background="{StaticResource AccentTeal}"
+                        CornerRadius="10"
+                        Padding="8,3"
+                        Margin="12,0,0,0"
+                        VerticalAlignment="Center"
+                        Visibility="{Binding IsLiveStreaming, Converter={StaticResource BoolToVisibleConverter}}">
+                    <TextBlock Text="● LIVE"
+                               Foreground="{StaticResource TextPrimary}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="10"
+                               FontWeight="Bold" />
+                </Border>
+            </StackPanel>
             <TextBlock Style="{StaticResource PageSubtitleStyle}"
-                       Text="Live battlegroup log stream. Detected issues appear above the log output." />
+                       Text="{Binding StreamStatusLabel}" />
         </StackPanel>
 
         <!-- ── Toolbar ── -->

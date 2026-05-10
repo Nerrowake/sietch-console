@@ -44,6 +44,7 @@ public partial class App : Application
         services.AddSingleton<ISteamCmdService, SteamCmdService>();
         services.AddSingleton<IServerPackageInstaller, ServerPackageInstaller>();
         services.AddSingleton<InstallationOrchestrator>();
+        services.AddSingleton<IServerProcessService, ServerProcessService>();
         services.AddSingleton<IBattlegroupControlService, BattlegroupControlService>();
         services.AddSingleton<IIniParserService, IniParserService>();
         services.AddSingleton<IConfigurationService, ConfigurationService>();

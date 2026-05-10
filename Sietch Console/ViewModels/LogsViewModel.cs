@@ -13,11 +13,12 @@ namespace Sietch_Console.ViewModels;
 
 public partial class LogsViewModel : ObservableObject, IDisposable
 {
-    private readonly ILogFileService     _logService;
-    private readonly ILogAnalysisService _analysisService;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly DispatcherTimer     _tailTimer;
-    private FileSystemWatcher?           _watcher;
+    private readonly ILogFileService       _logService;
+    private readonly ILogAnalysisService   _analysisService;
+    private readonly IServiceScopeFactory  _scopeFactory;
+    private readonly IServerProcessService _processService;
+    private readonly DispatcherTimer       _tailTimer;
+    private FileSystemWatcher?             _watcher;
 
     private BattlegroupProfile? _profile;
     private readonly Queue<LogEntry> _allEntries = new();
@@ -25,10 +26,23 @@ public partial class LogsViewModel : ObservableObject, IDisposable
     private const int MaxEntries = 5_000;
 
     // ── Status ────────────────────────────────────────────────────────
+
+    /// <summary>True while the file-based tail timer is active.</summary>
     [ObservableProperty] private bool   _isStreaming;
+
+    /// <summary>True while the server process is running and piping live output (#129).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StreamStatusLabel))]
+    private bool   _isLiveStreaming;
+
     [ObservableProperty] private bool   _autoScroll = true;
     [ObservableProperty] private string? _activeLogFile;
     [ObservableProperty] private IReadOnlyList<string> _availableLogFiles = [];
+
+    /// <summary>Status label shown in the view header.</summary>
+    public string StreamStatusLabel => IsLiveStreaming
+        ? "Live process stream active"
+        : "Live battlegroup log stream. Detected issues appear above the log output.";
 
     // ── Entries ───────────────────────────────────────────────────────
     [ObservableProperty]
@@ -56,17 +70,42 @@ public partial class LogsViewModel : ObservableObject, IDisposable
     partial void OnSeverityFilterChanged(LogSeverity? value) => ApplyFilter();
 
     public LogsViewModel(
-        ILogFileService logService,
-        ILogAnalysisService analysisService,
-        IServiceScopeFactory scopeFactory)
+        ILogFileService        logService,
+        ILogAnalysisService    analysisService,
+        IServiceScopeFactory   scopeFactory,
+        IServerProcessService  processService)
     {
         _logService      = logService;
         _analysisService = analysisService;
         _scopeFactory    = scopeFactory;
+        _processService  = processService;
+
+        // Subscribe to live process output (#129)
+        _processService.OutputLineReceived += OnServerOutputLine;
+        _processService.ProcessExited      += OnServerProcessExited;
 
         _tailTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
         _tailTimer.Tick += async (_, _) => await PollLogFileAsync();
         _tailTimer.Start();
+    }
+
+    // ── Live process stream (#129) ────────────────────────────────────
+
+    // Fired on a thread-pool thread; marshal to Dispatcher before touching ObservableCollections.
+    private void OnServerOutputLine(object? sender, string line)
+    {
+        Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            IsLiveStreaming = true;
+            var entry = _logService.ParseLine(line);
+            if (entry is not null)
+                AddEntries([entry]);
+        });
+    }
+
+    private void OnServerProcessExited(object? sender, ServerProcessExitEventArgs e)
+    {
+        Application.Current.Dispatcher.InvokeAsync(() => IsLiveStreaming = false);
     }
 
     public async Task InitializeAsync()
@@ -249,6 +288,8 @@ public partial class LogsViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
+        _processService.OutputLineReceived -= OnServerOutputLine;
+        _processService.ProcessExited      -= OnServerProcessExited;
         _tailTimer.Stop();
         _watcher?.Dispose();
     }

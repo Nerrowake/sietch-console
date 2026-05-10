@@ -11,6 +11,27 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.2.0-alpha.1] — 2026-05-10
+
+### Added
+
+- **Live server process management (Milestone 17)** — `ServerProcessService` spawns the Dune: Awakening dedicated server executable directly from `InstallPath` on the host machine
+- **Live stdout/stderr streaming to Logs view (#129)** — every line written by the server process is parsed and added to the log buffer in real time; the Logs header shows a "● LIVE" pill badge while streaming
+- **Server-ready detection (#130)** — `ServerProcessService` scans output for UE5 listener patterns (e.g. "listening on port", "accepting connections") and transitions the Dashboard to Running once detected; the 10-second status timer picks this up automatically
+- **Crash and exit-code surfacing (#131)** — `ProcessExited` event fires with a human-readable description for common Windows crash codes (0xC0000005 access violation, 0xC0000FD stack overflow, etc.); unexpected exits set the Dashboard to Error immediately via a Dispatcher callback
+- **Graceful shutdown sequence (#132)** — `StopAsync` writes "quit" to stdin and sends WM_CLOSE before falling back to force-kill; `BattlegroupControlService.StopAsync` stops the server process first (10 s window) before issuing the Hyper-V ACPI shutdown
+- **`IServerProcessService` interface** — clean Core-layer contract for process lifecycle; both `BattlegroupControlService` and the two ViewModels depend on it via DI
+
+### Changed
+
+- **`BattlegroupControlService.StartAsync`** — no longer requires a VM name; if `VmName` is set it provisions and starts the Hyper-V VM first, then always calls `ServerProcessService.StartAsync` to launch the server process on the host
+- **`BattlegroupControlService.GetStatusAsync`** — live process state now takes priority: `IsRunning + IsServerReady → Running`, `IsRunning + !IsServerReady → Starting`; VM/host-process fallback still applies when the process has not been started
+- **`BattlegroupControlService.StopAsync`** — no longer throws when `VmName` is empty; exits cleanly after stopping the process if there is no VM to shut down
+- **`LogsViewModel`** — now accepts `IServerProcessService` via constructor injection; subscribes to `OutputLineReceived` and `ProcessExited` events and exposes `IsLiveStreaming` and `StreamStatusLabel`
+- **`DashboardViewModel`** — now accepts `IServerProcessService` via constructor injection; subscribes to `ProcessExited` and immediately surfaces unexpected exits as Error state with a descriptive message
+
+---
+
 ## [0.1.0-alpha.4] — 2026-05-10
 
 ### Added
@@ -161,6 +182,9 @@ First internal alpha release. Core features are functional; the application is n
 
 ---
 
-[Unreleased]: https://github.com/michaelstoffer/sietch-console/compare/v0.1.0-alpha.2...HEAD
+[Unreleased]: https://github.com/michaelstoffer/sietch-console/compare/v0.2.0-alpha.1...HEAD
+[0.2.0-alpha.1]: https://github.com/michaelstoffer/sietch-console/compare/v0.1.0-alpha.4...v0.2.0-alpha.1
+[0.1.0-alpha.4]: https://github.com/michaelstoffer/sietch-console/compare/v0.1.0-alpha.3...v0.1.0-alpha.4
+[0.1.0-alpha.3]: https://github.com/michaelstoffer/sietch-console/compare/v0.1.0-alpha.2...v0.1.0-alpha.3
 [0.1.0-alpha.2]: https://github.com/michaelstoffer/sietch-console/releases/tag/v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/michaelstoffer/sietch-console/releases/tag/v0.1.0-alpha.1

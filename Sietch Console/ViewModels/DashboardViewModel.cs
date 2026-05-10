@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SietchConsole.Core.Exceptions;
 using SietchConsole.Core.Interfaces;
 using SietchConsole.Core.Models;
+using System.Windows;
 using System.Windows.Threading;
 
 namespace Sietch_Console.ViewModels;
@@ -114,15 +115,33 @@ public partial class DashboardViewModel : ObservableObject
     public DashboardViewModel(
         IBattlegroupControlService controlService,
         IServerPackageInstaller    installer,
-        IServiceScopeFactory       scopeFactory)
+        IServiceScopeFactory       scopeFactory,
+        IServerProcessService      processService)
     {
         _controlService = controlService;
         _installer      = installer;
         _scopeFactory   = scopeFactory;
 
+        // Subscribe to process exit so unexpected crashes surface immediately (#131)
+        processService.ProcessExited += OnServerProcessExited;
+
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
         _refreshTimer.Tick += async (_, _) => await RefreshStatusAsync();
         _refreshTimer.Start();
+    }
+
+    // Fires on a thread-pool thread — must marshal to Dispatcher before touching UI state.
+    private void OnServerProcessExited(object? sender, ServerProcessExitEventArgs e)
+    {
+        if (e.WasExpected) return;   // intentional stop — handled by RefreshStatusAsync
+
+        Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            Status    = e.ExitCode == 0
+                ? BattlegroupRuntimeStatus.Offline
+                : BattlegroupRuntimeStatus.Error;
+            LastError = e.ExitCode == 0 ? null : e.Description;
+        });
     }
 
     public async Task InitializeAsync()

@@ -2,7 +2,7 @@
 
 This document describes the planned feature trajectory for Sietch Console. Items are grouped by milestone. Ordering and scope are subject to change as the project evolves.
 
-The current release is `0.1.0-alpha.4`. Milestone 15 is complete. Milestones 16 and above are unimplemented as of this writing.
+The current release is `0.2.0-alpha.1`. Milestones 15–17 are complete. Milestone 18 and above are unimplemented as of this writing.
 
 ---
 
@@ -20,7 +20,7 @@ Replaced the stub server control layer with real Hyper-V operations.
 
 ---
 
-## Milestone 16 — Server Package Management
+## Milestone 16 — Server Package Management ✓ Complete (`0.2.0-alpha.1`)
 
 Automate server file installation and updates.
 
@@ -32,7 +32,7 @@ Automate server file installation and updates.
 
 ---
 
-## Milestone 17 — Live Server Integration
+## Milestone 17 — Live Server Integration ✓ Complete (`0.2.0-alpha.1`)
 
 Connect the app to the running server process.
 
@@ -101,8 +101,8 @@ These are ideas that may or may not be implemented, depending on community feedb
 
 | Range | Phase |
 |-------|-------|
-| `0.1.x-alpha.N` | Internal alpha — UI foundation, stub integrations |
-| `0.2.x-alpha.N` | Hyper-V + server process integration complete |
+| `0.1.x-alpha.N` | Internal alpha — UI foundation, stub integrations ✓ |
+| `0.2.x-alpha.N` | Hyper-V + server process integration complete ✓ |
 | `0.3.x-beta.N` | Save data backups, polish, broader testing |
 | `0.4.x-beta.N` | Auto-update, code signing, public beta |
 | `1.0.0` | First stable release |

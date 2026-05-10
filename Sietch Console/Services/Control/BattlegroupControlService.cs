@@ -10,6 +10,13 @@ namespace Sietch_Console.Services.Control;
 
 public class BattlegroupControlService : IBattlegroupControlService
 {
+    private readonly IServerProcessService _processService;
+
+    public BattlegroupControlService(IServerProcessService processService)
+    {
+        _processService = processService;
+    }
+
     // Known server process names used as a fallback when no VM name is configured
     private static readonly string[] ServerProcessNames =
         ["DedicatedServer", "DuneServer", "BattlegroupServer"];
@@ -28,6 +35,13 @@ public class BattlegroupControlService : IBattlegroupControlService
     {
         return Task.Run(() =>
         {
+            // Live process state takes priority over VM/host checks.
+            // IsServerReady becomes true once a "listening on port" line is detected.
+            if (_processService.IsRunning)
+                return _processService.IsServerReady
+                    ? BattlegroupRuntimeStatus.Running
+                    : BattlegroupRuntimeStatus.Starting;
+
             try
             {
                 if (!string.IsNullOrWhiteSpace(profile.VmName))
@@ -129,36 +143,45 @@ public class BattlegroupControlService : IBattlegroupControlService
 
     public Task StartAsync(BattlegroupProfile profile) => Task.Run(async () =>
     {
-        if (string.IsNullOrWhiteSpace(profile.VmName))
-            throw new HyperVException(HyperVErrorCode.VmNotFound,
-                "No VM name configured. Complete the Setup Wizard first.");
-
-        ProvisionVmIfNeeded(profile);
-
-        if (QueryVmState(profile.VmName) == BattlegroupRuntimeStatus.Running)
-            return;
-
-        var (exit, _, stderr) = RunPs($"Start-VM -Name '{EscapePs(profile.VmName)}'");
-        if (exit != 0)
+        // Start the Hyper-V VM if one is configured.
+        if (!string.IsNullOrWhiteSpace(profile.VmName))
         {
-            var code = stderr.Contains("access", StringComparison.OrdinalIgnoreCase)
-                ? HyperVErrorCode.AccessDenied
-                : HyperVErrorCode.WmiQueryFailed;
-            throw new HyperVException(code, $"Start-VM failed: {stderr.Trim()}");
+            ProvisionVmIfNeeded(profile);
+
+            if (QueryVmState(profile.VmName) != BattlegroupRuntimeStatus.Running)
+            {
+                var (exit, _, stderr) = RunPs($"Start-VM -Name '{EscapePs(profile.VmName)}'");
+                if (exit != 0)
+                {
+                    var code = stderr.Contains("access", StringComparison.OrdinalIgnoreCase)
+                        ? HyperVErrorCode.AccessDenied
+                        : HyperVErrorCode.WmiQueryFailed;
+                    throw new HyperVException(code, $"Start-VM failed: {stderr.Trim()}");
+                }
+
+                // Poll until Running or timeout (90 s)
+                await WaitForVmStateAsync(profile.VmName,
+                    BattlegroupRuntimeStatus.Running, TimeSpan.FromSeconds(90));
+            }
         }
 
-        // Poll until Running or timeout (90 s)
-        await WaitForVmStateAsync(profile.VmName,
-            BattlegroupRuntimeStatus.Running, TimeSpan.FromSeconds(90));
+        // Start the server process on the host from InstallPath.
+        // NOTE: In a future milestone this will use PowerShell Direct to spawn
+        // the process inside the Hyper-V guest when VmName is configured.
+        await _processService.StartAsync(profile);
     });
 
     // ── Stop ──────────────────────────────────────────────────────────────────
 
     public Task StopAsync(BattlegroupProfile profile) => Task.Run(async () =>
     {
+        // Stop the server process first (10 s graceful window, then force-kill).
+        if (_processService.IsRunning)
+            await _processService.StopAsync(TimeSpan.FromSeconds(10));
+
+        // If there is no VM to shut down, we are done.
         if (string.IsNullOrWhiteSpace(profile.VmName))
-            throw new HyperVException(HyperVErrorCode.VmNotFound,
-                "No VM name configured.");
+            return;
 
         var current = QueryVmState(profile.VmName);
         if (current is BattlegroupRuntimeStatus.Offline or BattlegroupRuntimeStatus.Unknown)
