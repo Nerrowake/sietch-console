@@ -11,6 +11,25 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.1.0-alpha.4] — 2026-05-10
+
+### Added
+
+- **Real Hyper-V integration (Milestone 15)** — `BattlegroupControlService` now issues actual WMI queries and PowerShell commands instead of stubs
+- **VM provisioning** — if the configured VM does not exist, `Start` automatically creates it (`New-VM`, `Set-VMProcessor`, `Set-VMMemory`) using the profile's CPU count, RAM, and virtual switch
+- **Graceful stop + force fallback** — `Stop` sends an ACPI shutdown signal, waits 30 s, then falls back to `Stop-VM -Force`
+- **State-transition polling** — Start waits up to 90 s for the VM to reach Running; all wait loops poll WMI every 2 s
+- **VM resource utilisation on Dashboard** — CPU% and RAM displayed live via `Msvm_SummaryInformation` while the VM is Running
+- **Typed Hyper-V exceptions** — `HyperVException` with `HyperVErrorCode` (AccessDenied, VmNotFound, OperationTimedOut, …) surfaces user-readable messages
+- **Dashboard error banner** — Hyper-V failures surface as an amber dismissible banner above the status card instead of silently failing
+- **Automatic SQLite schema migration** — `DatabaseInitializerService` runs `ALTER TABLE ADD COLUMN` for the three new profile fields (`CpuCount`, `MemoryMb`, `VirtualSwitchName`) so existing databases upgrade on next launch
+
+### Security
+
+- **PowerShell `-EncodedCommand`** — all `powershell.exe` invocations now pass the full script as Base64 UTF-16 via `-EncodedCommand`, eliminating any shell-quoting injection surface in VM names and paths
+
+---
+
 ## [0.1.0-alpha.3] — 2026-05-10
 
 ### Added
