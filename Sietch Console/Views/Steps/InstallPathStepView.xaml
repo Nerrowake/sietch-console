@@ -71,6 +71,14 @@
                             <TextBlock Text="Browse…" Style="{StaticResource BodyTextStyle}" Foreground="{StaticResource TextSecondary}" />
                         </Button>
                     </Grid>
+                    <!-- #179 – Inline validation error -->
+                    <TextBlock Text="{Binding InstallPathError}"
+                               Foreground="{StaticResource StatusError}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="12"
+                               Margin="0,6,0,0"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding InstallPathError, Converter={StaticResource NullToCollapsedConverter}}" />
                 </StackPanel>
             </Border>
 
@@ -129,6 +137,14 @@
                             <TextBlock Text="Browse…" Style="{StaticResource BodyTextStyle}" Foreground="{StaticResource TextSecondary}" />
                         </Button>
                     </Grid>
+                    <!-- #179 – Inline validation error -->
+                    <TextBlock Text="{Binding BackupPathError}"
+                               Foreground="{StaticResource StatusError}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="12"
+                               Margin="0,6,0,0"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding BackupPathError, Converter={StaticResource NullToCollapsedConverter}}" />
                 </StackPanel>
             </Border>
 
@@ -187,6 +203,14 @@
                             <TextBlock Text="Browse…" Style="{StaticResource BodyTextStyle}" Foreground="{StaticResource TextSecondary}" />
                         </Button>
                     </Grid>
+                    <!-- #179 – Inline validation error -->
+                    <TextBlock Text="{Binding LogsPathError}"
+                               Foreground="{StaticResource StatusError}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="12"
+                               Margin="0,6,0,0"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding LogsPathError, Converter={StaticResource NullToCollapsedConverter}}" />
                 </StackPanel>
             </Border>
 
