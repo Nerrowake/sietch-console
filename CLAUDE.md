@@ -180,7 +180,7 @@ To release: update `<Version>` in `Directory.Build.props`, update `CHANGELOG.md`
 
 - Default branch: `development`
 - Branch naming: `feature/short-description`, `fix/short-description`, `docs/short-description`
-- All work targets the `development` branch; `main` is reserved for stable releases
+- All work targets the `development` branch; there is no `main` branch at this time
 - Issues are tracked with milestone labels (Milestone 1, Milestone 2, …)
 - Close issues with `gh issue close <number> --repo michaelstoffer/sietch-console`
 

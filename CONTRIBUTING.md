@@ -121,8 +121,8 @@ Keep the subject line under 72 characters. Use the body for context when the rea
 
 ### Database
 
-- All schema changes require a new EF Core migration: `dotnet ef migrations add <Name> --project SietchConsole.Data`.
-- Never edit migration files by hand after they have been pushed.
+- Schema changes are applied via `DatabaseInitializerService.ApplySchemaUpdatesAsync()`, not EF Core migrations. Add a new `ALTER TABLE … ADD COLUMN` or `CREATE TABLE IF NOT EXISTS` call there for each change.
+- This approach lets existing user databases upgrade automatically on next launch without a migration runner.
 - Repositories must be accessed via `IServiceScopeFactory` in ViewModels — do not inject `IRepository<T>` directly as a singleton.
 
 ---
@@ -149,4 +149,4 @@ When adding a new feature:
 - Do not create helper utilities, extension methods, or abstractions unless they are used in at least two places.
 - Do not add comments that describe what the code does — only add a comment when the **why** is non-obvious.
 - Do not use `MessageBox.Show` — the app has an established overlay/confirmation pattern.
-- Do not commit to `main` directly. `main` is reserved for stable release snapshots.
+- Do not bypass the PR process for anything beyond trivial solo commits. All significant work should go through a branch and PR targeting `development`.

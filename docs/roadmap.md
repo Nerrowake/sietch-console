@@ -2,7 +2,7 @@
 
 This document describes the planned feature trajectory for Sietch Console. Items are grouped by milestone. Ordering and scope are subject to change as the project evolves.
 
-The current release is `0.6.0-alpha.1`. Milestones 15–21 are complete. Milestones 22–24 are complete.
+The current release is `0.6.0-alpha.1`. Milestones 15–24 and 28 are complete. Milestone 25 (Mod Management) was cancelled. Milestones 26 (Discord Webhooks) and 27 (Cloud Backup) are planned.
 
 ---
 
@@ -44,7 +44,7 @@ Connect the app to the running server process.
 
 ---
 
-## Milestone 18 — Save Data Backups
+## Milestone 18 — Save Data Backups ✓ Complete (`0.3.0-alpha.1`)
 
 Complete the backup system with save data support.
 
@@ -52,23 +52,26 @@ Complete the backup system with save data support.
 - Implement save data backup: compress and archive to `%LOCALAPPDATA%\SietchConsole\Backups\`
 - Implement save data restore: stop server, swap files, restart
 - Full backup type: config + save data in one operation
-- Scheduled automatic backups: configurable interval (e.g., every 6 hours) stored as a Windows Task Scheduler entry
+- Scheduled automatic backups: configurable interval (1/3/6/12/24 h) with enable toggle
 - Backup pruning: keep last N backups, auto-delete older records
 
 ---
 
-## Milestone 19 — Polish and Hardening
+## Milestone 19 — Polish and Hardening ✓ Complete (`0.4.0-alpha.1`)
 
 Address quality-of-life gaps and reliability issues from alpha feedback.
 
 - Application icon (`.ico`) and taskbar icon — proper Windows app identity
 - Splash screen on startup while the host initializes
-- Code-signed installer — removes SmartScreen warning
 - Setup Wizard resume support — if interrupted mid-setup, resume from the last completed step
 - Multiple battlegroup profiles — create, switch between, and delete named profiles
 - Hyper-V network adapter auto-detection for the VM IP on the Networking tab
 - Log file selector auto-refresh when new files appear
 - In-app application log viewer (Sietch Console's own logs, not the game server's)
+- Toast notification system for async operation results
+- DPAPI encryption at rest for the Dune account token and admin password
+
+> **Note:** Code-signed installer is deferred. It requires a purchased certificate and is tracked separately.
 
 ---
 
@@ -130,12 +133,37 @@ Historical server health data surfaced as charts.
 
 ---
 
+## Milestone 25 — Mod Management ✗ Cancelled
+
+Cancelled before implementation due to Funcom IP licensing restrictions. The four issues (#166–#169) were closed without code being written.
+
+---
+
+## Milestone 28 — UX Hardening and Friction Reduction ✓ Complete (`0.1.0-alpha.3` / `0.4.0-alpha.1`)
+
+Addressed quality-of-life gaps and security improvements identified during early alpha testing.
+
+- Toast / snackbar notification system for all async operation results
+- Setup Wizard install path validation (write access, free disk space, drive root guard)
+- Setup Wizard token validation (auto-trim, length hint)
+- Networking view: adapter picker for multi-NIC hosts; UAC cancel feedback
+- Log view: "Copy Logs" toolbar button
+- Setup Wizard Progress step: cancel button and 30-minute timeout detection
+- Settings view: raw INI editor sync warning when structured form also has unsaved changes
+- Log file auto-refresh via `FileSystemWatcher`
+- Dashboard quick-access shortcuts disabled when install path does not exist
+- Backups view: restore progress message before final result
+- `IActiveProfileService` singleton — active profile resolved once per session, eliminating redundant DB queries
+- DPAPI encryption at rest for the Dune account token and admin password
+
+---
+
 ## Post-MVP / Future Considerations
 
-These are ideas that may or may not be implemented, depending on community feedback and project direction.
+These are planned milestones with open GitHub issues, not yet implemented.
 
-- **Discord webhook integration** — notify a Discord channel when the server starts, stops, or detects errors
-- **Backup cloud sync** — optional sync of backups to OneDrive, Google Drive, or S3-compatible storage
+- **Milestone 26 — Discord Webhook Integration** — notify a Discord channel when the server starts, stops, or crashes; player milestone announcements; webhook configuration UI
+- **Milestone 27 — Backup Cloud Sync** — optional sync of backups to OneDrive (Microsoft Graph), S3-compatible storage (AWS, Backblaze, MinIO), with a provider abstraction layer and restore flow
 
 ---
 

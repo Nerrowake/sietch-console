@@ -259,7 +259,11 @@ First internal alpha release. Core features are functional; the application is n
 
 ---
 
-[Unreleased]: https://github.com/michaelstoffer/sietch-console/compare/v0.2.0-alpha.1...HEAD
+[Unreleased]: https://github.com/michaelstoffer/sietch-console/compare/v0.6.0-alpha.1...HEAD
+[0.6.0-alpha.1]: https://github.com/michaelstoffer/sietch-console/compare/v0.5.0-alpha.1...v0.6.0-alpha.1
+[0.5.0-alpha.1]: https://github.com/michaelstoffer/sietch-console/compare/v0.4.0-alpha.1...v0.5.0-alpha.1
+[0.4.0-alpha.1]: https://github.com/michaelstoffer/sietch-console/compare/v0.3.0-alpha.1...v0.4.0-alpha.1
+[0.3.0-alpha.1]: https://github.com/michaelstoffer/sietch-console/compare/v0.2.0-alpha.1...v0.3.0-alpha.1
 [0.2.0-alpha.1]: https://github.com/michaelstoffer/sietch-console/compare/v0.1.0-alpha.4...v0.2.0-alpha.1
 [0.1.0-alpha.4]: https://github.com/michaelstoffer/sietch-console/compare/v0.1.0-alpha.3...v0.1.0-alpha.4
 [0.1.0-alpha.3]: https://github.com/michaelstoffer/sietch-console/compare/v0.1.0-alpha.2...v0.1.0-alpha.3
