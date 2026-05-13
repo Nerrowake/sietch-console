@@ -47,12 +47,20 @@ jobs:
       - name: List publish output
         run: Get-ChildItem publish/ | Select-Object Name, Length | Format-Table -AutoSize
 
-      # Portable ZIP — no installer required
+      # Portable ZIP — zip from inside publish/ so files land at the archive root, not in a subfolder
       - name: Create portable ZIP
+        run: |
+          Push-Location publish
+          Compress-Archive -Path * -DestinationPath "../SietchConsole-${{ steps.version.outputs.VERSION }}-win-x64-portable.zip"
+          Pop-Location
+
+      # Verify ZIP contents so the Actions log shows exactly what's in the archive
+      - name: Verify portable ZIP contents
         run: >
-          Compress-Archive
-          -Path publish/*
-          -DestinationPath "SietchConsole-${{ steps.version.outputs.VERSION }}-win-x64-portable.zip"
+          Add-Type -AssemblyName System.IO.Compression.FileSystem;
+          [System.IO.Compression.ZipFile]::OpenRead("SietchConsole-${{ steps.version.outputs.VERSION }}-win-x64-portable.zip").Entries |
+          Select-Object Name, Length |
+          Format-Table -AutoSize
 
       # Windows installer via Inno Setup
       - name: Compile installer (Inno Setup)
