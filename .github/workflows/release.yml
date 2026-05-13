@@ -43,6 +43,10 @@ jobs:
           -p:DebugType=embedded
           -o publish/
 
+      # List publish output so we can verify loose files (OxyPlot DLLs etc.) in the Actions log
+      - name: List publish output
+        run: Get-ChildItem publish/ | Select-Object Name, Length | Format-Table -AutoSize
+
       # Portable ZIP — no installer required
       - name: Create portable ZIP
         run: >
