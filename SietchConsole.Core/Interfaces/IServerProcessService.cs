@@ -55,4 +55,10 @@ public interface IServerProcessService
     /// Falls back to a force-kill after <paramref name="timeout"/> elapses.
     /// </summary>
     Task StopAsync(TimeSpan timeout, CancellationToken ct = default);
+
+    /// <summary>
+    /// Writes a command line to the server process stdin.
+    /// No-op if the process is not running or stdin is not redirected.
+    /// </summary>
+    Task SendCommandAsync(string command);
 }

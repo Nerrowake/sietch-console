@@ -48,6 +48,9 @@ Sietch Console.sln
 | `Services/Profiles/` | Active battleground profile ownership and ProfileChanged event |
 | `Services/Update/` | GitHub Releases update check and installer download |
 | `Services/Remote/` | Embedded Kestrel web server, REST/SSE API, auth middleware, SSE hub |
+| `Services/Hosts/` | Remote Hyper-V host registry, WMI connection testing, DPAPI credential encryption |
+| `Services/Players/` | Log-based player detection, kick/ban commands, ban/allowlist SQLite CRUD |
+| `Services/Metrics/` | 60-second snapshot collection, downtime tracking, OxyPlot data preparation |
 | `Services/Installation/` | Setup wizard orchestration (Steam detection, package download, script execution) |
 
 ---
@@ -197,14 +200,14 @@ To release: update `<Version>` in `Directory.Build.props`, update `CHANGELOG.md`
 
 ## What Does Not Exist Yet (Alpha Gaps)
 
-All core infrastructure is implemented as of `0.5.0-alpha.1`. The remaining gaps are:
+All core infrastructure is implemented as of `0.6.0-alpha.1`. The remaining gaps are:
 
 - No code signing — SmartScreen will warn on the installer (deferred; requires a purchased certificate)
 - Server process runs on the **host machine**, not inside the Hyper-V guest — PowerShell Direct integration is not yet implemented
-- Player count in the remote dashboard is always `0` — requires a server query API that Funcom has not exposed
-- Uptime tracking in the remote dashboard is not yet implemented — server start time is not persisted
-- No player management (kick, ban, allowlist)
-- No server metrics history (CPU/memory/player count over time)
+- Player count in the remote dashboard is always `0` — requires a server query API that Funcom has not exposed; `ServerMetricSnapshot.PlayerCount` is also always 0 for the same reason
+- Player join/leave log patterns are heuristic guesses (`PlayerManagementService`) — must be validated against real Dune: Awakening server logs before v1.0
+- Kick/ban server commands are heuristic guesses — must be validated against Funcom's server documentation before v1.0
+- Remote host support (`HyperVHostService`) is untested against real remote Hyper-V hosts — requires a multi-machine test environment
 - No webhook/notification integrations
 - No cloud backup destinations
 

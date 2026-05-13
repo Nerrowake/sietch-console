@@ -36,7 +36,20 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
+    <PackageReference Include="OxyPlot.Wpf" Version="2.1.2" />
     <PackageReference Include="System.Management" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      OxyPlot.Wpf uses XmlnsDefinitionAttribute to map the 'http://oxyplot.org/wpf' XAML namespace.
+      When EnableCompressionInSingleFile=true the assembly is compressed inside the host EXE and the
+      WPF BAML type-resolver cannot scan it for that attribute, causing a hard crash at startup
+      ("The type 'System.Object' was not found"). Excluding these two DLLs from the bundle places them
+      as loose files next to the EXE so the resolver can find them normally.
+    -->
+    <ExcludeFromSingleFile Include="OxyPlot.dll" />
+    <ExcludeFromSingleFile Include="OxyPlot.Wpf.dll" />
   </ItemGroup>
 
   <ItemGroup>

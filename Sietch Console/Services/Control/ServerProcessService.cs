@@ -164,6 +164,20 @@ public sealed class ServerProcessService : IServerProcessService, IDisposable
         catch { }
     }
 
+    // ── Stdin command (#158) ────────────────────────────────────────────────
+
+    public async Task SendCommandAsync(string command)
+    {
+        Process? p;
+        lock (_lock) { p = _process; }
+        if (p is null || p.HasExited) return;
+        try
+        {
+            await p.StandardInput.WriteLineAsync(command);
+        }
+        catch { /* stdin closed or process gone — no-op */ }
+    }
+
     // ── Output handling (#129) ───────────────────────────────────────────────
 
     private void OnOutputLine(object sender, DataReceivedEventArgs e)

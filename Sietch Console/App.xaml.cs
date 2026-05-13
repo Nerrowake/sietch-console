@@ -7,9 +7,12 @@ using Sietch_Console.Services.Update;
 using Sietch_Console.Services.Configuration;
 using Sietch_Console.Services.Control;
 using Sietch_Console.Services.Diagnostics;
+using Sietch_Console.Services.Hosts;
 using Sietch_Console.Services.Installation;
 using Sietch_Console.Services.Logs;
+using Sietch_Console.Services.Metrics;
 using Sietch_Console.Services.Networking;
+using Sietch_Console.Services.Players;
 using Sietch_Console.Services.Profiles;
 using Sietch_Console.Services.Remote;
 using Sietch_Console.ViewModels;
@@ -78,12 +81,23 @@ public partial class App : Application
         services.AddSingleton<IBackupService, BackupService>();
         services.AddSingleton<INetworkingService, NetworkingService>();
 
+        // ── M22: Multi-host support (#153) ───────────────────────────────────────
+        services.AddSingleton<IHyperVHostService, HyperVHostService>();
+
+        // ── M23: Player management (#158, #160) ──────────────────────────────────
+        services.AddSingleton<IPlayerManagementService, PlayerManagementService>();
+
+        // ── M24: Server metrics (#163, #164) ─────────────────────────────────────
+        services.AddSingleton<IMetricsCollectorService, MetricsCollectorService>();
+
         // Repositories
         services.AddScoped<IApplicationSettingsRepository, ApplicationSettingsRepository>();
         services.AddScoped<IBattlegroupProfileRepository, BattlegroupProfileRepository>();
         services.AddScoped<IDiagnosticsResultRepository, DiagnosticsResultRepository>();
         services.AddScoped<IBackupRecordRepository, BackupRecordRepository>();
         services.AddScoped<ISetupWizardStateRepository, SetupWizardStateRepository>();
+        services.AddScoped<IHyperVHostRepository, HyperVHostRepository>();
+        services.AddScoped<IMetricsRepository, MetricsRepository>();
 
         // ViewModels
         services.AddSingleton<MainWindowViewModel>();
@@ -96,6 +110,8 @@ public partial class App : Application
         services.AddSingleton<NetworkingViewModel>();
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<AppLogsViewModel>();
+        services.AddSingleton<PlayersViewModel>();
+        services.AddSingleton<MetricsViewModel>();
 
         // Views
         services.AddSingleton<MainWindow>();
@@ -119,6 +135,10 @@ public partial class App : Application
         // ── #139: ActiveProfileService must initialize first ─────────────────
         var activeProfileService = _host.Services.GetRequiredService<IActiveProfileService>();
         await activeProfileService.InitializeAsync();
+
+        // ── #153: Hyper-V host registry ───────────────────────────────────────
+        var hyperVHostService = _host.Services.GetRequiredService<IHyperVHostService>();
+        await hyperVHostService.InitializeAsync();
 
         // Initialize ViewModels (all now use IActiveProfileService for the active profile)
         var dashboardVm = _host.Services.GetRequiredService<DashboardViewModel>();

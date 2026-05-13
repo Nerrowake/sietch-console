@@ -30,6 +30,12 @@ public class BattlegroupProfile
 
     public string? VmIpAddress { get; set; }
 
+    /// <summary>
+    /// The ID of the Hyper-V host this profile targets (#153).
+    /// Null means the local machine ("This machine").
+    /// </summary>
+    public string? HostId { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

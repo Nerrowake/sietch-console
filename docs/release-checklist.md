@@ -62,6 +62,22 @@ Run these manually on a machine with a real Hyper-V environment. VM control is n
 **Settings**
 - [ ] Settings loads existing config (or shows "no config" empty state)
 - [ ] Saving settings triggers the auto-backup and shows a success message
+- [ ] Remote Management card: enable toggle, port, token generate, Apply — web server starts/stops correctly
+
+**Players**
+- [ ] Connected Players tab loads (empty state shown when server is not running)
+- [ ] Ban List tab loads (empty state shown when no bans exist)
+- [ ] Allowlist tab loads (empty state shown when allowlist is empty)
+- [ ] Add to Allowlist form accepts a Steam ID and saves correctly
+- [ ] Ban form opens with Permanent/timed options and saves a BanRecord
+- [ ] Confirmation overlay appears before kick and unban actions
+
+**Metrics**
+- [ ] Metrics view opens without errors
+- [ ] Time range selector (1 h, 6 h, 24 h, 7 d, 30 d) updates charts
+- [ ] Charts are empty state when no data exists for the range
+- [ ] Availability summary shows "No data" when no snapshots exist
+- [ ] Live "Collecting" indicator appears when the server is running
 
 ---
 

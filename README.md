@@ -30,6 +30,9 @@ Sietch Console is a Windows-native desktop application that replaces the manual 
 | **App Logs** | In-app viewer for Sietch Console's own log stream — filter by level or keyword to diagnose service issues without opening external files |
 | **Auto-Update** | On-startup check against GitHub Releases; banner notification when a new version is available; one-click download and install |
 | **Remote Management** | Embedded web dashboard accessible from any browser on the LAN — status, controls, and live log tail; REST + SSE API for custom integrations; Bearer token auth with rate limiting |
+| **Players** | Live connected-player list (log-based detection), kick and timed/permanent ban commands, ban list with unban support, and Steam ID allowlist — all stored in SQLite |
+| **Metrics** | 60-second CPU, memory, and uptime snapshots charted over time with OxyPlot; availability percentage; downtime event log; configurable time-range selector (1 h – 30 d) |
+| **Multi-Host** | Register remote Hyper-V hosts by hostname with DPAPI-encrypted WMI credentials; WMI connection test; link battlegroup profiles to a specific host |
 
 ---
 
@@ -73,18 +76,17 @@ Full installation and first-launch instructions: [INSTALL.md](INSTALL.md)
 Sietch Console (WPF .NET 8)
 ├── Views/              XAML views — one per navigation section
 ├── ViewModels/         CommunityToolkit.Mvvm ObservableObject classes
-├── Services/           Application-layer services (Backups, Networking, …)
+├── Services/           Application-layer services (Control, Backups, Players, Metrics, …)
 ├── Converters/         IValueConverter implementations
 └── Themes/             SietchTheme.xaml — global brushes, styles, templates
 
 SietchConsole.Core
-├── Models/             Sealed record types (domain objects)
-└── Interfaces/         Service contracts (IBackupService, INetworkingService, …)
+├── Models/             Domain records (BattlegroupProfile, BanRecord, ServerMetricSnapshot, …)
+└── Interfaces/         Service contracts (IPlayerManagementService, IMetricsCollectorService, …)
 
 SietchConsole.Data
-├── Entities/           EF Core entity classes
-├── Repositories/       IRepository<T> implementations over SQLite
-└── Migrations/         EF Core migration history
+├── Repositories/       EF Core + SQLite repository implementations
+└── Database/           DbContext, DatabaseInitializerService (schema migration)
 ```
 
 The application uses **Microsoft.Extensions.Hosting** for dependency injection and startup orchestration. All ViewModels are singletons; database repositories are scoped and accessed via `IServiceScopeFactory`.

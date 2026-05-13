@@ -85,6 +85,8 @@ public partial class MainWindowViewModel : ObservableObject
         NetworkingViewModel   networking,
         SettingsViewModel     settings,
         AppLogsViewModel      appLogs,
+        PlayersViewModel      players,
+        MetricsViewModel      metrics,
         IActiveProfileService activeProfileService,
         IAppUpdateService     appUpdateService)
     {
@@ -96,6 +98,8 @@ public partial class MainWindowViewModel : ObservableObject
         {
             new("Dashboard",    dashboard,   "IconDashboard"),
             new("Setup Wizard", setupWizard, "IconSetupWizard"),
+            new("Players",      players,     "IconBattlegroup"),
+            new("Metrics",      metrics,     "IconDiagnostics"),
             new("Logs",         logs,        "IconLogs"),
             new("Diagnostics",  diagnostics, "IconDiagnostics"),
             new("Backups",      backups,     "IconBackups"),

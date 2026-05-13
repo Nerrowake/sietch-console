@@ -6,7 +6,7 @@ This document lists known bugs, unimplemented features, and unsupported configur
 
 ## Alpha Scope
 
-Sietch Console `0.5.0-alpha.1` is an **internal alpha**. The following features are fully implemented: application shell and all views, Hyper-V VM control (start, stop, restart, provisioning, live resource display), SteamCMD server file download and update, live server process management (stdout/stderr streaming, server-ready detection, crash surfacing, graceful shutdown), full + scheduled backups with retention, multiple battleground profiles, in-app application log viewer, VM IP auto-detection, GitHub Releases auto-update, and remote management (embedded Kestrel web server, REST + SSE API, built-in web dashboard, Bearer token auth with rate limiting).
+Sietch Console `0.6.0-alpha.1` is an **internal alpha**. The following features are fully implemented: application shell and all views, Hyper-V VM control (start, stop, restart, provisioning, live resource display), SteamCMD server file download and update, live server process management (stdout/stderr streaming, server-ready detection, crash surfacing, graceful shutdown), full + scheduled backups with retention, multiple battleground profiles, in-app application log viewer, VM IP auto-detection, GitHub Releases auto-update, remote management (embedded Kestrel web server, REST + SSE API, built-in web dashboard, Bearer token auth with rate limiting), player management (connected-player detection, kick/ban commands, ban list, Steam ID allowlist), server metrics (60-second CPU/memory/uptime charts, downtime event log), and remote Hyper-V host registration with DPAPI credential storage.
 
 ---
 
@@ -38,9 +38,19 @@ The Dashboard transitions to "Running" once `ServerProcessService` detects a ser
 
 `ServerPackageInstaller` uses App ID `2369390` for the Dune: Awakening dedicated server. This ID has not been officially confirmed by Funcom. If SteamCMD downloads the wrong app or reports an error, the App ID may need to be updated.
 
-### Remote dashboard player count is always 0 and uptime is always —
+### Remote dashboard player count is always 0
 
-The remote dashboard's player count and uptime fields are not yet populated. Player count requires a server query API that Funcom has not made available. Uptime would require persisting the server start time — this is planned but not yet implemented. Both fields display placeholder values in the current release.
+The remote dashboard's player count field is always 0. Player count requires a server-side query API that Funcom has not made available. The same limitation applies to `ServerMetricSnapshot.PlayerCount` in the Metrics view. Both fields display placeholder values.
+
+Uptime is now tracked internally by `MetricsCollectorService` and shown in the Metrics view, but the remote API's `uptimeSeconds` field is not yet wired to this source and remains `null` in the current release.
+
+### Player detection, kick, and ban commands are heuristic guesses
+
+`PlayerManagementService` uses regex patterns to detect player joins and leaves from the server's stdout. The kick and ban console commands it sends via stdin are based on common Unreal Engine 5 conventions. **None of these patterns or commands have been validated against real Dune: Awakening server output.** They may not work correctly until tested against a live server and tuned accordingly.
+
+### Remote host support is untested
+
+`HyperVHostService` can register remote Hyper-V hosts and test WMI connectivity, but the feature has not been validated against a real multi-machine setup. WMI `PacketPrivacy` authentication, credential encryption, and remote VM control all require a two-machine test environment to verify.
 
 ---
 
@@ -56,7 +66,7 @@ The application is published as a single-file self-contained win-x64 binary. It 
 
 ### Running the VM on a separate machine
 
-Sietch Console assumes the Hyper-V host and the user's desktop are the same machine. Running the VM on a remote Hyper-V host is not supported and is not planned for the current phase.
+Remote Hyper-V host registration is implemented but **untested** against a real multi-machine environment. The host registry stores encrypted credentials and tests WMI connectivity, but end-to-end VM control (start/stop/restart) over a remote WMI connection has not been validated.
 
 ### Server process inside the VM (PowerShell Direct)
 
@@ -72,12 +82,10 @@ This is a WPF application targeting `net8.0-windows`. It does not run on Linux o
 
 These features are not present in the alpha and are planned for future milestones:
 
-- Code-signed installer (removes the SmartScreen warning -- deferred, requires a real certificate)
+- Code-signed installer (removes the SmartScreen warning — deferred, requires a real certificate)
 - Server process inside the Hyper-V guest via PowerShell Direct
-- Player management (kick, ban, allowlist)
-- Server metrics history charts (CPU/memory over time, player count history)
-- Webhook / notification integrations (server lifecycle events)
-- Remote management player count and uptime (requires server-side API from Funcom)
+- Webhook / notification integrations (server lifecycle events — Discord, etc.)
+- Remote API player count and uptime (requires server-side API from Funcom)
 - Cloud backup destinations (S3, OneDrive, MinIO)
 
 ---

@@ -11,6 +11,29 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.6.0-alpha.1] — 2026-05-10
+
+### Added
+
+- **Multi-host support (#153, #154, #155, #156)** — `IHyperVHostService` / `HyperVHostService` manages a registry of remote Hyper-V hosts alongside the always-present local "This machine" entry; remote hosts are added by hostname, port, and optional WMI credentials; DPAPI (`ProtectedData.Protect`, `CurrentUser` scope) encrypts passwords before writing to SQLite; `TestConnectionAsync` probes the remote WMI namespace (`root\virtualization\v2`) via `ManagementScope` with `PacketPrivacy` authentication; `SwitchToAsync` sets the active host and fires `ActiveHostChanged`; `BattlegroupProfile.HostId` property links profiles to hosts (null = local)
+- **`HyperVHost` model and repository** — `HyperVHost` record persisted to a new `HyperVHosts` SQLite table; `HyperVHostRepository` ordered local-first, then alpha by name
+- **Player management — ban and allowlist (#158, #159, #160)** — `IPlayerManagementService` / `PlayerManagementService` parses `IServerProcessService.OutputLineReceived` with join/leave regex to maintain a live `ConnectedPlayers` list; `KickPlayerAsync` and `BanPlayerAsync` send console commands via the new `IServerProcessService.SendCommandAsync`; bans are persisted to `BanRecords` (SQLite); allowlist entries stored in `AllowlistEntries`; `UnbanPlayerAsync` / `RemoveFromAllowlistAsync` delete records by ID
+- **Players view (#158–#160)** — `PlayersViewModel` + `PlayersView.xaml` with three tabs: Connected Players (live list, kick/ban actions), Ban List (persistent records, unban), Allowlist (add by Steam ID, remove); confirmation overlay for destructive actions; ban form overlay with permanent vs. timed options
+- **Server metrics dashboard (#163, #164)** — `IMetricsCollectorService` / `MetricsCollectorService` fires a 60-second `PeriodicTimer`, samples `IBattlegroupControlService.GetVmResourcesAsync` for CPU % and memory MB, tracks uptime since server start, and writes `ServerMetricSnapshot` records via `IMetricsRepository`; old snapshots pruned at 30 days; downtime events opened on `ProcessExited` and closed when the server restarts
+- **Metrics view (#163, #164)** — `MetricsViewModel` + `MetricsView.xaml`; time-range selector (1 h / 6 h / 24 h / 7 d / 30 d); three OxyPlot 2.x `LineSeries` charts (player count, CPU %, memory MB); availability percentage and uptime summary; downtime event list with reason, start time, and duration; live "Collecting" indicator; charts auto-append new snapshots without a full reload
+- **`OxyPlot.Wpf` 2.1.2** added to the WPF project for charting
+- **`IServerProcessService.SendCommandAsync`** — new interface method writes a line to the server process stdin; implemented in `ServerProcessService`; used by `PlayerManagementService` for kick/ban commands
+
+### Changed
+
+- `SietchConsoleDbContext` gains five new `DbSet<T>` entries: `HyperVHosts`, `BanRecords`, `AllowlistEntries`, `MetricSnapshots`, `DowntimeEvents`
+- `DatabaseInitializerService` gains `CreateTableIfMissingAsync` helper for idempotent `CREATE TABLE IF NOT EXISTS` (used for the five new tables and the `BattlegroupProfiles.HostId` column) so existing user databases are upgraded automatically on next launch
+- `App.xaml.cs` registers `IHyperVHostService`, `IPlayerManagementService`, `IMetricsCollectorService`, `IHyperVHostRepository`, `IMetricsRepository`, `PlayersViewModel`, `MetricsViewModel`; calls `IHyperVHostService.InitializeAsync()` on startup
+- `MainWindowViewModel` adds **Players** and **Metrics** to the sidebar navigation
+- `App.xaml` adds `DataTemplate` routes for `PlayersViewModel` → `PlayersView` and `MetricsViewModel` → `MetricsView`
+
+---
+
 ## [0.5.0-alpha.1] — 2026-05-10
 
 ### Added

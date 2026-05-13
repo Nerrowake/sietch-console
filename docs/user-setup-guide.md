@@ -146,6 +146,31 @@ After saving any setting that requires a server restart, stop and restart the se
 
 ---
 
+## Managing Players
+
+Go to the **Players** view for live player management:
+
+- **Connected Players** — shows players detected from the server's log output while the server is running. Select a player to kick or ban them.
+- **Ban List** — shows all active bans stored locally. Select a ban record to remove it.
+- **Allowlist** — manage a list of approved Steam IDs. Click **+ Add Steam ID** to add an entry.
+
+> Player detection is log-based and the kick/ban commands are based on Unreal Engine 5 conventions. They have not yet been validated against real Dune: Awakening server output. See [Known Limitations](known-limitations.md).
+
+---
+
+## Server Metrics
+
+The **Metrics** view shows historical server health collected every 60 seconds while the server is running:
+
+- Use the **time range selector** to view the last 1 hour, 6 hours, 24 hours, 7 days, or 30 days.
+- Three charts display **player count**, **CPU utilisation**, and **memory usage** over time.
+- The **Availability** summary shows uptime percentage and minutes up/down for the selected window.
+- The **Downtime Events** list records each time the server stopped unexpectedly, with reason and duration.
+
+Snapshots are automatically pruned after 30 days.
+
+---
+
 ## Frequently Asked Questions
 
 **Can I move the server files to a different drive after setup?**

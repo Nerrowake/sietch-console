@@ -50,6 +50,11 @@ Name: "startupicon"; Description: "Start {#AppName} with Windows"; GroupDescript
 [Files]
 ; Main application (single-file self-contained publish)
 Source: "publish\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+; OxyPlot assemblies are excluded from the single-file bundle (ExcludeFromSingleFile in .csproj)
+; so the WPF BAML type-resolver can find the XmlnsDefinitionAttribute at runtime.
+; skipifsourcedoesntexist guards against Debug builds where these DLLs are not published.
+Source: "publish\OxyPlot.dll";     DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "publish\OxyPlot.Wpf.dll"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
 [Icons]
 Name: "{group}\{#AppName}";                           Filename: "{app}\{#AppExeName}"

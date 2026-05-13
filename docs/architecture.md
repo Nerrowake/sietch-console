@@ -61,6 +61,12 @@ Sealed records representing domain objects. They carry no behavior.
 | `ServerProcessExitEventArgs` | Exit code, human-readable description, and `WasExpected` flag from a server process exit |
 | `AppLogEntry` | A single in-memory application log entry: timestamp, level, category, message, optional exception |
 | `AppUpdateInfo` | Metadata from a GitHub Release: tag name, release name, HTML URL, installer download URL, release notes |
+| `HyperVHost` | A registered Hyper-V host: name, hostname, WMI port, optional DPAPI-encrypted credentials, `IsLocal` flag |
+| `PlayerInfo` | A connected player detected from log output: ID, name, optional Steam ID, join timestamp |
+| `BanRecord` | A persisted ban: player ID, name, reason, banned-at, optional expiry; `IsPermanent` / `IsExpired` computed |
+| `AllowlistEntry` | An approved Steam ID on the server allowlist: Steam ID, optional display name, added-at |
+| `ServerMetricSnapshot` | A 60-second health sample: profile ID, timestamp, player count, CPU %, memory MB, uptime seconds |
+| `DowntimeEvent` | A recorded server outage: profile ID, start/end timestamps, reason (`Crash`, `Manual stop`, `Unknown`); `Duration` / `IsOpen` computed |
 
 ### Interfaces (`Core/Interfaces/`)
 
@@ -86,16 +92,21 @@ Service contracts that the WPF app depends on, with implementations in the app p
 | `IAppLogSink` | `InMemoryAppLogSink` — ring-buffer log sink for the App Logs view |
 | `IAppUpdateService` | `AppUpdateService` — GitHub Releases update check and installer download |
 | `IRemoteManagementService` | `RemoteManagementService` — embedded Kestrel web server lifecycle |
+| `IHyperVHostService` | `HyperVHostService` — Hyper-V host registry, WMI connection tests, DPAPI credential encryption |
+| `IPlayerManagementService` | `PlayerManagementService` — log-based player detection, kick/ban commands, ban/allowlist CRUD |
+| `IMetricsCollectorService` | `MetricsCollectorService` — 60-second snapshot collection, downtime event tracking |
 
 Repository interfaces (implemented in `SietchConsole.Data`):
 
 | Interface | Purpose |
 |-----------|---------|
-| `IBattlegroupProfileRepository` | CRUD for the active battlegroup profile |
+| `IBattlegroupProfileRepository` | CRUD for the active battleground profile |
 | `IApplicationSettingsRepository` | CRUD for user preferences |
 | `ISetupWizardStateRepository` | Persist setup wizard progress across restarts |
 | `IDiagnosticsResultRepository` | Store and retrieve diagnostic history |
 | `IBackupRecordRepository` | Store and retrieve backup metadata |
+| `IHyperVHostRepository` | CRUD for registered Hyper-V hosts |
+| `IMetricsRepository` | Snapshot storage/retrieval, snapshot pruning, downtime event lifecycle |
 
 ---
 
@@ -104,7 +115,7 @@ Repository interfaces (implemented in `SietchConsole.Data`):
 The persistence layer. It implements repository interfaces using EF Core 8 against a SQLite database.
 
 - **Database location:** `%LOCALAPPDATA%\SietchConsole\sietch.db`
-- **Schema evolution:** `DatabaseInitializerService.InitializeAsync()` calls `EnsureCreated` (creates schema on first run) then `ApplySchemaUpdatesAsync`, which runs `ALTER TABLE … ADD COLUMN` statements for any columns added after initial release. This lets existing user databases upgrade automatically on next launch without EF Core migrations.
+- **Schema evolution:** `DatabaseInitializerService.InitializeAsync()` calls `EnsureCreated` (creates schema on first run) then `ApplySchemaUpdatesAsync`, which runs `ALTER TABLE … ADD COLUMN` for new columns and `CREATE TABLE IF NOT EXISTS` for new tables. This lets existing user databases upgrade automatically on next launch without EF Core migrations.
 - **Lifetime:** Repositories are registered as **scoped** services. ViewModels access them via `IServiceScopeFactory` to avoid holding an open connection for the lifetime of the application.
 
 ### Entities (`Data/Entities/`)
@@ -135,6 +146,8 @@ Navigation items and their target ViewModels:
 |-------|-----------|
 | Dashboard | `DashboardViewModel` |
 | Setup Wizard | `SetupWizardViewModel` |
+| Players | `PlayersViewModel` |
+| Metrics | `MetricsViewModel` |
 | Logs | `LogsViewModel` |
 | Diagnostics | `DiagnosticsViewModel` |
 | Backups | `BackupsViewModel` |
@@ -175,6 +188,12 @@ Services/
 │                   RemoteApiEndpoints — minimal API route registration
 │                   RemoteAuthMiddleware — Bearer token auth + IP rate limiting
 │                   SseHub — per-client Channel<string> SSE broadcast hub
+├── Hosts/          HyperVHostService — remote Hyper-V host registry, WMI connection test,
+│                   DPAPI credential encryption/decryption
+├── Players/        PlayerManagementService — log-regex player detection, kick/ban via stdin,
+│                   ban and allowlist SQLite CRUD
+├── Metrics/        MetricsCollectorService — 60-second PeriodicTimer, VM resource sampling,
+│                   downtime event tracking, snapshot pruning
 └── Installation/   SteamDetectionService, SteamCmdService, ServerPackageService,
                     ServerPackageInstaller, SetupScriptService, InstallationOrchestrator
 ```
@@ -293,3 +312,5 @@ Server package management and server process management are fully implemented as
 | `Microsoft.Extensions.Hosting` | DI container and application lifetime |
 | `Microsoft.EntityFrameworkCore.Sqlite` | SQLite persistence |
 | `Microsoft.EntityFrameworkCore.Tools` | EF migrations |
+| `OxyPlot.Wpf` | WPF line charts for the Metrics view |
+| `System.Management` | WMI queries for Hyper-V VM state, resources, and remote host connections |

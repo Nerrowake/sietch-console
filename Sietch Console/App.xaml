@@ -37,6 +37,12 @@
             <DataTemplate DataType="{x:Type vm:AppLogsViewModel}">
                 <views:AppLogsView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PlayersViewModel}">
+                <views:PlayersView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:MetricsViewModel}">
+                <views:MetricsView />
+            </DataTemplate>
 
             <!-- Wizard step ViewModel → View routing -->
             <DataTemplate DataType="{x:Type steps:WelcomeStepViewModel}">

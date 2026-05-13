@@ -163,7 +163,43 @@ The SSE (live update) connection dropped. This usually self-recovers — the bro
 
 ### Player count always shows 0 / Uptime always shows —
 
-These fields are not yet populated. Player count requires a server-side query API that Funcom has not exposed yet. Uptime tracking is planned for a future release. See [Known Limitations](known-limitations.md).
+Player count in the remote dashboard is always 0 — Funcom has not exposed a server-side query API. Uptime is now tracked in the Metrics view, but the remote dashboard's uptime field is not yet wired to that source. See [Known Limitations](known-limitations.md).
+
+---
+
+## Player Management Problems
+
+### Players don't appear in the Connected Players list even when online
+
+Player detection is log-based — `PlayerManagementService` parses the server's stdout for join/leave patterns. If the Dune: Awakening server uses different log output than the expected patterns, players will not be detected.
+
+This is a known limitation: the log patterns are heuristic guesses based on Unreal Engine 5 conventions and have not yet been validated against real Dune: Awakening server output. Check the **App Logs** tab for any pattern-match warnings.
+
+**Workaround:** The player list will remain empty. The server is still running and accepting connections — only the detection is unavailable.
+
+### Kick or ban commands don't appear to work
+
+Kick and ban commands are sent via the server's stdin using conventions common to UE5 dedicated servers. The exact command format for Dune: Awakening has not been confirmed with Funcom. If the server doesn't respond, the command was sent but not recognised.
+
+This is expected in the current alpha. Ban records are still written to SQLite even if the server-side command has no effect.
+
+---
+
+## Metrics Problems
+
+### Metrics charts are empty / show no data
+
+The Metrics view shows data collected by `MetricsCollectorService`, which runs while the server is active. If the server has never been started in the current session, no snapshots exist yet. Start the server and wait at least 60 seconds for the first snapshot.
+
+If the server has been running but charts are still empty, check that the time range selector covers the period the server was active.
+
+### CPU and memory always show 0
+
+Metric data comes from `Msvm_SummaryInformation` via WMI, which requires a VM name to be set in the battlegroup profile. If the server is running directly on the host without a VM (no VM Name configured), resource metrics cannot be read and will show 0.
+
+### Availability shows "No data"
+
+No metric snapshots exist for the selected time range. Either the server hasn't been running during that period, or the snapshots for that period have been pruned (snapshots are kept for 30 days).
 
 ---
 

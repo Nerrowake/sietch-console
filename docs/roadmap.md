@@ -2,7 +2,7 @@
 
 This document describes the planned feature trajectory for Sietch Console. Items are grouped by milestone. Ordering and scope are subject to change as the project evolves.
 
-The current release is `0.5.0-alpha.1`. Milestones 15–21 are complete.
+The current release is `0.6.0-alpha.1`. Milestones 15–21 are complete. Milestones 22–24 are complete.
 
 ---
 
@@ -96,14 +96,44 @@ Monitor and control the server from any device on the local network.
 
 ---
 
+## Milestone 22 — Multi-Host Support ✓ Complete (`0.6.0-alpha.1`)
+
+Manage Hyper-V VMs on remote machines on the LAN.
+
+- `HyperVHost` model and `HyperVHosts` SQLite table; DPAPI-encrypted credentials
+- `IHyperVHostService` manages the local + remote host registry; `TestConnectionAsync` probes remote WMI namespace
+- `BattlegroupProfile.HostId` links profiles to their target host (null = local)
+
+---
+
+## Milestone 23 — Player Management ✓ Complete (`0.6.0-alpha.1`)
+
+Surface in-game admin commands in the UI.
+
+- Log-based player detection from `OutputLineReceived`
+- Kick command via stdin (`IServerProcessService.SendCommandAsync`)
+- Ban records persisted to SQLite; timed or permanent bans
+- Allowlist by Steam ID with optional display name
+- Players view with Connected Players, Ban List, and Allowlist tabs
+
+---
+
+## Milestone 24 — Server Metrics Dashboard ✓ Complete (`0.6.0-alpha.1`)
+
+Historical server health data surfaced as charts.
+
+- 60-second periodic snapshot collection (CPU %, memory MB, player count, uptime)
+- OxyPlot line charts for player count, CPU, and memory
+- Downtime event tracking: opened on unexpected server exit, closed on restart
+- Uptime availability percentage per time window
+- 30-day snapshot retention with automatic pruning
+
+---
+
 ## Post-MVP / Future Considerations
 
 These are ideas that may or may not be implemented, depending on community feedback and project direction.
 
-- **Remote management** — a lightweight web UI for monitoring and control from a phone or secondary device
-- **Multi-host support** — manage a VM running on a separate Hyper-V host on the local network
-- **Player management** — in-game admin commands (kick, ban, allowlist) surfaced in the UI
-- **Server metrics dashboard** — player count history, uptime graph, memory and CPU over time
 - **Discord webhook integration** — notify a Discord channel when the server starts, stops, or detects errors
 - **Backup cloud sync** — optional sync of backups to OneDrive, Google Drive, or S3-compatible storage
 
@@ -118,7 +148,7 @@ These are ideas that may or may not be implemented, depending on community feedb
 | `0.3.x-alpha.N` | Save data backups, polish, app log viewer ✓ |
 | `0.4.x-alpha.N` | Auto-update, multiple profiles ✓ |
 | `0.5.x-alpha.N` | Remote management web dashboard ✓ |
-| `0.6.x-beta.N` | Server metrics, player management, code signing |
+| `0.6.x-alpha.N` | Multi-host support, player management, server metrics ✓ |
 | `1.0.0` | First stable release |
 
 ---

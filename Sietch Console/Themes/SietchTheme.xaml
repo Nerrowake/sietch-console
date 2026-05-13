@@ -78,6 +78,8 @@
     <SolidColorBrush x:Key="BorderDefault" Color="{StaticResource ColorIron}" />
     <!-- Slightly lighter — subtle dividers -->
     <SolidColorBrush x:Key="BorderSubtle"  Color="#FF26313D" />
+    <!-- Alias used by form overlays and dialogs (same tone as BorderSubtle) -->
+    <SolidColorBrush x:Key="BorderMuted"   Color="#FF26313D" />
     <!-- Hairline — sandstone @ 18% on dark, for premium dividers -->
     <SolidColorBrush x:Key="BorderHairline" Color="#2EFF000000" />
     <!-- Ash Brown — warm subtle borders -->
@@ -250,6 +252,30 @@
         <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
         <Setter Property="FontFamily" Value="{StaticResource FontUI}" />
         <Setter Property="FontSize"   Value="12" />
+    </Style>
+
+    <!-- Field label — used above TextBox inputs in forms and overlays -->
+    <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+        <Setter Property="FontFamily" Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"   Value="{StaticResource FontSizeSmall}" />
+    </Style>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- INPUT STYLES                                -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- Standard text input — matches inline TextBox styling used across Settings/Wizard -->
+    <Style x:Key="FieldBoxStyle" TargetType="TextBox">
+        <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
+        <Setter Property="Foreground"     Value="{StaticResource TextPrimary}" />
+        <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
+        <Setter Property="FontSize"       Value="{StaticResource FontSizeBody}" />
+        <Setter Property="Padding"        Value="8,6" />
+        <Setter Property="CaretBrush"     Value="{StaticResource AccentPrimary}" />
+        <Setter Property="SelectionBrush" Value="{StaticResource AccentPrimary}" />
     </Style>
 
     <!-- ═══════════════════════════════════════════ -->

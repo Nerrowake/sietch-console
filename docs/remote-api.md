@@ -182,7 +182,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" "http://192.168.1.10:5151/api/logs?li
 
 ## Planned Improvements
 
-- Player count from the server API when Funcom exposes it
-- Server uptime tracking (start time persisted in SQLite)
-- `GET /api/metrics` for CPU/memory data
+- Player count in `/api/status` when Funcom exposes a server-side query API
+- `uptimeSeconds` wired to `MetricsCollectorService` (uptime is now tracked internally in the Metrics view but not yet surfaced via the remote API)
+- `GET /api/metrics` — expose the most-recent CPU/memory snapshot from the metrics pipeline
 - Optional HTTPS via a self-signed certificate

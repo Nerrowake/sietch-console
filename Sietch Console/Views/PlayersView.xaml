@@ -1,0 +1,553 @@
+<UserControl x:Class="Sietch_Console.Views.PlayersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource AppBackground}">
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="28,24,28,28">
+
+                <!-- Page Header -->
+                <TextBlock Style="{StaticResource PageTitleStyle}"
+                           Text="Players"
+                           Margin="0,0,0,4" />
+                <TextBlock Style="{StaticResource PageSubtitleStyle}"
+                           Text="Manage connected players, bans, and the server allowlist."
+                           Margin="0,0,0,16" />
+
+                <!-- Loading bar -->
+                <ProgressBar Style="{StaticResource LoadingBarStyle}"
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibleConverter}}"
+                             Margin="0,0,0,16" />
+
+                <!-- Status message -->
+                <Border Background="{StaticResource StatusSuccessBg}"
+                        BorderBrush="{StaticResource StatusSuccessBorder}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource CornerMedium}"
+                        Padding="14,10"
+                        Margin="0,0,0,14"
+                        Visibility="{Binding StatusMessage, Converter={StaticResource NullToCollapsedConverter}}">
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Foreground="{StaticResource StatusSuccess}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeBody}" />
+                </Border>
+
+                <!-- Tab control -->
+                <TabControl Background="Transparent"
+                            BorderBrush="{StaticResource BorderMuted}"
+                            BorderThickness="1"
+                            Padding="0"
+                            SelectedIndex="{Binding SelectedTabIndex}">
+
+                    <!-- ── Connected Players ─────────────────────────────────── -->
+                    <TabItem Header="Connected Players"
+                             Foreground="{StaticResource TextSecondary}"
+                             Background="{StaticResource PanelBackground}"
+                             Padding="14,8">
+                        <Grid Margin="0,16,0,0">
+                            <StackPanel>
+
+                                <!-- Action bar -->
+                                <Border Style="{StaticResource CardStyle}"
+                                        Padding="16,12"
+                                        Margin="0,0,0,12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0"
+                                                   Style="{StaticResource MutedTextStyle}"
+                                                   VerticalAlignment="Center"
+                                                   Text="Select a player to kick or ban them." />
+
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <Button Style="{StaticResource DangerButtonStyle}"
+                                                    Padding="14,7"
+                                                    Margin="0,0,8,0"
+                                                    Command="{Binding RequestKickCommand}"
+                                                    IsEnabled="{Binding HasSelectedPlayer}">
+                                                <TextBlock Text="Kick" />
+                                            </Button>
+                                            <Button Style="{StaticResource DangerButtonStyle}"
+                                                    Padding="14,7"
+                                                    Margin="0,0,8,0"
+                                                    Command="{Binding OpenBanFormCommand}"
+                                                    IsEnabled="{Binding HasSelectedPlayer}">
+                                                <TextBlock Text="Ban" />
+                                            </Button>
+                                            <Button Style="{StaticResource InfoButtonStyle}"
+                                                    Padding="14,7"
+                                                    Command="{Binding RefreshCommand}">
+                                                <TextBlock Text="Refresh" />
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Player list -->
+                                <Border Style="{StaticResource CardStyle}" Padding="0">
+                                    <Grid>
+                                        <ListBox ItemsSource="{Binding ConnectedPlayers}"
+                                                 SelectedItem="{Binding SelectedPlayer}"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 Padding="0"
+                                                 Visibility="{Binding HasConnectedPlayers, Converter={StaticResource BoolToVisibleConverter}}">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="16,10">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                   Text="{Binding PlayerName}"
+                                                                   Foreground="{StaticResource TextPrimary}"
+                                                                   FontFamily="{StaticResource FontUI}"
+                                                                   FontSize="{StaticResource FontSizeBody}"
+                                                                   VerticalAlignment="Center" />
+
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding PlayerId}"
+                                                                   Foreground="{StaticResource TextMuted}"
+                                                                   FontFamily="{StaticResource FontMono}"
+                                                                   FontSize="{StaticResource FontSizeSmall}"
+                                                                   Margin="12,0,24,0"
+                                                                   VerticalAlignment="Center" />
+
+                                                        <TextBlock Grid.Column="2"
+                                                                   Foreground="{StaticResource TextMuted}"
+                                                                   FontFamily="{StaticResource FontUI}"
+                                                                   FontSize="{StaticResource FontSizeSmall}"
+                                                                   VerticalAlignment="Center">
+                                                            <TextBlock.Text>
+                                                                <MultiBinding StringFormat="Joined {0:HH:mm}">
+                                                                    <Binding Path="JoinedAt" />
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+
+                                        <!-- Empty state -->
+                                        <Border Style="{StaticResource EmptyStateBorderStyle}"
+                                                Margin="20"
+                                                Visibility="{Binding HasConnectedPlayers, Converter={StaticResource BoolToCollapsedConverter}}">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock Style="{StaticResource EmptyStateHeadingStyle}"
+                                                           Text="No players connected."
+                                                           Margin="0,0,0,6" />
+                                                <TextBlock Style="{StaticResource EmptyStateSubtextStyle}"
+                                                           Text="Players will appear here automatically when detected in the server log."
+                                                           MaxWidth="420" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- ── Ban List ──────────────────────────────────────────── -->
+                    <TabItem Header="Ban List"
+                             Foreground="{StaticResource TextSecondary}"
+                             Background="{StaticResource PanelBackground}"
+                             Padding="14,8">
+                        <Grid Margin="0,16,0,0">
+                            <StackPanel>
+
+                                <!-- Action bar -->
+                                <Border Style="{StaticResource CardStyle}"
+                                        Padding="16,12"
+                                        Margin="0,0,0,12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0"
+                                                   Style="{StaticResource MutedTextStyle}"
+                                                   VerticalAlignment="Center"
+                                                   Text="Bans are stored locally in SQLite. Select a record to remove it." />
+
+                                        <Button Grid.Column="1"
+                                                Style="{StaticResource CancelButtonStyle}"
+                                                Padding="14,7"
+                                                Command="{Binding RequestUnbanCommand}"
+                                                IsEnabled="{Binding HasSelectedBan}">
+                                            <TextBlock Text="Remove Ban" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Ban list -->
+                                <Border Style="{StaticResource CardStyle}" Padding="0">
+                                    <Grid>
+                                        <ListBox ItemsSource="{Binding Bans}"
+                                                 SelectedItem="{Binding SelectedBan}"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 Padding="0"
+                                                 Visibility="{Binding HasBans, Converter={StaticResource BoolToVisibleConverter}}">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="16,10">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="160" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="120" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                   Text="{Binding PlayerName}"
+                                                                   Foreground="{StaticResource TextPrimary}"
+                                                                   FontFamily="{StaticResource FontUI}"
+                                                                   FontSize="{StaticResource FontSizeBody}"
+                                                                   VerticalAlignment="Center" />
+
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding Reason, FallbackValue='No reason given'}"
+                                                                   Foreground="{StaticResource TextSecondary}"
+                                                                   FontFamily="{StaticResource FontUI}"
+                                                                   FontSize="{StaticResource FontSizeBody}"
+                                                                   Margin="12,0"
+                                                                   VerticalAlignment="Center" />
+
+                                                        <Border Grid.Column="2"
+                                                                Background="{StaticResource StatusErrorBg}"
+                                                                CornerRadius="{StaticResource CornerSmall}"
+                                                                Padding="8,3"
+                                                                Margin="0,0,12,0"
+                                                                Visibility="{Binding IsPermanent, Converter={StaticResource BoolToVisibleConverter}}">
+                                                            <TextBlock Text="Permanent"
+                                                                       Foreground="{StaticResource StatusError}"
+                                                                       FontFamily="{StaticResource FontUI}"
+                                                                       FontSize="{StaticResource FontSizeSmall}" />
+                                                        </Border>
+
+                                                        <TextBlock Grid.Column="3"
+                                                                   Foreground="{StaticResource TextMuted}"
+                                                                   FontFamily="{StaticResource FontUI}"
+                                                                   FontSize="{StaticResource FontSizeSmall}"
+                                                                   VerticalAlignment="Center"
+                                                                   HorizontalAlignment="Right">
+                                                            <TextBlock.Text>
+                                                                <MultiBinding StringFormat="Banned {0:yyyy-MM-dd}">
+                                                                    <Binding Path="BannedAt" />
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+
+                                        <!-- Empty state -->
+                                        <Border Style="{StaticResource EmptyStateBorderStyle}"
+                                                Margin="20"
+                                                Visibility="{Binding HasBans, Converter={StaticResource BoolToCollapsedConverter}}">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock Style="{StaticResource EmptyStateHeadingStyle}"
+                                                           Text="No bans on record."
+                                                           Margin="0,0,0,6" />
+                                                <TextBlock Style="{StaticResource EmptyStateSubtextStyle}"
+                                                           Text="Banned players will appear here. Bans issued via this panel are stored locally."
+                                                           MaxWidth="420" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- ── Allowlist ─────────────────────────────────────────── -->
+                    <TabItem Header="Allowlist"
+                             Foreground="{StaticResource TextSecondary}"
+                             Background="{StaticResource PanelBackground}"
+                             Padding="14,8">
+                        <Grid Margin="0,16,0,0">
+                            <StackPanel>
+
+                                <!-- Action bar -->
+                                <Border Style="{StaticResource CardStyle}"
+                                        Padding="16,12"
+                                        Margin="0,0,0,12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0"
+                                                   Style="{StaticResource MutedTextStyle}"
+                                                   VerticalAlignment="Center"
+                                                   Text="Allowlisted Steam IDs are stored locally. Select an entry to remove it." />
+
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <Button Style="{StaticResource DangerButtonStyle}"
+                                                    Padding="14,7"
+                                                    Margin="0,0,8,0"
+                                                    Command="{Binding RequestRemoveAllowlistEntryCommand}"
+                                                    IsEnabled="{Binding HasSelectedAllowlistEntry}">
+                                                <TextBlock Text="Remove" />
+                                            </Button>
+                                            <Button Style="{StaticResource SuccessButtonStyle}"
+                                                    Padding="14,7"
+                                                    Command="{Binding OpenAddAllowlistFormCommand}">
+                                                <TextBlock Text="+ Add Steam ID" />
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Add form (inline, slides in) -->
+                                <Border Style="{StaticResource CardStyle}"
+                                        Padding="20,16"
+                                        Margin="0,0,0,12"
+                                        Visibility="{Binding ShowAddAllowlistForm, Converter={StaticResource BoolToVisibleConverter}}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource CardTitleStyle}"
+                                                   Text="Add to Allowlist"
+                                                   Margin="0,0,0,12" />
+
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                                       Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Steam ID *"
+                                                       Margin="0,0,8,4" />
+                                            <TextBox Grid.Row="1" Grid.Column="0"
+                                                     Style="{StaticResource FieldBoxStyle}"
+                                                     Text="{Binding NewSteamId, UpdateSourceTrigger=PropertyChanged}"
+                                                     Margin="0,0,8,0" />
+
+                                            <TextBlock Grid.Row="0" Grid.Column="1"
+                                                       Style="{StaticResource FieldLabelStyle}"
+                                                       Text="Display Name (optional)"
+                                                       Margin="8,0,0,4" />
+                                            <TextBox Grid.Row="1" Grid.Column="1"
+                                                     Style="{StaticResource FieldBoxStyle}"
+                                                     Text="{Binding NewDisplayName, UpdateSourceTrigger=PropertyChanged}"
+                                                     Margin="8,0,0,0" />
+                                        </Grid>
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Style="{StaticResource CancelButtonStyle}"
+                                                    Padding="14,7"
+                                                    Margin="0,0,8,0"
+                                                    Command="{Binding CloseAddAllowlistFormCommand}">
+                                                <TextBlock Text="Cancel" />
+                                            </Button>
+                                            <Button Style="{StaticResource SuccessButtonStyle}"
+                                                    Padding="14,7"
+                                                    Command="{Binding ConfirmAddToAllowlistCommand}"
+                                                    IsEnabled="{Binding CanAddToAllowlist}">
+                                                <TextBlock Text="Add" />
+                                            </Button>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Allowlist entries -->
+                                <Border Style="{StaticResource CardStyle}" Padding="0">
+                                    <Grid>
+                                        <ListBox ItemsSource="{Binding Allowlist}"
+                                                 SelectedItem="{Binding SelectedAllowlistEntry}"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 Padding="0"
+                                                 Visibility="{Binding HasAllowlistEntries, Converter={StaticResource BoolToVisibleConverter}}">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="16,10">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="200" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="120" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                   Text="{Binding SteamId}"
+                                                                   Foreground="{StaticResource TextPrimary}"
+                                                                   FontFamily="{StaticResource FontMono}"
+                                                                   FontSize="{StaticResource FontSizeBody}"
+                                                                   VerticalAlignment="Center" />
+
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding DisplayName, FallbackValue='—'}"
+                                                                   Foreground="{StaticResource TextSecondary}"
+                                                                   FontFamily="{StaticResource FontUI}"
+                                                                   FontSize="{StaticResource FontSizeBody}"
+                                                                   Margin="12,0"
+                                                                   VerticalAlignment="Center" />
+
+                                                        <TextBlock Grid.Column="2"
+                                                                   Foreground="{StaticResource TextMuted}"
+                                                                   FontFamily="{StaticResource FontUI}"
+                                                                   FontSize="{StaticResource FontSizeSmall}"
+                                                                   HorizontalAlignment="Right"
+                                                                   VerticalAlignment="Center">
+                                                            <TextBlock.Text>
+                                                                <MultiBinding StringFormat="Added {0:yyyy-MM-dd}">
+                                                                    <Binding Path="AddedAt" />
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+
+                                        <!-- Empty state -->
+                                        <Border Style="{StaticResource EmptyStateBorderStyle}"
+                                                Margin="20"
+                                                Visibility="{Binding HasAllowlistEntries, Converter={StaticResource BoolToCollapsedConverter}}">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock Style="{StaticResource EmptyStateHeadingStyle}"
+                                                           Text="Allowlist is empty."
+                                                           Margin="0,0,0,6" />
+                                                <TextBlock Style="{StaticResource EmptyStateSubtextStyle}"
+                                                           Text="Add Steam IDs to restrict server access to approved players."
+                                                           MaxWidth="420" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+
+                </TabControl>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ── Confirmation overlay ──────────────────────────────────────── -->
+        <Border Background="#CC000000"
+                Visibility="{Binding ShowConfirmation, Converter={StaticResource BoolToVisibleConverter}}">
+            <Border Background="{StaticResource CardBackground}"
+                    BorderBrush="{StaticResource BorderMuted}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource CornerLarge}"
+                    Padding="32,28"
+                    MaxWidth="420"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="{Binding ConfirmationTitle}"
+                               Style="{StaticResource CardTitleStyle}"
+                               Margin="0,0,0,10" />
+                    <TextBlock Text="{Binding ConfirmationBody}"
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,24" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource CancelButtonStyle}"
+                                Padding="18,8"
+                                Margin="0,0,10,0"
+                                Command="{Binding CancelActionCommand}">
+                            <TextBlock Text="Cancel" />
+                        </Button>
+                        <Button Style="{StaticResource DangerButtonStyle}"
+                                Padding="18,8"
+                                Command="{Binding ConfirmActionCommand}">
+                            <TextBlock Text="Confirm" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- ── Ban form overlay ──────────────────────────────────────────── -->
+        <Border Background="#CC000000"
+                Visibility="{Binding ShowBanForm, Converter={StaticResource BoolToVisibleConverter}}">
+            <Border Background="{StaticResource CardBackground}"
+                    BorderBrush="{StaticResource BorderMuted}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource CornerLarge}"
+                    Padding="32,28"
+                    MaxWidth="460"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="Ban Player"
+                               Style="{StaticResource CardTitleStyle}"
+                               Margin="0,0,0,4" />
+                    <TextBlock Text="{Binding SelectedPlayer.PlayerName, FallbackValue=''}"
+                               Foreground="{StaticResource AccentSandstone}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeBody}"
+                               Margin="0,0,0,16" />
+
+                    <TextBlock Style="{StaticResource FieldLabelStyle}"
+                               Text="Reason (optional)"
+                               Margin="0,0,0,6" />
+                    <TextBox Style="{StaticResource FieldBoxStyle}"
+                             Text="{Binding BanReason, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,14" />
+
+                    <CheckBox IsChecked="{Binding IsPermanentBan}"
+                              Foreground="{StaticResource TextSecondary}"
+                              FontFamily="{StaticResource FontUI}"
+                              FontSize="{StaticResource FontSizeBody}"
+                              Margin="0,0,0,12"
+                              Content="Permanent ban" />
+
+                    <Grid Visibility="{Binding IsPermanentBan, Converter={StaticResource BoolToCollapsedConverter}}"
+                          Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Style="{StaticResource FieldLabelStyle}"
+                                   Text="Duration (days)"
+                                   VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1"
+                                 Style="{StaticResource FieldBoxStyle}"
+                                 Text="{Binding BanDurationDays, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="80" />
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource CancelButtonStyle}"
+                                Padding="18,8"
+                                Margin="0,0,10,0"
+                                Command="{Binding CloseBanFormCommand}">
+                            <TextBlock Text="Cancel" />
+                        </Button>
+                        <Button Style="{StaticResource DangerButtonStyle}"
+                                Padding="18,8"
+                                Command="{Binding ConfirmBanCommand}">
+                            <TextBlock Text="Ban Player" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+    </Grid>
+</UserControl>
