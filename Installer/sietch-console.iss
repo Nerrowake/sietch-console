@@ -48,13 +48,11 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "startupicon"; Description: "Start {#AppName} with Windows"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-; Main application (single-file self-contained publish)
-Source: "publish\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-; OxyPlot assemblies are excluded from the single-file bundle (ExcludeFromSingleFile in .csproj)
-; so the WPF BAML type-resolver can find the XmlnsDefinitionAttribute at runtime.
-; skipifsourcedoesntexist guards against Debug builds where these DLLs are not published.
-Source: "publish\OxyPlot.dll";     DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
-Source: "publish\OxyPlot.Wpf.dll"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+; Copy everything from the publish output directory.
+; This captures the single-file EXE plus any loose files placed alongside it
+; (e.g. assemblies excluded from the bundle via ExcludeFromSingleFile such as OxyPlot.Wpf).
+; Adding new excluded assemblies in the future requires no change here.
+Source: "publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{group}\{#AppName}";                           Filename: "{app}\{#AppExeName}"
