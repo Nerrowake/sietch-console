@@ -69,6 +69,13 @@ public class DatabaseInitializerService
             )
             """);
 
+        // ── M26: Discord webhook settings (#172) ─────────────────────────────────
+        await AddColumnIfMissingAsync("ApplicationSettings", "DiscordWebhookEnabled",    "INTEGER NOT NULL DEFAULT 0");
+        await AddColumnIfMissingAsync("ApplicationSettings", "DiscordWebhookUrl",         "TEXT NULL");
+        await AddColumnIfMissingAsync("ApplicationSettings", "DiscordNotifyServerStart",  "INTEGER NOT NULL DEFAULT 1");
+        await AddColumnIfMissingAsync("ApplicationSettings", "DiscordNotifyServerStop",   "INTEGER NOT NULL DEFAULT 1");
+        await AddColumnIfMissingAsync("ApplicationSettings", "DiscordNotifyServerCrash",  "INTEGER NOT NULL DEFAULT 1");
+
         // ── M24: Server metrics (#163, #164) ─────────────────────────────────────
         await CreateTableIfMissingAsync("MetricSnapshots", """
             CREATE TABLE IF NOT EXISTS MetricSnapshots (

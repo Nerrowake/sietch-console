@@ -34,6 +34,12 @@ public interface IServerProcessService
     event EventHandler<string>? OutputLineReceived;
 
     /// <summary>
+    /// Fired once when the server transitions to the ready state (server-ready log pattern matched).
+    /// Raised on a thread-pool thread.
+    /// </summary>
+    event EventHandler? ServerStarted;
+
+    /// <summary>
     /// Fired when the server process exits (expected stop or unexpected crash).
     /// Raised on a thread-pool thread.
     /// </summary>

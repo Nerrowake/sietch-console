@@ -6,6 +6,7 @@ using SietchConsole.Core.Interfaces;
 using SietchConsole.Core.Models;
 using System.Windows;
 using System.Windows.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Sietch_Console.ViewModels;
 
@@ -17,6 +18,7 @@ public partial class DashboardViewModel : ObservableObject
     private readonly IServerPackageInstaller    _installer;
     private readonly IServiceScopeFactory       _scopeFactory;
     private readonly IActiveProfileService      _activeProfileService;
+    private readonly IDiscordWebhookService     _discordService;
     private readonly DispatcherTimer            _refreshTimer;
 
     [ObservableProperty]
@@ -58,6 +60,11 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty] private bool   _isUpdating;
     [ObservableProperty] private double _updateProgress;
     [ObservableProperty] private string _updateLog = string.Empty;
+
+    // ── Discord announcement (#171) ───────────────────────────────────────────
+    [ObservableProperty] private string _announcementText          = string.Empty;
+    [ObservableProperty] private string _announcementStatusMessage = string.Empty;
+    [ObservableProperty] private bool   _isAnnouncementBusy;
 
     public bool HasProfile      => ActiveProfile is not null;
     public string ProfileName   => ActiveProfile?.Name ?? "No battlegroup configured";
@@ -118,12 +125,14 @@ public partial class DashboardViewModel : ObservableObject
         IServerPackageInstaller    installer,
         IServiceScopeFactory       scopeFactory,
         IServerProcessService      processService,
-        IActiveProfileService      activeProfileService)
+        IActiveProfileService      activeProfileService,
+        IDiscordWebhookService     discordService)
     {
         _controlService       = controlService;
         _installer            = installer;
         _scopeFactory         = scopeFactory;
         _activeProfileService = activeProfileService;
+        _discordService       = discordService;
 
         // Subscribe to process exit so unexpected crashes surface immediately (#131)
         processService.ProcessExited += OnServerProcessExited;
@@ -401,4 +410,33 @@ public partial class DashboardViewModel : ObservableObject
         var current = UpdateLog;
         UpdateLog = string.IsNullOrEmpty(current) ? line : $"{current}\n{line}";
     }
+
+    // ── Discord announcement (#171) ───────────────────────────────────────────
+
+    [RelayCommand(CanExecute = nameof(CanSendAnnouncement))]
+    private async Task SendAnnouncementAsync()
+    {
+        if (string.IsNullOrWhiteSpace(AnnouncementText)) return;
+
+        IsAnnouncementBusy       = true;
+        AnnouncementStatusMessage = string.Empty;
+
+        try
+        {
+            var serverName = ActiveProfile?.Name ?? "Server";
+            await _discordService.SendAnnouncementAsync(AnnouncementText.Trim(), serverName);
+            AnnouncementText          = string.Empty;
+            AnnouncementStatusMessage = "Announcement sent.";
+        }
+        catch (Exception ex)
+        {
+            AnnouncementStatusMessage = $"Failed: {ex.Message}";
+        }
+        finally
+        {
+            IsAnnouncementBusy = false;
+        }
+    }
+
+    private bool CanSendAnnouncement() => !IsAnnouncementBusy && !string.IsNullOrWhiteSpace(AnnouncementText);
 }

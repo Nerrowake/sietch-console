@@ -39,6 +39,23 @@ public class ApplicationSettings
     /// <summary>Bearer access token for the remote management API (DPAPI-encrypted at rest).</summary>
     public string? RemoteManagementToken { get; set; }
 
+    // ── Discord webhook settings (#170, #171, #172) ──────────────────────────
+
+    /// <summary>Whether Discord webhook notifications are enabled.</summary>
+    public bool DiscordWebhookEnabled { get; set; } = false;
+
+    /// <summary>The Discord webhook URL to POST notifications to.</summary>
+    public string? DiscordWebhookUrl { get; set; }
+
+    /// <summary>Send a notification when the server reaches the ready state.</summary>
+    public bool DiscordNotifyServerStart { get; set; } = true;
+
+    /// <summary>Send a notification when the server is stopped normally.</summary>
+    public bool DiscordNotifyServerStop { get; set; } = true;
+
+    /// <summary>Send a notification when the server exits unexpectedly.</summary>
+    public bool DiscordNotifyServerCrash { get; set; } = true;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

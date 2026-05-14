@@ -5,6 +5,7 @@ using SietchConsole.Core.Interfaces;
 using SietchConsole.Core.Models;
 using System.Security.Cryptography;
 using System.Text;
+using System.Windows;
 
 namespace Sietch_Console.ViewModels;
 
@@ -15,6 +16,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IServiceScopeFactory     _scopeFactory;
     private readonly IActiveProfileService    _activeProfileService;
     private readonly IRemoteManagementService _remoteService;
+    private readonly IDiscordWebhookService   _discordService;
 
     private BattlegroupProfile? _profile;
     private bool _loaded;
@@ -85,15 +87,25 @@ public partial class SettingsViewModel : ObservableObject
 
     public bool CanSaveRemote => !RemoteIsBusy && RemotePort is >= 1024 and <= 65535;
 
+    // ── Discord webhook settings (#170, #171, #172) ───────────────────────────
+    [ObservableProperty] private bool   _discordEnabled;
+    [ObservableProperty] private string _discordWebhookUrl    = string.Empty;
+    [ObservableProperty] private bool   _discordNotifyStart   = true;
+    [ObservableProperty] private bool   _discordNotifyStop    = true;
+    [ObservableProperty] private bool   _discordNotifyCrash   = true;
+    [ObservableProperty] private string _discordStatusMessage = string.Empty;
+    [ObservableProperty] private bool   _discordIsBusy;
+
     public SettingsViewModel(IConfigurationService configService, IBackupService backupService,
                              IServiceScopeFactory scopeFactory, IActiveProfileService activeProfileService,
-                             IRemoteManagementService remoteService)
+                             IRemoteManagementService remoteService, IDiscordWebhookService discordService)
     {
         _configService        = configService;
         _backupService        = backupService;
         _scopeFactory         = scopeFactory;
         _activeProfileService = activeProfileService;
         _remoteService        = remoteService;
+        _discordService       = discordService;
 
         _activeProfileService.ProfileChanged += (_, profile) =>
         {
@@ -110,6 +122,7 @@ public partial class SettingsViewModel : ObservableObject
         _profile = _activeProfileService.Current;
         await LoadConfigAsync();
         await LoadRemoteSettingsAsync();
+        await LoadDiscordSettingsAsync();
     }
 
     private async Task LoadConfigAsync()
@@ -334,6 +347,77 @@ public partial class SettingsViewModel : ObservableObject
     {
         RemoteIsRunning = _remoteService.IsRunning;
         RemoteLiveUrl   = _remoteService.ListenUrl;
+    }
+
+    // ── Discord webhook commands (#170, #171, #172) ──────────────────────────
+
+    [RelayCommand]
+    private async Task SaveDiscordSettingsAsync()
+    {
+        DiscordIsBusy       = true;
+        DiscordStatusMessage = string.Empty;
+
+        try
+        {
+            using var scope  = _scopeFactory.CreateScope();
+            var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
+            var settings     = await settingsRepo.GetAsync();
+
+            settings.DiscordWebhookEnabled   = DiscordEnabled;
+            settings.DiscordWebhookUrl       = DiscordWebhookUrl.Trim();
+            settings.DiscordNotifyServerStart = DiscordNotifyStart;
+            settings.DiscordNotifyServerStop  = DiscordNotifyStop;
+            settings.DiscordNotifyServerCrash = DiscordNotifyCrash;
+
+            await settingsRepo.SaveAsync(settings);
+            DiscordStatusMessage = "Discord settings saved.";
+        }
+        catch (Exception ex)
+        {
+            DiscordStatusMessage = $"Save failed: {ex.Message}";
+        }
+        finally
+        {
+            DiscordIsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task TestDiscordWebhookAsync()
+    {
+        if (string.IsNullOrWhiteSpace(DiscordWebhookUrl))
+        {
+            DiscordStatusMessage = "Enter a webhook URL before testing.";
+            return;
+        }
+
+        DiscordIsBusy       = true;
+        DiscordStatusMessage = "Sending test message…";
+
+        try
+        {
+            var (success, error) = await _discordService.TestWebhookAsync(DiscordWebhookUrl.Trim());
+            DiscordStatusMessage = success
+                ? "Test message delivered successfully."
+                : $"Test failed: {error}";
+        }
+        finally
+        {
+            DiscordIsBusy = false;
+        }
+    }
+
+    private async Task LoadDiscordSettingsAsync()
+    {
+        using var scope  = _scopeFactory.CreateScope();
+        var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
+        var settings     = await settingsRepo.GetAsync();
+
+        DiscordEnabled    = settings.DiscordWebhookEnabled;
+        DiscordWebhookUrl = settings.DiscordWebhookUrl ?? string.Empty;
+        DiscordNotifyStart = settings.DiscordNotifyServerStart;
+        DiscordNotifyStop  = settings.DiscordNotifyServerStop;
+        DiscordNotifyCrash = settings.DiscordNotifyServerCrash;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────

@@ -65,6 +65,7 @@ public sealed class ServerProcessService : IServerProcessService, IDisposable
     // ── Events ───────────────────────────────────────────────────────────────
 
     public event EventHandler<string>?                    OutputLineReceived;
+    public event EventHandler?                            ServerStarted;
     public event EventHandler<ServerProcessExitEventArgs>? ProcessExited;
 
     // ── Start (#128) ─────────────────────────────────────────────────────────
@@ -204,6 +205,7 @@ public sealed class ServerProcessService : IServerProcessService, IDisposable
             if (pattern.IsMatch(line))
             {
                 _isServerReady = true;
+                ServerStarted?.Invoke(this, EventArgs.Empty);
                 return;
             }
         }

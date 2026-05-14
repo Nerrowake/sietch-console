@@ -825,6 +825,147 @@
                     </StackPanel>
                 </Border>
 
+                <!-- ══════════════════════════════════════════════════════ -->
+                <!-- Discord Webhooks (#170, #171, #172)                   -->
+                <!-- ══════════════════════════════════════════════════════ -->
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="20,16"
+                        Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource CardTitleStyle}"
+                                   Text="Discord Webhooks"
+                                   Margin="0,0,0,4" />
+                        <TextBlock Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"
+                                   Text="Post notifications to a Discord channel when your server starts, stops, or crashes. Create a webhook in your Discord server settings and paste the URL below."
+                                   Margin="0,0,0,16" />
+
+                        <!-- Loading bar while saving or testing -->
+                        <ProgressBar Style="{StaticResource LoadingBarStyle}"
+                                     Visibility="{Binding DiscordIsBusy, Converter={StaticResource BoolToVisibleConverter}}"
+                                     Margin="0,0,0,12" />
+
+                        <!-- Enable toggle -->
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                       Text="Enable" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="1"
+                                      IsChecked="{Binding DiscordEnabled}"
+                                      VerticalAlignment="Center"
+                                      Foreground="{StaticResource TextSecondary}"
+                                      FontFamily="{StaticResource FontUI}"
+                                      FontSize="{StaticResource FontSizeBody}"
+                                      Content="Enable Discord notifications" />
+                        </Grid>
+
+                        <!-- Webhook URL -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Style="{StaticResource BodyTextStyle}" Text="Webhook URL" />
+                                <TextBlock Style="{StaticResource MutedTextStyle}" Text="From Discord channel settings" />
+                            </StackPanel>
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding DiscordWebhookUrl, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="{StaticResource FieldBackground}"
+                                     Foreground="{StaticResource TextPrimary}"
+                                     BorderBrush="{StaticResource BorderDefault}"
+                                     BorderThickness="1"
+                                     FontFamily="{StaticResource FontMono}"
+                                     FontSize="11"
+                                     Padding="8,6"
+                                     Margin="0,0,8,0"
+                                     VerticalAlignment="Top"
+                                     CaretBrush="{StaticResource AccentPrimary}" />
+                            <Button Grid.Column="2"
+                                    Command="{Binding TestDiscordWebhookCommand}"
+                                    IsEnabled="{Binding DiscordIsBusy, Converter={StaticResource BoolInverseConverter}}"
+                                    Style="{StaticResource InfoButtonStyle}"
+                                    Padding="12,6"
+                                    VerticalAlignment="Top"
+                                    Content="Test" />
+                        </Grid>
+
+                        <!-- Notification toggles -->
+                        <TextBlock Style="{StaticResource CardTitleStyle}"
+                                   Text="Notifications"
+                                   Margin="0,0,0,10" />
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                       Text="Server Online" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="1"
+                                      IsChecked="{Binding DiscordNotifyStart}"
+                                      VerticalAlignment="Center"
+                                      Foreground="{StaticResource TextSecondary}"
+                                      FontFamily="{StaticResource FontUI}"
+                                      FontSize="{StaticResource FontSizeBody}"
+                                      Content="Notify when server is ready" />
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                       Text="Server Offline" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="1"
+                                      IsChecked="{Binding DiscordNotifyStop}"
+                                      VerticalAlignment="Center"
+                                      Foreground="{StaticResource TextSecondary}"
+                                      FontFamily="{StaticResource FontUI}"
+                                      FontSize="{StaticResource FontSizeBody}"
+                                      Content="Notify when server is stopped" />
+                        </Grid>
+
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Style="{StaticResource BodyTextStyle}"
+                                       Text="Server Crash" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="1"
+                                      IsChecked="{Binding DiscordNotifyCrash}"
+                                      VerticalAlignment="Center"
+                                      Foreground="{StaticResource TextSecondary}"
+                                      FontFamily="{StaticResource FontUI}"
+                                      FontSize="{StaticResource FontSizeBody}"
+                                      Content="Notify on unexpected exit" />
+                        </Grid>
+
+                        <!-- Status message -->
+                        <TextBlock Text="{Binding DiscordStatusMessage}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   Margin="0,0,0,12"
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding DiscordStatusMessage, Converter={StaticResource NullToCollapsedConverter}}" />
+
+                        <!-- Save button -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Command="{Binding SaveDiscordSettingsCommand}"
+                                    IsEnabled="{Binding DiscordIsBusy, Converter={StaticResource BoolInverseConverter}}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Padding="16,7"
+                                    Cursor="Hand"
+                                    Content="Save Discord Settings" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
             </StackPanel>
         </ScrollViewer>
     </Grid>

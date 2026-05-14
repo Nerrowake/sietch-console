@@ -14,6 +14,7 @@ using Sietch_Console.Services.Metrics;
 using Sietch_Console.Services.Networking;
 using Sietch_Console.Services.Players;
 using Sietch_Console.Services.Profiles;
+using Sietch_Console.Services.Discord;
 using Sietch_Console.Services.Remote;
 using Sietch_Console.ViewModels;
 using Sietch_Console.ViewModels.Steps;
@@ -89,6 +90,9 @@ public partial class App : Application
 
         // ── M24: Server metrics (#163, #164) ─────────────────────────────────────
         services.AddSingleton<IMetricsCollectorService, MetricsCollectorService>();
+
+        // ── M26: Discord webhooks (#170, #171, #172) ──────────────────────────────
+        services.AddSingleton<IDiscordWebhookService, DiscordWebhookService>();
 
         // Repositories
         services.AddScoped<IApplicationSettingsRepository, ApplicationSettingsRepository>();

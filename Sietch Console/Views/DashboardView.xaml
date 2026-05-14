@@ -450,6 +450,56 @@
                     </Border>
                 </Grid>
 
+                <!-- ══════════════════════════════════════════ -->
+                <!-- Discord Announcement (#171)               -->
+                <!-- ══════════════════════════════════════════ -->
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="20,16"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource CardTitleStyle}"
+                                   Text="Discord Announcement"
+                                   Margin="0,0,0,4" />
+                        <TextBlock Style="{StaticResource MutedTextStyle}"
+                                   Text="Send a message to your Discord channel via the configured webhook."
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,12" />
+
+                        <ProgressBar Style="{StaticResource LoadingBarStyle}"
+                                     Visibility="{Binding IsAnnouncementBusy, Converter={StaticResource BoolToVisibleConverter}}"
+                                     Margin="0,0,0,8" />
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding AnnouncementText, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="{StaticResource FieldBackground}"
+                                     Foreground="{StaticResource TextPrimary}"
+                                     BorderBrush="{StaticResource BorderDefault}"
+                                     BorderThickness="1"
+                                     FontFamily="{StaticResource FontUI}"
+                                     FontSize="{StaticResource FontSizeBody}"
+                                     Padding="8,6"
+                                     Margin="0,0,8,0"
+                                     CaretBrush="{StaticResource AccentPrimary}" />
+                            <Button Grid.Column="1"
+                                    Command="{Binding SendAnnouncementCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Padding="14,6"
+                                    Cursor="Hand"
+                                    Content="Send" />
+                        </Grid>
+
+                        <TextBlock Text="{Binding AnnouncementStatusMessage}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   Margin="0,6,0,0"
+                                   Visibility="{Binding AnnouncementStatusMessage, Converter={StaticResource NullToCollapsedConverter}}" />
+                    </StackPanel>
+                </Border>
+
             </StackPanel>
         </ScrollViewer>
 
