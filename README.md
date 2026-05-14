@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Sietch Console/Resources/AppIcon-256.png" width="128" alt="Sietch Console" />
+</p>
+
 # Sietch Console
 
 > The easiest way to self-host a Dune: Awakening battlegroup.
