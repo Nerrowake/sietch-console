@@ -2,7 +2,7 @@
 
 This document describes the planned feature trajectory for Sietch Console. Items are grouped by milestone. Ordering and scope are subject to change as the project evolves.
 
-The current release is `0.6.0-alpha.1`. Milestones 15–24 and 28 are complete. Milestone 25 (Mod Management) was cancelled. Milestones 26 (Discord Webhooks) and 27 (Cloud Backup) are planned.
+The current release is `0.6.0-alpha.1`. Milestones 15–24, 26, and 28 are complete. Milestone 25 (Mod Management) was cancelled. Milestone 27 (Cloud Backup) is planned.
 
 ---
 
@@ -158,11 +158,23 @@ Addressed quality-of-life gaps and security improvements identified during early
 
 ---
 
+## Milestone 26 — Discord Webhook Integration ✓ Complete (Unreleased)
+
+Notify a Discord channel of server events.
+
+- `IDiscordWebhookService` posts colour-coded embeds via `HttpClient`; fire-and-forget with one retry on HTTP 5xx
+- Server lifecycle events: started (green), stopped normally (orange), crashed (red)
+- Per-event toggle settings — each notification type can be enabled or disabled independently
+- Manual announcement panel on the Dashboard — free-text message sent as a blue embed
+- Webhook configuration in Settings: URL field, Test button, Save, enable toggle
+- Settings persisted to `ApplicationSettings` with `ALTER TABLE` migration for existing databases
+
+---
+
 ## Post-MVP / Future Considerations
 
 These are planned milestones with open GitHub issues, not yet implemented.
 
-- **Milestone 26 — Discord Webhook Integration** — notify a Discord channel when the server starts, stops, or crashes; player milestone announcements; webhook configuration UI
 - **Milestone 27 — Backup Cloud Sync** — optional sync of backups to OneDrive (Microsoft Graph), S3-compatible storage (AWS, Backblaze, MinIO), with a provider abstraction layer and restore flow
 
 ---

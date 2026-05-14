@@ -9,6 +9,13 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Discord webhook integration (#170, #171, #172)** — `IDiscordWebhookService` / `DiscordWebhookService` POSTs colour-coded embeds to a Discord webhook URL on server start, stop, and crash events; fire-and-forget with one retry on HTTP 5xx; per-event toggles for start / stop / crash notifications; manual announcement panel on the Dashboard sends a free-text message to the configured channel; Test button in Settings verifies the URL without touching the enable flag
+- **`IServerProcessService.ServerStarted` event** — fires once when the server-ready log pattern is matched in `ServerProcessService`; consumed by `DiscordWebhookService` for lifecycle notifications
+- **Discord settings card in Settings view** — webhook URL field, enable toggle, per-event checkboxes (Server Online, Server Offline, Server Crash), Test and Save actions; status message shows result of the last test or save
+- **Discord announcement card in Dashboard view** — text field and Send button; posts announcement as a blue embed to the configured webhook
+
 ---
 
 ## [0.6.0-alpha.1] — 2026-05-10
