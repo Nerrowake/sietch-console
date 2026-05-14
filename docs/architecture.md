@@ -48,7 +48,8 @@ Sealed records representing domain objects. They carry no behavior.
 | `SetupWizardState` | Persisted progress through the Setup Wizard |
 | `ApplicationSettings` | User preferences stored in SQLite |
 | `DiagnosticsResult` | A single check result: name, severity, description, detail |
-| `BackupRecord` | Metadata for a saved backup: timestamp, type, path, size |
+| `BackupRecord` | Metadata for a saved backup: timestamp, type, path, size; `CloudSyncedAt` and `CloudRemoteId` track cloud upload state |
+| `CloudBackupFile` | Lightweight descriptor of a file stored in the cloud provider: `RemoteId`, `FileName`, `SizeBytes`, `CreatedAt` |
 | `IniDocument` | Parsed representation of an INI file: sections and key-value pairs |
 | `LogEntry` | A single parsed log line: timestamp, severity, message |
 | `DetectedIssue` | A pattern-matched issue found in log output |
@@ -95,6 +96,9 @@ Service contracts that the WPF app depends on, with implementations in the app p
 | `IHyperVHostService` | `HyperVHostService` — Hyper-V host registry, WMI connection tests, DPAPI credential encryption |
 | `IPlayerManagementService` | `PlayerManagementService` — log-based player detection, kick/ban commands, ban/allowlist CRUD |
 | `IMetricsCollectorService` | `MetricsCollectorService` — 60-second snapshot collection, downtime event tracking |
+| `IDiscordWebhookService` | `DiscordWebhookService` — POSTs colour-coded embeds on server lifecycle events; fire-and-forget with one retry; per-event toggles |
+| `ICloudStorageProvider` | `OneDriveStorageProvider` / `S3StorageProvider` — upload, download, list, delete, test-connection against a cloud backend |
+| `ICloudSyncService` | `CloudSyncService` — zip/upload and download/unzip/restore orchestration; DPAPI encryption of S3 credentials |
 
 Repository interfaces (implemented in `SietchConsole.Data`):
 
@@ -194,6 +198,12 @@ Services/
 │                   ban and allowlist SQLite CRUD
 ├── Metrics/        MetricsCollectorService — 60-second PeriodicTimer, VM resource sampling,
 │                   downtime event tracking, snapshot pruning
+├── Discord/        DiscordWebhookService — lifecycle event embeds, announcement POST,
+│                   fire-and-forget with one 5xx retry
+├── Cloud/          CloudSyncService — zip/upload + download/unzip/restore orchestration
+│                   OneDriveStorageProvider — MSAL interactive auth, DPAPI token cache,
+│                   raw Graph REST (simple PUT ≤4 MB, chunked upload for larger files)
+│                   S3StorageProvider — AWSSDK.S3 v3, ForcePathStyle for non-AWS providers
 └── Installation/   SteamDetectionService, SteamCmdService, ServerPackageService,
                     ServerPackageInstaller, SetupScriptService, InstallationOrchestrator
 ```
@@ -246,6 +256,8 @@ var records = await repo.GetAllAsync();
 |------|-------|
 | SQLite database | `%LOCALAPPDATA%\SietchConsole\sietch.db` |
 | Configuration backups | `%LOCALAPPDATA%\SietchConsole\Backups\` |
+| MSAL token cache (OneDrive) | `%LOCALAPPDATA%\SietchConsole\msal_cache.bin` (DPAPI-encrypted) |
+| Cloud sync temp files | `%TEMP%\SietchConsole\CloudSync\` (cleaned up after each operation) |
 | Log files (read-only) | Server install path, as configured in the battlegroup profile |
 
 The application never writes to the directory it was installed into. All mutable state lives under `%LOCALAPPDATA%\SietchConsole\`.
@@ -314,3 +326,5 @@ Server package management and server process management are fully implemented as
 | `Microsoft.EntityFrameworkCore.Tools` | EF migrations |
 | `OxyPlot.Wpf` | WPF line charts for the Metrics view |
 | `System.Management` | WMI queries for Hyper-V VM state, resources, and remote host connections |
+| `Microsoft.Identity.Client` (MSAL) | Interactive OAuth2 / silent token acquisition for OneDrive (Microsoft Graph) |
+| `AWSSDK.S3` | S3-compatible object storage (AWS, Backblaze B2, MinIO, Cloudflare R2) |

@@ -6,7 +6,7 @@ This document lists known bugs, unimplemented features, and unsupported configur
 
 ## Alpha Scope
 
-Sietch Console `0.6.0-alpha.1` is an **internal alpha**. The following features are fully implemented: application shell and all views, Hyper-V VM control (start, stop, restart, provisioning, live resource display), SteamCMD server file download and update, live server process management (stdout/stderr streaming, server-ready detection, crash surfacing, graceful shutdown), full + scheduled backups with retention, multiple battleground profiles, in-app application log viewer, VM IP auto-detection, GitHub Releases auto-update, remote management (embedded Kestrel web server, REST + SSE API, built-in web dashboard, Bearer token auth with rate limiting), player management (connected-player detection, kick/ban commands, ban list, Steam ID allowlist), server metrics (60-second CPU/memory/uptime charts, downtime event log), and remote Hyper-V host registration with DPAPI credential storage.
+Sietch Console `0.6.0-alpha.1` is an **internal alpha**. The following features are fully implemented: application shell and all views, Hyper-V VM control (start, stop, restart, provisioning, live resource display), SteamCMD server file download and update, live server process management (stdout/stderr streaming, server-ready detection, crash surfacing, graceful shutdown), full + scheduled backups with retention, multiple battleground profiles, in-app application log viewer, VM IP auto-detection, GitHub Releases auto-update, remote management (embedded Kestrel web server, REST + SSE API, built-in web dashboard, Bearer token auth with rate limiting), player management (connected-player detection, kick/ban commands, ban list, Steam ID allowlist), server metrics (60-second CPU/memory/uptime charts, downtime event log), remote Hyper-V host registration with DPAPI credential storage, Discord webhook notifications (server lifecycle events, manual announcements, per-event toggles), and cloud backup sync (OneDrive via MSAL + Microsoft Graph, S3-compatible via AWSSDK.S3, DPAPI-encrypted credentials, upload/download/restore/delete).
 
 ---
 
@@ -84,9 +84,7 @@ These features are not present in the alpha and are planned for future milestone
 
 - Code-signed installer (removes the SmartScreen warning — deferred, requires a real certificate)
 - Server process inside the Hyper-V guest via PowerShell Direct
-- Webhook / notification integrations (server lifecycle events — Discord, etc.)
 - Remote API player count and uptime (requires server-side API from Funcom)
-- Cloud backup destinations (S3, OneDrive, MinIO)
 
 ---
 

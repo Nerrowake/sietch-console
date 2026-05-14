@@ -53,6 +53,10 @@ Run these manually on a machine with a real Hyper-V environment. VM control is n
 - [ ] "Backup Configuration" creates a record in the list
 - [ ] Empty state is shown when no backups exist
 - [ ] Restore and Delete confirmation dialogs work
+- [ ] "↑ Sync" button on a backup row uploads to the configured cloud provider
+- [ ] Cloud Sync card: provider selector, credential fields, Test Connection returns success or a clear error
+- [ ] Cloud Backups list populates after Refresh; ↓ Restore and Delete actions work
+- [ ] S3 secret key is accepted via the PasswordBox and is not echoed in plain text
 
 **Networking**
 - [ ] Network Information card shows host IP (or a placeholder)
@@ -63,6 +67,8 @@ Run these manually on a machine with a real Hyper-V environment. VM control is n
 - [ ] Settings loads existing config (or shows "no config" empty state)
 - [ ] Saving settings triggers the auto-backup and shows a success message
 - [ ] Remote Management card: enable toggle, port, token generate, Apply — web server starts/stops correctly
+- [ ] Discord Webhooks card: URL field, Test button returns success or a descriptive error, Save persists settings
+- [ ] Discord notification fires in the configured channel when the server starts or stops
 
 **Players**
 - [ ] Connected Players tab loads (empty state shown when server is not running)
