@@ -17,7 +17,7 @@
 
 ## Installation (Installer)
 
-1. Download `SietchConsole-<version>-Setup.exe` from the [Releases page](https://github.com/michaelstouffer/sietch-console/releases).
+1. Download `SietchConsole-<version>-Setup.exe` from the [Releases page](https://github.com/michaelstoffer/sietch-console/releases).
 2. Run the installer. Windows may show a SmartScreen prompt — click **More info → Run anyway** (the binary is not yet code-signed).
 3. Follow the on-screen setup wizard.
 4. Launch **Sietch Console** from the Start menu or desktop shortcut.
@@ -28,7 +28,7 @@
 
 If you prefer not to use the installer:
 
-1. Download `SietchConsole-<version>-win-x64-portable.zip` from the [Releases page](https://github.com/michaelstouffer/sietch-console/releases).
+1. Download `SietchConsole-<version>-win-x64-portable.zip` from the [Releases page](https://github.com/michaelstoffer/sietch-console/releases).
 2. Extract the ZIP to any folder (e.g. `C:\Tools\SietchConsole\`).
 3. Run `Sietch Console.exe` directly.
 
