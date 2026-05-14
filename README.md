@@ -23,7 +23,7 @@ Sietch Console is a Windows-native desktop application that replaces the manual 
 | **Configuration** | Structured INI editor for server identity, gameplay settings, and network options; auto-backup before every save |
 | **Logs** | Live stdout/stderr stream from the running server process (with a LIVE badge) plus file-based tail; search, severity filtering, and detected-issue explanations |
 | **Diagnostics** | On-demand system readiness checks with friendly pass/warning/failure results and remediation guidance |
-| **Backups** | Config, save-data, and full (config + save-data) backups with full history, one-click restore, scheduled auto-backups, and configurable retention |
+| **Backups** | Config, save-data, and full (config + save-data) backups with full history, one-click restore, scheduled auto-backups, and configurable retention; optional cloud sync to OneDrive or any S3-compatible provider (AWS, Backblaze B2, MinIO, Cloudflare R2) with upload, restore, and delete |
 | **Networking** | Host and VM IP detection (auto-persisted to profile), Windows Firewall rule checker and auto-creator, port forwarding guide, local port test, copyable connection summary |
 | **Settings** | Structured settings editor and raw INI editor with per-file selection |
 | **Multiple profiles** | Create, switch, and delete battleground profiles from the sidebar; all views update instantly when you switch |
@@ -32,7 +32,8 @@ Sietch Console is a Windows-native desktop application that replaces the manual 
 | **Remote Management** | Embedded web dashboard accessible from any browser on the LAN — status, controls, and live log tail; REST + SSE API for custom integrations; Bearer token auth with rate limiting |
 | **Players** | Live connected-player list (log-based detection), kick and timed/permanent ban commands, ban list with unban support, and Steam ID allowlist — all stored in SQLite |
 | **Metrics** | 60-second CPU, memory, and uptime snapshots charted over time with OxyPlot; availability percentage; downtime event log; configurable time-range selector (1 h – 30 d) |
-| **Multi-Host** | Register remote Hyper-V hosts by hostname with DPAPI-encrypted WMI credentials; WMI connection test; link battlegroup profiles to a specific host |
+| **Multi-Host** | Register remote Hyper-V hosts by hostname with DPAPI-encrypted WMI credentials; WMI connection test; link battleground profiles to a specific host |
+| **Discord Webhooks** | Configurable webhook URL with per-event toggles (server start, stop, crash); colour-coded embed notifications sent automatically on lifecycle events; manual announcement panel on the Dashboard for broadcasting messages to your community |
 
 ---
 
