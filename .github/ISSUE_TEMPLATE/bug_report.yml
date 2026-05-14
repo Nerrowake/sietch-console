@@ -1,0 +1,83 @@
+name: Bug Report
+description: Something isn't working correctly in Sietch Console.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug. Please fill out every section — incomplete reports are much harder to act on.
+
+        Before filing, check [Known Limitations](https://github.com/michaelstoffer/sietch-console/blob/development/docs/known-limitations.md) to see if the issue is already documented.
+
+  - type: input
+    id: version
+    attributes:
+      label: Sietch Console version
+      description: Found in the title bar or the About section. Example — `0.6.0-alpha.1`
+      placeholder: "0.x.x-alpha.x"
+    validations:
+      required: true
+
+  - type: input
+    id: windows_version
+    attributes:
+      label: Windows version
+      description: Run `winver` and paste the result. Example — `Windows 11 23H2 (Build 22631)`
+      placeholder: "Windows 10/11 — Build xxxxx"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install_type
+    attributes:
+      label: Installation type
+      options:
+        - Installer (Setup.exe)
+        - Portable ZIP
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear, concise description of the bug.
+      placeholder: "When I click X, the application does Y instead of Z."
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro_steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps that reliably reproduce the issue.
+      placeholder: |
+        1. Open the Backups view
+        2. Click "Backup Configuration"
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: |
+        Paste any relevant output from the **App Logs** view (filter to Error/Warning).
+        Wrap long output in a code block — triple backticks (```) before and after.
+      render: text
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Screenshots, Hyper-V configuration details, or anything else that might help.

@@ -1,0 +1,59 @@
+name: Feature Request
+description: Suggest a new feature or improvement for Sietch Console.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for the suggestion. The best feature requests describe the **problem** you are trying to solve, not just the solution you have in mind — it helps evaluate fit and alternatives.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the situation or workflow that is currently frustrating or missing.
+      placeholder: "When I manage multiple battlegroups, I have to manually..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the feature or change you would like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you found any workarounds or alternative approaches? Why are they insufficient?
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature area
+      description: Which part of the app is most relevant?
+      options:
+        - Dashboard / Server Control
+        - Setup Wizard
+        - Configuration / INI Editor
+        - Logs
+        - Diagnostics
+        - Backups / Cloud Sync
+        - Networking
+        - Settings
+        - Players
+        - Metrics
+        - Remote Management
+        - Discord Webhooks
+        - Multi-Host
+        - Other / Cross-cutting
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Mockups, screenshots, links to similar tools, or any other context.

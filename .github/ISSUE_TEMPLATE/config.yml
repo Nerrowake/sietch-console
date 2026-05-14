@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question or start a discussion
+    url: https://github.com/michaelstoffer/sietch-console/discussions
+    about: Not a bug and not a feature request? Start a discussion instead.
+  - name: Known Limitations
+    url: https://github.com/michaelstoffer/sietch-console/blob/development/docs/known-limitations.md
+    about: Check here first — your issue may already be documented.
