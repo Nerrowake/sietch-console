@@ -26,6 +26,12 @@ public class BackupRecordRepository : IBackupRecordRepository
         return record;
     }
 
+    public async Task UpdateAsync(BackupRecord record)
+    {
+        _db.BackupRecords.Update(record);
+        await _db.SaveChangesAsync();
+    }
+
     public async Task DeleteAsync(int id)
     {
         var record = await _db.BackupRecords.FindAsync(id);

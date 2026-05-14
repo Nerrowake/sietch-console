@@ -2,7 +2,7 @@
 
 This document describes the planned feature trajectory for Sietch Console. Items are grouped by milestone. Ordering and scope are subject to change as the project evolves.
 
-The current release is `0.6.0-alpha.1`. Milestones 15–24, 26, and 28 are complete. Milestone 25 (Mod Management) was cancelled. Milestone 27 (Cloud Backup) is planned.
+The current release is `0.6.0-alpha.1`. Milestones 15–24 and 26–27 are complete. Milestone 25 (Mod Management) was cancelled. Milestone 28 is complete.
 
 ---
 
@@ -175,7 +175,7 @@ Notify a Discord channel of server events.
 
 These are planned milestones with open GitHub issues, not yet implemented.
 
-- **Milestone 27 — Backup Cloud Sync** — optional sync of backups to OneDrive (Microsoft Graph), S3-compatible storage (AWS, Backblaze, MinIO), with a provider abstraction layer and restore flow
+- **Milestone 27 — Backup Cloud Sync ✓ Complete** — `ICloudStorageProvider` abstraction with OneDrive (MSAL, raw Graph REST, chunked upload) and S3-compatible (AWSSDK.S3 v3, ForcePathStyle for Backblaze/MinIO/R2) providers; `ICloudSyncService` / `CloudSyncService` orchestrates zip/upload and download/unzip/restore; DPAPI encryption for S3 secret key; cloud sync UI in Backups view with provider selector, credential fields, Test Connection, remote file list with restore/delete actions, and per-backup Sync button
 
 ---
 

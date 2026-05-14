@@ -14,6 +14,7 @@ using Sietch_Console.Services.Metrics;
 using Sietch_Console.Services.Networking;
 using Sietch_Console.Services.Players;
 using Sietch_Console.Services.Profiles;
+using Sietch_Console.Services.Cloud;
 using Sietch_Console.Services.Discord;
 using Sietch_Console.Services.Remote;
 using Sietch_Console.ViewModels;
@@ -93,6 +94,9 @@ public partial class App : Application
 
         // ── M26: Discord webhooks (#170, #171, #172) ──────────────────────────────
         services.AddSingleton<IDiscordWebhookService, DiscordWebhookService>();
+
+        // ── M27: Cloud backup sync (#173, #174, #175, #176) ───────────────────────
+        services.AddSingleton<ICloudSyncService, CloudSyncService>();
 
         // Repositories
         services.AddScoped<IApplicationSettingsRepository, ApplicationSettingsRepository>();

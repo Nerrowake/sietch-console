@@ -69,6 +69,18 @@ public class DatabaseInitializerService
             )
             """);
 
+        // ── M27: Cloud sync settings (#174) ──────────────────────────────────────
+        await AddColumnIfMissingAsync("ApplicationSettings", "CloudSyncEnabled",    "INTEGER NOT NULL DEFAULT 0");
+        await AddColumnIfMissingAsync("ApplicationSettings", "CloudSyncProvider",   "TEXT NOT NULL DEFAULT 'None'");
+        await AddColumnIfMissingAsync("ApplicationSettings", "CloudSyncFolderPath", "TEXT NULL");
+        await AddColumnIfMissingAsync("ApplicationSettings", "S3BucketName",         "TEXT NULL");
+        await AddColumnIfMissingAsync("ApplicationSettings", "S3Region",             "TEXT NULL");
+        await AddColumnIfMissingAsync("ApplicationSettings", "S3EndpointUrl",        "TEXT NULL");
+        await AddColumnIfMissingAsync("ApplicationSettings", "S3AccessKeyId",        "TEXT NULL");
+        await AddColumnIfMissingAsync("ApplicationSettings", "S3EncryptedSecretKey", "TEXT NULL");
+        await AddColumnIfMissingAsync("BackupRecords",        "CloudSyncedAt",       "TEXT NULL");
+        await AddColumnIfMissingAsync("BackupRecords",        "CloudRemoteId",       "TEXT NULL");
+
         // ── M26: Discord webhook settings (#172) ─────────────────────────────────
         await AddColumnIfMissingAsync("ApplicationSettings", "DiscordWebhookEnabled",    "INTEGER NOT NULL DEFAULT 0");
         await AddColumnIfMissingAsync("ApplicationSettings", "DiscordWebhookUrl",         "TEXT NULL");

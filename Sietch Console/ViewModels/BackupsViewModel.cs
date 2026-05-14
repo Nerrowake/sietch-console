@@ -3,6 +3,7 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
+using Sietch_Console.Services.Cloud;
 using SietchConsole.Core.Interfaces;
 using SietchConsole.Core.Models;
 
@@ -13,6 +14,7 @@ public enum PendingBackupAction { None, Delete, Restore }
 public partial class BackupsViewModel : ObservableObject
 {
     private readonly IBackupService       _backupService;
+    private readonly ICloudSyncService    _cloudSync;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IActiveProfileService _activeProfileService;
     private readonly DispatcherTimer      _autoBackupTimer;
@@ -67,12 +69,42 @@ public partial class BackupsViewModel : ObservableObject
     partial void OnAutoBackupEnabledChanged(bool value)   => ReconfigureTimer();
     partial void OnBackupIntervalHoursChanged(int value)  => ReconfigureTimer();
 
+    // ── Cloud sync settings (#173, #174, #175, #176) ──────────────────────────
+
+    public IReadOnlyList<string> CloudProviders { get; } = ["None", "OneDrive", "S3"];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowOneDriveFields))]
+    [NotifyPropertyChangedFor(nameof(ShowS3Fields))]
+    private string _cloudProvider = "None";
+
+    [ObservableProperty] private bool   _cloudEnabled;
+    [ObservableProperty] private string _cloudFolderPath     = "SietchConsole/Backups";
+    [ObservableProperty] private string _s3Bucket            = string.Empty;
+    [ObservableProperty] private string _s3Region            = "us-east-1";
+    [ObservableProperty] private string _s3Endpoint          = string.Empty;
+    [ObservableProperty] private string _s3AccessKeyId       = string.Empty;
+    [ObservableProperty] private string _s3SecretKey         = string.Empty;   // plain text while editing; encrypted before save
+    [ObservableProperty] private string _cloudStatusMessage  = string.Empty;
+    [ObservableProperty] private bool   _cloudIsBusy;
+    [ObservableProperty] private double _cloudProgress;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCloudBackups))]
+    private ObservableCollection<CloudBackupFile> _cloudBackups = [];
+
+    public bool HasCloudBackups    => CloudBackups.Count > 0;
+    public bool ShowOneDriveFields => CloudProvider == "OneDrive";
+    public bool ShowS3Fields       => CloudProvider == "S3";
+
     // ── Constructor ───────────────────────────────────────────────────────────
 
-    public BackupsViewModel(IBackupService backupService, IServiceScopeFactory scopeFactory,
+    public BackupsViewModel(IBackupService backupService, ICloudSyncService cloudSync,
+                            IServiceScopeFactory scopeFactory,
                             IActiveProfileService activeProfileService)
     {
         _backupService        = backupService;
+        _cloudSync            = cloudSync;
         _scopeFactory         = scopeFactory;
         _activeProfileService = activeProfileService;
 
@@ -100,6 +132,9 @@ public partial class BackupsViewModel : ObservableObject
         AutoBackupEnabled   = settings.AutoBackupEnabled;
         BackupIntervalHours = settings.BackupIntervalHours > 0 ? settings.BackupIntervalHours : 6;
         BackupRetainCount   = settings.BackupRetainCount   > 0 ? settings.BackupRetainCount   : 10;
+
+        // Load cloud sync settings
+        await LoadCloudSettingsAsync(settings);
 
         await LoadBackupsAsync();
         ReconfigureTimer();
@@ -268,4 +303,161 @@ public partial class BackupsViewModel : ObservableObject
 
     [RelayCommand]
     private async Task RefreshAsync() => await LoadBackupsAsync();
+
+    // ── Cloud sync commands (#173, #174, #175, #176) ──────────────────────────
+
+    [RelayCommand]
+    private async Task SaveCloudSettingsAsync()
+    {
+        CloudIsBusy      = true;
+        CloudStatusMessage = string.Empty;
+        try
+        {
+            using var scope  = _scopeFactory.CreateScope();
+            var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
+            var settings     = await settingsRepo.GetAsync();
+
+            settings.CloudSyncEnabled    = CloudEnabled;
+            settings.CloudSyncProvider   = CloudProvider;
+            settings.CloudSyncFolderPath = CloudFolderPath.Trim();
+            settings.S3BucketName        = S3Bucket.Trim();
+            settings.S3Region            = S3Region.Trim();
+            settings.S3EndpointUrl       = string.IsNullOrWhiteSpace(S3Endpoint) ? null : S3Endpoint.Trim();
+            settings.S3AccessKeyId       = S3AccessKeyId.Trim();
+
+            if (!string.IsNullOrWhiteSpace(S3SecretKey))
+                settings.S3EncryptedSecretKey = CloudSyncService.EncryptSecretKey(S3SecretKey.Trim());
+
+            await settingsRepo.SaveAsync(settings);
+            CloudStatusMessage = "Cloud sync settings saved.";
+        }
+        catch (Exception ex)
+        {
+            CloudStatusMessage = $"Save failed: {ex.Message}";
+        }
+        finally { CloudIsBusy = false; }
+    }
+
+    [RelayCommand]
+    private async Task TestCloudConnectionAsync()
+    {
+        CloudIsBusy       = true;
+        CloudStatusMessage = "Testing connection…";
+        try
+        {
+            // Save current form values first so TestConnectionAsync uses the latest input
+            await SaveCloudSettingsAsync();
+            var (ok, error) = await _cloudSync.TestConnectionAsync();
+            CloudStatusMessage = ok ? "Connection successful." : $"Connection failed: {error}";
+        }
+        catch (Exception ex)
+        {
+            CloudStatusMessage = $"Error: {ex.Message}";
+        }
+        finally { CloudIsBusy = false; }
+    }
+
+    [RelayCommand]
+    private async Task SyncToCloudAsync(BackupRecord record)
+    {
+        if (!_cloudSync.IsConfigured)
+        {
+            CloudStatusMessage = "Cloud sync is not enabled. Configure a provider below.";
+            return;
+        }
+
+        CloudIsBusy        = true;
+        CloudProgress      = 0;
+        CloudStatusMessage = $"Uploading {record.BackupType} backup…";
+        try
+        {
+            var prog = new Progress<double>(p => CloudProgress = p);
+            var id   = await _cloudSync.UploadBackupAsync(record, prog);
+            CloudStatusMessage = "Upload complete.";
+
+            // Refresh backup list so the cloud icon appears
+            await LoadBackupsAsync();
+        }
+        catch (Exception ex)
+        {
+            CloudStatusMessage = $"Upload failed: {ex.Message}";
+        }
+        finally { CloudIsBusy = false; }
+    }
+
+    [RelayCommand]
+    private async Task RefreshCloudBackupsAsync()
+    {
+        if (!_cloudSync.IsConfigured) { CloudStatusMessage = "Cloud sync is not configured."; return; }
+
+        CloudIsBusy        = true;
+        CloudStatusMessage = string.Empty;
+        try
+        {
+            var files   = await _cloudSync.ListCloudBackupsAsync();
+            CloudBackups = new ObservableCollection<CloudBackupFile>(files);
+            OnPropertyChanged(nameof(HasCloudBackups));
+            CloudStatusMessage = files.Count == 0 ? "No cloud backups found." : string.Empty;
+        }
+        catch (Exception ex)
+        {
+            CloudStatusMessage = $"Failed to list cloud backups: {ex.Message}";
+        }
+        finally { CloudIsBusy = false; }
+    }
+
+    [RelayCommand]
+    private async Task DownloadAndRestoreCloudBackupAsync(CloudBackupFile file)
+    {
+        CloudIsBusy        = true;
+        CloudProgress      = 0;
+        CloudStatusMessage = $"Downloading {file.FileName}…";
+        try
+        {
+            var prog = new Progress<double>(p => CloudProgress = p);
+            await _cloudSync.DownloadAndRestoreAsync(file, prog);
+            CloudStatusMessage = "Restore complete. Restart the battlegroup to apply changes.";
+        }
+        catch (Exception ex)
+        {
+            CloudStatusMessage = $"Restore failed: {ex.Message}";
+        }
+        finally { CloudIsBusy = false; }
+    }
+
+    [RelayCommand]
+    private async Task DeleteCloudBackupAsync(CloudBackupFile file)
+    {
+        CloudIsBusy        = true;
+        CloudStatusMessage = string.Empty;
+        try
+        {
+            await _cloudSync.DeleteCloudBackupAsync(file);
+            CloudBackups.Remove(file);
+            OnPropertyChanged(nameof(HasCloudBackups));
+            CloudStatusMessage = "Cloud backup deleted.";
+        }
+        catch (Exception ex)
+        {
+            CloudStatusMessage = $"Delete failed: {ex.Message}";
+        }
+        finally { CloudIsBusy = false; }
+    }
+
+    // ── Cloud settings helpers ────────────────────────────────────────────────
+
+    private async Task LoadCloudSettingsAsync(ApplicationSettings settings)
+    {
+        CloudEnabled    = settings.CloudSyncEnabled;
+        CloudProvider   = settings.CloudSyncProvider ?? "None";
+        CloudFolderPath = settings.CloudSyncFolderPath ?? "SietchConsole/Backups";
+        S3Bucket        = settings.S3BucketName   ?? string.Empty;
+        S3Region        = settings.S3Region        ?? "us-east-1";
+        S3Endpoint      = settings.S3EndpointUrl   ?? string.Empty;
+        S3AccessKeyId   = settings.S3AccessKeyId   ?? string.Empty;
+        // Secret key is never loaded back into the text field — user must re-enter to change it.
+        S3SecretKey     = string.Empty;
+
+        await Task.CompletedTask;
+    }
 }

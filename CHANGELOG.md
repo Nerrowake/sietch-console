@@ -11,10 +11,21 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Cloud backup sync (#173, #174, #175, #176)** — `ICloudSyncService` / `CloudSyncService` zips a local backup directory and uploads it to a configured cloud provider; downloads are unzipped and handed to `IBackupService.RestoreAsync`; two concrete `ICloudStorageProvider` implementations ship: **OneDrive** (MSAL `PublicClientApplication`, interactive browser auth, DPAPI token cache, raw Microsoft Graph REST calls with 10 MB chunked upload) and **S3-compatible** (`AWSSDK.S3 v3`, `BasicAWSCredentials`, `ForcePathStyle` for non-AWS providers such as Backblaze and MinIO); `CloudSyncService.EncryptSecretKey` / `DecryptSecretKey` use `ProtectedData` (DPAPI) so S3 credentials are never stored in plain text
+- **`CloudBackupFile` model** — lightweight record (`RemoteId`, `FileName`, `SizeBytes`, `CreatedAt`) returned by `ICloudStorageProvider.ListAsync`; displayed in the Cloud Backups list card
+- **`BackupRecord.CloudSyncedAt` / `CloudRemoteId` fields** — track when a local backup was last pushed to the cloud and store its provider-assigned ID for future deletion
+- **Cloud sync UI in Backups view** — provider selector (None / OneDrive / S3); enable toggle; remote folder path; OneDrive info banner; S3 fields (endpoint URL, bucket, region, access key ID, secret key via `PasswordBox`); Test Connection and Save buttons; Cloud Backups list with ↓ Restore and Delete actions; "↑ Sync" button and "☁ Synced" badge on each local backup row
 - **Discord webhook integration (#170, #171, #172)** — `IDiscordWebhookService` / `DiscordWebhookService` POSTs colour-coded embeds to a Discord webhook URL on server start, stop, and crash events; fire-and-forget with one retry on HTTP 5xx; per-event toggles for start / stop / crash notifications; manual announcement panel on the Dashboard sends a free-text message to the configured channel; Test button in Settings verifies the URL without touching the enable flag
 - **`IServerProcessService.ServerStarted` event** — fires once when the server-ready log pattern is matched in `ServerProcessService`; consumed by `DiscordWebhookService` for lifecycle notifications
 - **Discord settings card in Settings view** — webhook URL field, enable toggle, per-event checkboxes (Server Online, Server Offline, Server Crash), Test and Save actions; status message shows result of the last test or save
 - **Discord announcement card in Dashboard view** — text field and Send button; posts announcement as a blue embed to the configured webhook
+
+### Changed
+
+- `BackupsViewModel` injects `ICloudSyncService`; exposes cloud provider, credential, and status observable properties; adds `SaveCloudSettingsAsync`, `TestCloudConnectionAsync`, `SyncToCloudAsync`, `RefreshCloudBackupsAsync`, `DownloadAndRestoreCloudBackupAsync`, and `DeleteCloudBackupAsync` relay commands
+- `ApplicationSettings` extended with `CloudSyncEnabled`, `CloudSyncProvider`, `CloudSyncFolderPath`, `S3BucketName`, `S3Region`, `S3EndpointUrl`, `S3AccessKeyId`, `S3EncryptedSecretKey`; existing databases upgraded automatically via `AddColumnIfMissingAsync` in `DatabaseInitializerService`
+- `BackupRecordRepository` implements the new `UpdateAsync` method required to persist `CloudSyncedAt` / `CloudRemoteId` after a successful upload
+- WPF project adds `AWSSDK.S3 3.7.502` and `Microsoft.Identity.Client 4.84.0` NuGet packages
 
 ---
 
