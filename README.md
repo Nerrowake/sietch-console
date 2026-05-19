@@ -23,7 +23,7 @@ Sietch Console is a Windows-native desktop application that replaces the manual 
 | Area | What it does |
 |------|-------------|
 | **Setup Wizard** | Guided multi-step onboarding — validates requirements, downloads server files via SteamCMD, configures the Hyper-V VM, and saves your battlegroup profile |
-| **Dashboard** | One-click Start / Stop / Restart with real Hyper-V VM control and server process management; live status, CPU/RAM display, update-available indicator, and one-click server update |
+| **Dashboard** | One-click Start / Stop / Restart / Update with Hyper-V VM and battlegroup binary control; hero status card with live uptime counter, CPU/RAM resource badges, and contextual actions; shortcut tiles for the Battlegroup Director, file browser, and VM shell; Discord announcement panel |
 | **Configuration** | Structured INI editor for server identity, gameplay settings, and network options; auto-backup before every save |
 | **Logs** | Live stdout/stderr stream from the running server process (with a LIVE badge) plus file-based tail; search, severity filtering, and detected-issue explanations |
 | **Diagnostics** | On-demand system readiness checks with friendly pass/warning/failure results and remediation guidance |
