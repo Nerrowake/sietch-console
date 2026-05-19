@@ -9,132 +9,252 @@
                       HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="28,24,28,28">
 
-                <!-- Page Header -->
-                <TextBlock Style="{StaticResource PageTitleStyle}"
-                           Text="Metrics"
-                           Margin="0,0,0,4" />
-                <TextBlock Style="{StaticResource PageSubtitleStyle}"
-                           Text="Historical server health data — CPU, memory, player count, and uptime."
-                           Margin="0,0,0,16" />
+                <!-- ── Page Header ──────────────────────────────────────────── -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Style="{StaticResource PageTitleStyle}"
+                                   Text="Metrics"
+                                   Margin="0,0,0,4" />
+                        <TextBlock Style="{StaticResource PageSubtitleStyle}"
+                                   Text="Historical server health — CPU, memory, player count, and uptime." />
+                    </StackPanel>
+
+                    <!-- Time range selector -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                        <!-- Live indicator -->
+                        <Border Background="{StaticResource StatusSuccessBg}"
+                                BorderBrush="{StaticResource StatusSuccessBorder}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="10,4"
+                                Margin="0,0,10,0"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding IsCollecting, Converter={StaticResource BoolToVisibleConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="7" Height="7" Fill="{StaticResource StatusSuccess}"
+                                         VerticalAlignment="Center" Margin="0,0,6,0" />
+                                <TextBlock Text="LIVE"
+                                           Foreground="{StaticResource StatusSuccess}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="11"
+                                           FontWeight="Bold" />
+                            </StackPanel>
+                        </Border>
+
+                        <ComboBox ItemsSource="{Binding TimeRangeOptions}"
+                                  SelectedIndex="{Binding SelectedTimeRangeIndex}"
+                                  Foreground="{StaticResource TextPrimary}"
+                                  Background="{StaticResource FieldBackground}"
+                                  BorderBrush="{StaticResource BorderDefault}"
+                                  FontFamily="{StaticResource FontUI}"
+                                  FontSize="{StaticResource FontSizeBody}"
+                                  MinWidth="160"
+                                  VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
 
                 <!-- Loading bar -->
                 <ProgressBar Style="{StaticResource LoadingBarStyle}"
                              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibleConverter}}"
                              Margin="0,0,0,16" />
 
-                <!-- Time range + collecting status bar -->
-                <Border Style="{StaticResource CardStyle}"
-                        Padding="16,12"
-                        Margin="0,0,0,16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="220" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                <!-- ── Stat tiles row ────────────────────────────────────────── -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0"
-                                   Style="{StaticResource FieldLabelStyle}"
-                                   Text="Time range:"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,10,0" />
+                    <!-- Availability tile -->
+                    <Border Grid.Column="0"
+                            Style="{StaticResource CardStyle}"
+                            Padding="20,18"
+                            ClipToBounds="True">
+                        <Grid>
+                            <!-- Top accent bar -->
+                            <Border VerticalAlignment="Top"
+                                    HorizontalAlignment="Stretch"
+                                    Height="2"
+                                    Margin="-20,-18,-20,0"
+                                    Background="{StaticResource AccentCyan}" />
 
-                        <ComboBox Grid.Column="1"
-                                  ItemsSource="{Binding TimeRangeOptions}"
-                                  SelectedIndex="{Binding SelectedTimeRangeIndex}"
-                                  Foreground="{StaticResource TextPrimary}"
-                                  Background="{StaticResource FieldBackground}"
-                                  FontFamily="{StaticResource FontUI}"
-                                  FontSize="{StaticResource FontSizeBody}" />
-
-                        <!-- Live indicator -->
-                        <StackPanel Grid.Column="3"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center"
-                                    Visibility="{Binding IsCollecting, Converter={StaticResource BoolToVisibleConverter}}">
-                            <Ellipse Width="8" Height="8"
-                                     Margin="0,0,8,0"
-                                     Fill="{StaticResource StatusRunning}" />
-                            <TextBlock Text="Collecting"
-                                       Foreground="{StaticResource StatusRunning}"
-                                       FontFamily="{StaticResource FontUI}"
-                                       FontSize="{StaticResource FontSizeSmall}" />
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- ── Uptime summary ──────────────────────────────────────── -->
-                <Border Style="{StaticResource CardStyle}"
-                        Padding="20,16"
-                        Margin="0,0,0,16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Style="{StaticResource CardTitleStyle}"
-                                       Text="Availability"
-                                       Margin="0,0,0,4" />
-                            <TextBlock Text="{Binding AvailabilityPct}"
-                                       Foreground="{StaticResource AccentCyan}"
-                                       FontFamily="{StaticResource FontUI}"
-                                       FontSize="28"
-                                       FontWeight="Bold" />
-                            <TextBlock Text="{Binding UptimeSummary}"
-                                       Style="{StaticResource MutedTextStyle}"
-                                       Margin="0,4,0,0" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource CardTitleStyle}"
-                                       Text="Status"
-                                       Margin="0,0,0,4" />
-                            <StackPanel Orientation="Horizontal">
-                                <Ellipse Width="10" Height="10"
-                                         Margin="0,0,8,0"
-                                         Fill="{StaticResource StatusRunning}"
-                                         VerticalAlignment="Center"
-                                         Visibility="{Binding IsCollecting, Converter={StaticResource BoolToVisibleConverter}}" />
-                                <Ellipse Width="10" Height="10"
-                                         Margin="0,0,8,0"
-                                         Fill="{StaticResource StatusOffline}"
-                                         VerticalAlignment="Center"
-                                         Visibility="{Binding IsCollecting, Converter={StaticResource BoolToCollapsedConverter}}" />
-                                <TextBlock Text="Live"
-                                           Foreground="{StaticResource StatusRunning}"
+                            <StackPanel Margin="0,8,0,0">
+                                <TextBlock Text="AVAILABILITY"
+                                           Style="{StaticResource SectionLabelStyle}"
+                                           Margin="0,0,0,8" />
+                                <TextBlock Text="{Binding AvailabilityPct}"
+                                           Foreground="{StaticResource AccentCyan}"
                                            FontFamily="{StaticResource FontUI}"
-                                           FontSize="{StaticResource FontSizeBody}"
-                                           VerticalAlignment="Center"
-                                           Visibility="{Binding IsCollecting, Converter={StaticResource BoolToVisibleConverter}}" />
-                                <TextBlock Text="Server offline"
-                                           Foreground="{StaticResource StatusOffline}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="{StaticResource FontSizeBody}"
-                                           VerticalAlignment="Center"
-                                           Visibility="{Binding IsCollecting, Converter={StaticResource BoolToCollapsedConverter}}" />
+                                           FontSize="36"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,4" />
+                                <TextBlock Text="{Binding UptimeSummary}"
+                                           Style="{StaticResource MutedTextStyle}" />
                             </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                        </Grid>
+                    </Border>
 
-                <!-- ── Player Count chart ─────────────────────────────────── -->
+                    <!-- Server status tile -->
+                    <Border Grid.Column="2"
+                            Style="{StaticResource CardStyle}"
+                            Padding="20,18"
+                            ClipToBounds="True">
+                        <Grid>
+                            <!-- Top accent bar — green when collecting, muted otherwise -->
+                            <Border VerticalAlignment="Top"
+                                    HorizontalAlignment="Stretch"
+                                    Height="2"
+                                    Margin="-20,-18,-20,0">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{StaticResource BorderDefault}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCollecting}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource StatusSuccess}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                            </Border>
+
+                            <StackPanel Margin="0,8,0,0">
+                                <TextBlock Text="STATUS"
+                                           Style="{StaticResource SectionLabelStyle}"
+                                           Margin="0,0,0,8" />
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <Ellipse Width="10" Height="10"
+                                             Margin="0,0,8,0"
+                                             VerticalAlignment="Center">
+                                        <Ellipse.Style>
+                                            <Style TargetType="Ellipse">
+                                                <Setter Property="Fill" Value="{StaticResource StatusOffline}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCollecting}" Value="True">
+                                                        <Setter Property="Fill" Value="{StaticResource StatusSuccess}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Ellipse.Style>
+                                    </Ellipse>
+                                    <TextBlock FontFamily="{StaticResource FontUI}"
+                                               FontSize="24"
+                                               FontWeight="Bold"
+                                               VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text"       Value="Offline" />
+                                                <Setter Property="Foreground" Value="{StaticResource StatusOffline}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCollecting}" Value="True">
+                                                        <Setter Property="Text"       Value="Live" />
+                                                        <Setter Property="Foreground" Value="{StaticResource StatusSuccess}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                                <TextBlock Foreground="{StaticResource TextMuted}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeSmall}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Metrics are not being collected" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCollecting}" Value="True">
+                                                    <Setter Property="Text" Value="Collecting snapshots every 60 s" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Downtime events tile -->
+                    <Border Grid.Column="4"
+                            Style="{StaticResource CardStyle}"
+                            Padding="20,18"
+                            ClipToBounds="True">
+                        <Grid>
+                            <!-- Top accent bar -->
+                            <Border VerticalAlignment="Top"
+                                    HorizontalAlignment="Stretch"
+                                    Height="2"
+                                    Margin="-20,-18,-20,0">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{StaticResource AccentPrimary}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasDowntimeEvents}" Value="False">
+                                                <Setter Property="Background" Value="{StaticResource BorderDefault}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                            </Border>
+
+                            <StackPanel Margin="0,8,0,0">
+                                <TextBlock Text="DOWNTIME EVENTS"
+                                           Style="{StaticResource SectionLabelStyle}"
+                                           Margin="0,0,0,8" />
+                                <TextBlock Text="{Binding DowntimeEvents.Count}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="36"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,4">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasDowntimeEvents}" Value="True">
+                                                    <Setter Property="Foreground" Value="{StaticResource AccentPrimary}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="in selected period"
+                                           Style="{StaticResource MutedTextStyle}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- ── Player Count chart ────────────────────────────────────── -->
                 <Border Style="{StaticResource CardStyle}"
                         Padding="20,16"
                         Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource CardTitleStyle}"
-                                   Text="Player Count"
-                                   Margin="0,0,0,12" />
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Style="{StaticResource CardTitleStyle}"
+                                       Text="Player Count" />
+                            <TextBlock Grid.Column="1"
+                                       Style="{StaticResource MutedTextStyle}"
+                                       Text="Heuristic — log-based detection"
+                                       VerticalAlignment="Center" />
+                        </Grid>
                         <oxy:PlotView Model="{Binding PlayerCountModel}"
                                       Height="160"
                                       Background="Transparent" />
                     </StackPanel>
                 </Border>
 
-                <!-- ── CPU chart ──────────────────────────────────────────── -->
+                <!-- ── CPU chart ─────────────────────────────────────────────── -->
                 <Border Style="{StaticResource CardStyle}"
                         Padding="20,16"
                         Margin="0,0,0,16">
@@ -148,7 +268,7 @@
                     </StackPanel>
                 </Border>
 
-                <!-- ── Memory chart ───────────────────────────────────────── -->
+                <!-- ── Memory chart ──────────────────────────────────────────── -->
                 <Border Style="{StaticResource CardStyle}"
                         Padding="20,16"
                         Margin="0,0,0,16">
@@ -162,7 +282,7 @@
                     </StackPanel>
                 </Border>
 
-                <!-- ── Downtime events ────────────────────────────────────── -->
+                <!-- ── Downtime events list ──────────────────────────────────── -->
                 <Border Style="{StaticResource CardStyle}"
                         Padding="20,16">
                     <StackPanel>
@@ -170,15 +290,16 @@
                                    Text="Downtime Events"
                                    Margin="0,0,0,12" />
 
-                        <!-- Event list -->
                         <ItemsControl ItemsSource="{Binding DowntimeEvents}"
                                       Visibility="{Binding HasDowntimeEvents, Converter={StaticResource BoolToVisibleConverter}}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border Background="{StaticResource SurfaceBackground}"
+                                            BorderBrush="{StaticResource BorderDefault}"
+                                            BorderThickness="1"
                                             CornerRadius="{StaticResource CornerSmall}"
-                                            Padding="14,10"
-                                            Margin="0,0,0,6">
+                                            Padding="16,12"
+                                            Margin="0,0,0,8">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
@@ -190,11 +311,12 @@
                                                 <TextBlock Text="{Binding Reason}"
                                                            Foreground="{StaticResource TextPrimary}"
                                                            FontFamily="{StaticResource FontUI}"
-                                                           FontSize="{StaticResource FontSizeBody}" />
+                                                           FontSize="{StaticResource FontSizeBody}"
+                                                           FontWeight="SemiBold" />
                                                 <TextBlock Foreground="{StaticResource TextMuted}"
                                                            FontFamily="{StaticResource FontUI}"
                                                            FontSize="{StaticResource FontSizeSmall}"
-                                                           Margin="0,2,0,0">
+                                                           Margin="0,3,0,0">
                                                     <TextBlock.Text>
                                                         <MultiBinding StringFormat="Started {0:yyyy-MM-dd HH:mm}">
                                                             <Binding Path="StartedAt" />
@@ -206,6 +328,8 @@
                                             <!-- Open badge -->
                                             <Border Grid.Column="1"
                                                     Background="{StaticResource StatusWarningBg}"
+                                                    BorderBrush="{StaticResource StatusWarningBorder}"
+                                                    BorderThickness="1"
                                                     CornerRadius="{StaticResource CornerSmall}"
                                                     Padding="8,3"
                                                     Margin="12,0"
@@ -214,14 +338,15 @@
                                                 <TextBlock Text="Open"
                                                            Foreground="{StaticResource StatusWarning}"
                                                            FontFamily="{StaticResource FontUI}"
-                                                           FontSize="{StaticResource FontSizeSmall}" />
+                                                           FontSize="{StaticResource FontSizeSmall}"
+                                                           FontWeight="SemiBold" />
                                             </Border>
 
                                             <!-- Duration -->
                                             <TextBlock Grid.Column="2"
                                                        Foreground="{StaticResource TextMuted}"
                                                        FontFamily="{StaticResource FontMono}"
-                                                       FontSize="{StaticResource FontSizeSmall}"
+                                                       FontSize="{StaticResource FontSizeBody}"
                                                        VerticalAlignment="Center"
                                                        Visibility="{Binding IsOpen, Converter={StaticResource BoolToCollapsedConverter}}">
                                                 <TextBlock.Text>

@@ -20,6 +20,9 @@ public partial class PlayersViewModel : ObservableObject
 
     [ObservableProperty] private int _selectedTabIndex;
 
+    [RelayCommand]
+    private void SelectTab(int index) => SelectedTabIndex = index;
+
     // ── Connected players ─────────────────────────────────────────────────────
 
     [ObservableProperty]

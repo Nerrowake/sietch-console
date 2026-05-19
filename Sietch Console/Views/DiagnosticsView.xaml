@@ -183,36 +183,9 @@
                 <Button Grid.Column="1"
                         Command="{Binding RunChecksCommand}"
                         IsEnabled="{Binding IsRunning, Converter={StaticResource BoolInverseConverter}}"
+                        Style="{StaticResource PrimaryButtonStyle}"
                         Padding="20,10"
-                        Background="{StaticResource AccentPrimary}"
-                        Foreground="{StaticResource TextPrimary}"
-                        BorderThickness="0"
-                        FontWeight="SemiBold"
-                        Cursor="Hand">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}"
-                                                CornerRadius="{StaticResource CornerMedium}"
-                                                Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter HorizontalAlignment="Center"
-                                                              VerticalAlignment="Center" />
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="{StaticResource AccentAmber}" />
-                                            </Trigger>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter Property="Background" Value="{StaticResource BorderDefault}" />
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </Button.Style>
+                        VerticalAlignment="Top">
                     <TextBlock>
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">

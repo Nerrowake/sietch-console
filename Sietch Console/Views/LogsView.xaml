@@ -4,6 +4,51 @@
              xmlns:models="clr-namespace:SietchConsole.Core.Models;assembly=SietchConsole.Core"
              Background="{StaticResource AppBackground}">
 
+    <UserControl.Resources>
+
+        <!-- Base filter pill button (not active) -->
+        <Style x:Key="FilterPillStyle" TargetType="Button">
+            <Setter Property="Height"          Value="32" />
+            <Setter Property="Padding"         Value="14,0" />
+            <Setter Property="FontFamily"      Value="{StaticResource FontUI}" />
+            <Setter Property="FontSize"        Value="12" />
+            <Setter Property="FontWeight"      Value="Medium" />
+            <Setter Property="Background"      Value="{StaticResource FieldBackground}" />
+            <Setter Property="Foreground"      Value="{StaticResource TextSecondary}" />
+            <Setter Property="BorderBrush"     Value="{StaticResource BorderDefault}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor"          Value="Hand" />
+            <Setter Property="Margin"          Value="0,0,4,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource CornerMedium}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background"
+                                        Value="{StaticResource OverlayBackground}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toolbar action button (Copy Logs, Export, etc.) -->
+        <Style x:Key="ToolbarActionStyle" TargetType="Button" BasedOn="{StaticResource FilterPillStyle}">
+            <Setter Property="Margin" Value="0,0,6,0" />
+        </Style>
+
+    </UserControl.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -17,7 +62,7 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,4">
                 <TextBlock Style="{StaticResource PageTitleStyle}" Text="Logs" />
 
-                <!-- Live stream indicator pill (#129) -->
+                <!-- Live stream indicator pill -->
                 <Border Background="{StaticResource AccentTeal}"
                         CornerRadius="10"
                         Padding="8,3"
@@ -52,13 +97,13 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Search box (#70) -->
+                <!-- Search box -->
                 <Border Grid.Column="0"
                         Background="{StaticResource FieldBackground}"
                         BorderBrush="{StaticResource BorderDefault}"
                         BorderThickness="1"
                         CornerRadius="{StaticResource CornerMedium}"
-                        Height="34">
+                        Height="32">
                     <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                              Background="Transparent"
                              BorderThickness="0"
@@ -70,22 +115,12 @@
                              CaretBrush="{StaticResource AccentPrimary}">
                         <TextBox.Style>
                             <Style TargetType="TextBox">
-                                <Style.Resources>
-                                    <VisualBrush x:Key="Hint" TileMode="None" Stretch="None" AlignmentX="Left" AlignmentY="Center">
-                                        <VisualBrush.Visual>
-                                            <TextBlock Text="Search logs..."
-                                                       Foreground="{StaticResource TextDisabled}"
-                                                       FontFamily="Segoe UI Variable"
-                                                       FontSize="13" />
-                                        </VisualBrush.Visual>
-                                    </VisualBrush>
-                                </Style.Resources>
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="TextBox">
                                             <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
                                                 <Grid>
-                                                    <TextBlock Text="Search logs..."
+                                                    <TextBlock Text="Search logs…"
                                                                Foreground="{StaticResource TextDisabled}"
                                                                FontFamily="{StaticResource FontUI}"
                                                                FontSize="{StaticResource FontSizeBody}"
@@ -113,38 +148,18 @@
                     </TextBox>
                 </Border>
 
-                <!-- Severity filter buttons (#70) -->
+                <!-- Severity filter pills -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button Command="{Binding FilterAllCommand}"
-                            Margin="0,0,4,0" Padding="14,0" Height="34" Cursor="Hand">
+
+                    <!-- All -->
+                    <Button Command="{Binding FilterAllCommand}">
                         <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                <Setter Property="FontSize"       Value="12" />
-                                <Setter Property="FontWeight"     Value="SemiBold" />
-                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
-                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                <Setter Property="BorderThickness" Value="1" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Bd"
-                                                    Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="{StaticResource CornerMedium}"
-                                                    Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterPillStyle}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding SeverityFilter}" Value="{x:Null}">
-                                        <Setter Property="Background" Value="#2A1E12" />
+                                        <Setter Property="Background"  Value="#2A1E12" />
                                         <Setter Property="BorderBrush" Value="{StaticResource AccentPrimary}" />
-                                        <Setter Property="Foreground" Value="{StaticResource AccentPrimary}" />
+                                        <Setter Property="Foreground"  Value="{StaticResource AccentPrimary}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -152,32 +167,14 @@
                         <TextBlock Text="All" />
                     </Button>
 
-                    <Button Command="{Binding FilterErrorsCommand}"
-                            Margin="0,0,4,0" Padding="14,0" Height="34" Cursor="Hand">
+                    <!-- Error -->
+                    <Button Command="{Binding FilterErrorsCommand}">
                         <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                <Setter Property="FontSize"       Value="12" />
-                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                <Setter Property="Foreground"     Value="{StaticResource StatusError}" />
-                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                <Setter Property="BorderThickness" Value="1" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="{StaticResource CornerMedium}"
-                                                    Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterPillStyle}">
+                                <Setter Property="Foreground" Value="{StaticResource StatusError}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding SeverityFilter}" Value="{x:Static models:LogSeverity.Error}">
-                                        <Setter Property="Background" Value="{StaticResource StatusErrorBg}" />
+                                        <Setter Property="Background"  Value="{StaticResource StatusErrorBg}" />
                                         <Setter Property="BorderBrush" Value="{StaticResource StatusErrorBorder}" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -186,32 +183,14 @@
                         <TextBlock Text="Error" />
                     </Button>
 
-                    <Button Command="{Binding FilterWarningsCommand}"
-                            Margin="0,0,4,0" Padding="14,0" Height="34" Cursor="Hand">
+                    <!-- Warning -->
+                    <Button Command="{Binding FilterWarningsCommand}">
                         <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                <Setter Property="FontSize"       Value="12" />
-                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                <Setter Property="Foreground"     Value="{StaticResource StatusWarning}" />
-                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                <Setter Property="BorderThickness" Value="1" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="{StaticResource CornerMedium}"
-                                                    Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterPillStyle}">
+                                <Setter Property="Foreground" Value="{StaticResource StatusWarning}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding SeverityFilter}" Value="{x:Static models:LogSeverity.Warning}">
-                                        <Setter Property="Background" Value="{StaticResource StatusWarningBg}" />
+                                        <Setter Property="Background"  Value="{StaticResource StatusWarningBg}" />
                                         <Setter Property="BorderBrush" Value="{StaticResource StatusWarningBorder}" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -220,32 +199,15 @@
                         <TextBlock Text="Warning" />
                     </Button>
 
-                    <Button Command="{Binding FilterInfoCommand}"
-                            Padding="14,0" Height="34" Cursor="Hand">
+                    <!-- Info -->
+                    <Button Command="{Binding FilterInfoCommand}" Margin="0">
                         <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                <Setter Property="FontSize"       Value="12" />
-                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                <Setter Property="Foreground"     Value="{StaticResource StatusInfo}" />
-                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                <Setter Property="BorderThickness" Value="1" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="{StaticResource CornerMedium}"
-                                                    Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterPillStyle}">
+                                <Setter Property="Foreground" Value="{StaticResource StatusInfo}" />
+                                <Setter Property="Margin"     Value="0" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding SeverityFilter}" Value="{x:Static models:LogSeverity.Info}">
-                                        <Setter Property="Background" Value="{StaticResource StatusInfoBg}" />
+                                        <Setter Property="Background"  Value="{StaticResource StatusInfoBg}" />
                                         <Setter Property="BorderBrush" Value="{StaticResource StatusInfoBorder}" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -253,19 +215,20 @@
                         </Button.Style>
                         <TextBlock Text="Info" />
                     </Button>
+
                 </StackPanel>
 
                 <!-- File selector -->
                 <ComboBox Grid.Column="4"
                           ItemsSource="{Binding AvailableLogFiles}"
                           SelectedItem="{Binding ActiveLogFile}"
-                          MinWidth="160" Height="34"
+                          MinWidth="160" Height="32"
                           Background="{StaticResource FieldBackground}"
                           Foreground="{StaticResource TextSecondary}"
                           BorderBrush="{StaticResource BorderDefault}"
                           FontFamily="{StaticResource FontMono}"
                           FontSize="11"
-                          Padding="8,5">
+                          Padding="8,4">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Converter={StaticResource PathToFileNameConverter}}"
@@ -275,124 +238,39 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>
 
-                <!-- Action buttons (#74, #75, #188) -->
+                <!-- Action buttons -->
                 <StackPanel Grid.Column="6" Orientation="Horizontal">
-                    <!-- #188 – Copy visible (filtered) log lines -->
                     <Button Command="{Binding CopyVisibleLogsCommand}"
-                            Margin="0,0,6,0" Padding="14,0" Height="34" Cursor="Hand"
+                            Style="{StaticResource ToolbarActionStyle}"
                             ToolTip="Copy visible log lines to clipboard">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
-                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                <Setter Property="BorderThickness" Value="1" />
-                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                <Setter Property="FontSize"       Value="12" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="{StaticResource CornerMedium}"
-                                                    Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </Button.Style>
                         <TextBlock Text="Copy Logs" />
                     </Button>
 
                     <Button Command="{Binding CopyReportCommand}"
-                            Margin="0,0,6,0" Padding="14,0" Height="34" Cursor="Hand">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
-                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                <Setter Property="BorderThickness" Value="1" />
-                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                <Setter Property="FontSize"       Value="12" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="{StaticResource CornerMedium}"
-                                                    Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </Button.Style>
+                            Style="{StaticResource ToolbarActionStyle}">
                         <TextBlock Text="Copy Report" />
                     </Button>
 
                     <Button Command="{Binding ExportLogsCommand}"
-                            Padding="14,0" Height="34" Cursor="Hand">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background"     Value="{StaticResource FieldBackground}" />
-                                <Setter Property="Foreground"     Value="{StaticResource TextSecondary}" />
-                                <Setter Property="BorderBrush"    Value="{StaticResource BorderDefault}" />
-                                <Setter Property="BorderThickness" Value="1" />
-                                <Setter Property="FontFamily"     Value="{StaticResource FontUI}" />
-                                <Setter Property="FontSize"       Value="12" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="{StaticResource CornerMedium}"
-                                                    Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource OverlayBackground}" />
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </Button.Style>
+                            Style="{StaticResource ToolbarActionStyle}"
+                            Margin="0">
                         <TextBlock Text="Export" />
                     </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- ── Detected Issues Panel (#71, #72, #73) ── -->
+        <!-- ── Detected Issues Panel ── -->
         <Border Grid.Row="2"
                 Margin="28,12,28,0"
                 Style="{StaticResource CardStyle}"
                 Padding="16,12">
             <StackPanel>
                 <!-- Header row -->
-                <Grid Margin="0,0,0,0">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*"    />
-                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
@@ -425,7 +303,7 @@
                                Margin="12,0,0,0" />
                 </Grid>
 
-                <!-- Issue cards (#73) -->
+                <!-- Issue cards -->
                 <ItemsControl ItemsSource="{Binding DetectedIssues}"
                               Margin="0,10,0,0"
                               Visibility="{Binding HasDetectedIssues, Converter={StaticResource BoolToVisibleConverter}}">
@@ -448,7 +326,6 @@
                                     </Style>
                                 </Border.Style>
                                 <StackPanel>
-                                    <!-- Title -->
                                     <TextBlock Text="{Binding Title}"
                                                FontFamily="{StaticResource FontUI}"
                                                FontSize="{StaticResource FontSizeBody}"
@@ -465,16 +342,12 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-
-                                    <!-- Explanation (#72) -->
                                     <TextBlock Text="{Binding Explanation}"
                                                Foreground="{StaticResource TextSecondary}"
                                                FontFamily="{StaticResource FontUI}"
                                                FontSize="12"
                                                TextWrapping="Wrap"
                                                Margin="0,0,0,6" />
-
-                                    <!-- Recommendations -->
                                     <ItemsControl ItemsSource="{Binding Recommendations}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
@@ -496,7 +369,7 @@
             </StackPanel>
         </Border>
 
-        <!-- ── Log Stream (#69) ── -->
+        <!-- ── Log Stream ── -->
         <Border Grid.Row="3"
                 Margin="28,12,28,20"
                 Background="{StaticResource DeepBackground}"
@@ -629,8 +502,8 @@
                     </ListBox.Style>
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
-                            <Setter Property="Padding" Value="0" />
-                            <Setter Property="Margin"  Value="0,1" />
+                            <Setter Property="Padding"  Value="0" />
+                            <Setter Property="Margin"   Value="0,1" />
                             <Setter Property="Background" Value="Transparent" />
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                             <Setter Property="Template">
