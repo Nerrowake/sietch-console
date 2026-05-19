@@ -13,6 +13,7 @@ namespace Sietch_Console.ViewModels;
 public partial class SettingsViewModel : ObservableObject
 {
     private readonly IConfigurationService    _configService;
+    private readonly IRemoteConfigService     _remoteConfigService;
     private readonly IBackupService           _backupService;
     private readonly IServiceScopeFactory     _scopeFactory;
     private readonly IActiveProfileService    _activeProfileService;
@@ -91,6 +92,19 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _vmSshStatusMessage = string.Empty;
     [ObservableProperty] private bool   _vmSshIsBusy;
 
+    // ── Remote config path (#201) ─────────────────────────────────────
+    /// <summary>
+    /// Absolute path inside the VM to the battlegroup config directory.
+    /// When set and SSH is connected, the raw editor reads/writes via SFTP.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsRemoteConfigAvailable))]
+    private string _remoteConfigPath = string.Empty;
+
+    /// <summary>True when SSH is live and a remote config path has been specified.</summary>
+    public bool IsRemoteConfigAvailable =>
+        _remoteConfigService.IsAvailable && !string.IsNullOrWhiteSpace(RemoteConfigPath);
+
     /// <summary>Displayed placeholder when the path field is empty (uses the known default).</summary>
     public string SshKeyPathDisplay => string.IsNullOrWhiteSpace(VmSshKeyPath)
         ? BattlegroupProfile.DefaultSshKeyPath
@@ -125,12 +139,14 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _discordStatusMessage = string.Empty;
     [ObservableProperty] private bool   _discordIsBusy;
 
-    public SettingsViewModel(IConfigurationService configService, IBackupService backupService,
+    public SettingsViewModel(IConfigurationService configService, IRemoteConfigService remoteConfigService,
+                             IBackupService backupService,
                              IServiceScopeFactory scopeFactory, IActiveProfileService activeProfileService,
                              IRemoteManagementService remoteService, IDiscordWebhookService discordService,
                              ISshService sshService)
     {
         _configService        = configService;
+        _remoteConfigService  = remoteConfigService;
         _backupService        = backupService;
         _scopeFactory         = scopeFactory;
         _activeProfileService = activeProfileService;
@@ -172,9 +188,21 @@ public partial class SettingsViewModel : ObservableObject
                 return;
             }
 
-            ConfigDirectory = _configService.LocateConfigDirectory(_profile);
-            HasConfig = ConfigDirectory is not null;
-            AvailableFiles = await _configService.GetConfigFilesAsync(_profile);
+            if (IsRemoteConfigAvailable)
+            {
+                ConfigDirectory = RemoteConfigPath;
+                HasConfig       = true;
+                var names = await _remoteConfigService.ListConfigFilesAsync(RemoteConfigPath);
+                AvailableFiles  = names
+                    .Select(n => RemoteConfigPath.TrimEnd('/') + "/" + n)
+                    .ToList();
+            }
+            else
+            {
+                ConfigDirectory = _configService.LocateConfigDirectory(_profile);
+                HasConfig       = ConfigDirectory is not null;
+                AvailableFiles  = await _configService.GetConfigFilesAsync(_profile);
+            }
 
             var config = await _configService.LoadAsync(_profile);
             if (config is not null)
@@ -289,16 +317,47 @@ public partial class SettingsViewModel : ObservableObject
     private async Task SaveRawAsync()
     {
         if (SelectedFile is null) return;
-        await _configService.SaveRawContentAsync(SelectedFile, RawContent, createBackup: true);
-        RawHasUnsavedChanges = false;
-        StatusMessage = "Raw file saved. Reload the Settings page to reflect changes in the form.";
+
+        if (IsRemoteConfigAvailable)
+        {
+            IsLoading = true;
+            try
+            {
+                await _remoteConfigService.WriteConfigFileAsync(SelectedFile, RawContent);
+                RawHasUnsavedChanges = false;
+                StatusMessage = "Remote config file saved via SFTP. Restart the battlegroup to apply changes.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"SFTP write failed: {ex.Message}";
+            }
+            finally { IsLoading = false; }
+        }
+        else
+        {
+            await _configService.SaveRawContentAsync(SelectedFile, RawContent, createBackup: true);
+            RawHasUnsavedChanges = false;
+            StatusMessage = "Raw file saved. Reload the Settings page to reflect changes in the form.";
+        }
     }
 
     [RelayCommand]
     private async Task ReloadRawAsync()
     {
         if (SelectedFile is null) { RawContent = string.Empty; return; }
-        RawContent = await _configService.GetRawContentAsync(SelectedFile);
+
+        if (IsRemoteConfigAvailable)
+        {
+            IsLoading = true;
+            try { RawContent = await _remoteConfigService.ReadConfigFileAsync(SelectedFile); }
+            catch (Exception ex) { RawContent = $"# SFTP read failed: {ex.Message}"; }
+            finally { IsLoading = false; }
+        }
+        else
+        {
+            RawContent = await _configService.GetRawContentAsync(SelectedFile);
+        }
+
         RawHasUnsavedChanges = false;
     }
 
@@ -520,11 +579,12 @@ public partial class SettingsViewModel : ObservableObject
 
         try
         {
-            _profile.VmIpAddress  = VmIpAddress.Trim();
-            _profile.VmSshKeyPath = string.IsNullOrWhiteSpace(VmSshKeyPath) ? null : VmSshKeyPath.Trim();
-            _profile.VmUsername   = string.IsNullOrWhiteSpace(VmUsername) ? "dune" : VmUsername.Trim();
-            _profile.VmSshPort    = VmSshPort;
-            _profile.UpdatedAt    = DateTime.UtcNow;
+            _profile.VmIpAddress      = VmIpAddress.Trim();
+            _profile.VmSshKeyPath     = string.IsNullOrWhiteSpace(VmSshKeyPath) ? null : VmSshKeyPath.Trim();
+            _profile.VmUsername       = string.IsNullOrWhiteSpace(VmUsername) ? "dune" : VmUsername.Trim();
+            _profile.VmSshPort        = VmSshPort;
+            _profile.RemoteConfigPath = string.IsNullOrWhiteSpace(RemoteConfigPath) ? null : RemoteConfigPath.Trim();
+            _profile.UpdatedAt        = DateTime.UtcNow;
 
             using var scope  = _scopeFactory.CreateScope();
             var profileRepo  = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
@@ -557,10 +617,11 @@ public partial class SettingsViewModel : ObservableObject
     private void LoadVmConnectionSettings()
     {
         if (_profile is null) return;
-        VmIpAddress  = _profile.VmIpAddress  ?? string.Empty;
-        VmSshKeyPath = _profile.VmSshKeyPath ?? string.Empty;
-        VmUsername   = _profile.VmUsername;
-        VmSshPort    = _profile.VmSshPort;
+        VmIpAddress      = _profile.VmIpAddress      ?? string.Empty;
+        VmSshKeyPath     = _profile.VmSshKeyPath     ?? string.Empty;
+        VmUsername       = _profile.VmUsername;
+        VmSshPort        = _profile.VmSshPort;
+        RemoteConfigPath = _profile.RemoteConfigPath ?? string.Empty;
         VmSshStatusMessage = string.Empty;
     }
 

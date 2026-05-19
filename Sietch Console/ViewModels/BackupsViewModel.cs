@@ -13,11 +13,12 @@ public enum PendingBackupAction { None, Delete, Restore }
 
 public partial class BackupsViewModel : ObservableObject
 {
-    private readonly IBackupService       _backupService;
-    private readonly ICloudSyncService    _cloudSync;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IActiveProfileService _activeProfileService;
-    private readonly DispatcherTimer      _autoBackupTimer;
+    private readonly IBackupService              _backupService;
+    private readonly ICloudSyncService           _cloudSync;
+    private readonly IServiceScopeFactory        _scopeFactory;
+    private readonly IActiveProfileService       _activeProfileService;
+    private readonly IBattlegroupControlService  _battlegroup;
+    private readonly DispatcherTimer             _autoBackupTimer;
 
     private BattlegroupProfile? _profile;
 
@@ -69,6 +70,11 @@ public partial class BackupsViewModel : ObservableObject
     partial void OnAutoBackupEnabledChanged(bool value)   => ReconfigureTimer();
     partial void OnBackupIntervalHoursChanged(int value)  => ReconfigureTimer();
 
+    // ── VM backup (#199, #200) ────────────────────────────────────────────────
+
+    [ObservableProperty] private bool   _isVmBackupBusy;
+    [ObservableProperty] private string _vmBackupLog = string.Empty;
+
     // ── Cloud sync settings (#173, #174, #175, #176) ──────────────────────────
 
     public IReadOnlyList<string> CloudProviders { get; } = ["None", "OneDrive", "S3"];
@@ -101,12 +107,14 @@ public partial class BackupsViewModel : ObservableObject
 
     public BackupsViewModel(IBackupService backupService, ICloudSyncService cloudSync,
                             IServiceScopeFactory scopeFactory,
-                            IActiveProfileService activeProfileService)
+                            IActiveProfileService activeProfileService,
+                            IBattlegroupControlService battlegroup)
     {
         _backupService        = backupService;
         _cloudSync            = cloudSync;
         _scopeFactory         = scopeFactory;
         _activeProfileService = activeProfileService;
+        _battlegroup          = battlegroup;
 
         _autoBackupTimer = new DispatcherTimer();
         _autoBackupTimer.Tick += async (_, _) => await RunAutoBackupAsync();
@@ -280,6 +288,16 @@ public partial class BackupsViewModel : ObservableObject
                 OnPropertyChanged(nameof(HasBackups));
                 StatusMessage = "Backup deleted.";
             }
+            else if (!string.IsNullOrEmpty(record.VmArchivePath))
+            {
+                // VM-native backup — route to battlegroup import (#200)
+                StatusMessage = $"Restoring VM backup via battlegroup import…";
+                void AppendLog(string line)
+                    => VmBackupLog = string.IsNullOrEmpty(VmBackupLog) ? line : $"{VmBackupLog}\n{line}";
+                VmBackupLog = string.Empty;
+                await _battlegroup.ImportBattlegroupAsync(_profile!, record.VmArchivePath, AppendLog);
+                StatusMessage = "VM backup imported. Restart the battlegroup to apply changes.";
+            }
             else
             {
                 StatusMessage = "Restoring backup…";
@@ -303,6 +321,57 @@ public partial class BackupsViewModel : ObservableObject
 
     [RelayCommand]
     private async Task RefreshAsync() => await LoadBackupsAsync();
+
+    // ── VM backup (#199, #200) ────────────────────────────────────────────────
+
+    [RelayCommand]
+    private async Task VmBackupAsync()
+    {
+        if (_profile is null) { StatusMessage = "No battlegroup profile configured."; return; }
+
+        IsVmBackupBusy = true;
+        VmBackupLog    = string.Empty;
+        StatusMessage  = string.Empty;
+        try
+        {
+            void AppendLog(string line)
+            {
+                VmBackupLog = string.IsNullOrEmpty(VmBackupLog) ? line : $"{VmBackupLog}\n{line}";
+            }
+
+            var archivePath = await _battlegroup.BackupBattlegroupAsync(_profile, AppendLog);
+
+            // Persist a BackupRecord so the backup appears in the list
+            using var scope = _scopeFactory.CreateScope();
+            var repo        = scope.ServiceProvider.GetRequiredService<IBackupRecordRepository>();
+            var record      = new BackupRecord
+            {
+                BackupType           = "VM",
+                BackupPath           = string.Empty,   // no host-side file
+                VmArchivePath        = archivePath,
+                SizeBytes            = 0,
+                Notes                = "VM-native backup (battlegroup backup)",
+                AppVersion           = GetType().Assembly.GetName().Version?.ToString(),
+                BattlegroupProfileId = _profile.Id,
+                CreatedAt            = DateTime.UtcNow,
+            };
+            await repo.AddAsync(record);
+            Backups.Insert(0, record);
+            OnPropertyChanged(nameof(HasBackups));
+
+            StatusMessage = string.IsNullOrEmpty(archivePath)
+                ? "VM backup completed."
+                : $"VM backup completed — archive: {archivePath}";
+        }
+        catch (Exception ex)
+        {
+            VmBackupLog   = string.IsNullOrEmpty(VmBackupLog)
+                ? ex.Message
+                : $"{VmBackupLog}\nERROR: {ex.Message}";
+            StatusMessage = $"VM backup failed: {ex.Message}";
+        }
+        finally { IsVmBackupBusy = false; }
+    }
 
     // ── Cloud sync commands (#173, #174, #175, #176) ──────────────────────────
 

@@ -94,6 +94,10 @@ public class DatabaseInitializerService
         await AddColumnIfMissingAsync("BattlegroupProfiles", "VmSshPort",            "INTEGER NOT NULL DEFAULT 22");
         await AddColumnIfMissingAsync("BattlegroupProfiles", "BattlegroupNamespace", "TEXT NOT NULL DEFAULT 'dune'");
 
+        // ── M30: VM backup + remote config (#199, #200, #201) ────────────────────
+        await AddColumnIfMissingAsync("BackupRecords",       "VmArchivePath",   "TEXT NULL");
+        await AddColumnIfMissingAsync("BattlegroupProfiles", "RemoteConfigPath", "TEXT NULL");
+
         // ── M24: Server metrics (#163, #164) ─────────────────────────────────────
         await CreateTableIfMissingAsync("MetricSnapshots", """
             CREATE TABLE IF NOT EXISTS MetricSnapshots (

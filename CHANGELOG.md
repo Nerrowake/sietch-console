@@ -11,6 +11,13 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`battlegroup backup` command (#199)** — `IBattlegroupControlService.BackupBattlegroupAsync` runs `battlegroup backup` inside the VM over SSH; output lines are streamed back to the Backups view log panel; the resulting VM-side archive path is parsed from the command output and stored in a new `BackupRecord.VmArchivePath` column; the backup appears in the history list with a **VM** badge
+- **`battlegroup import` command (#200)** — `IBattlegroupControlService.ImportBattlegroupAsync` runs `battlegroup import <vmArchivePath>` inside the VM; triggered automatically when the user clicks Restore on a backup record that has a `VmArchivePath`; log output streamed to the Backups view
+- **VM Backup card in Backups view** — dedicated card with a "VM Backup" button, indeterminate loading strip, and a scrollable live-output log panel; appears above the Cloud Sync section
+- **SFTP-based config editing (#201)** — new `IRemoteConfigService` / `RemoteConfigService` reads and writes battlegroup configuration files inside the VM via SFTP; backed by the singleton `ISshService`; provides `ListConfigFilesAsync` (runs `ls` over SSH), `ReadConfigFileAsync`, and `WriteConfigFileAsync`
+- **Remote Config Path field in Settings → VM Connection card** — optional absolute path inside the VM (e.g. `/home/dune/.config/battlegroup`); when set and SSH is connected, the Raw Editor lists files via SFTP, loads content via `ReadRemoteFileAsync`, and saves via `WriteRemoteFileAsync`; a green "SFTP active" banner appears below the field when the remote transport is live
+- **`BattlegroupProfile.RemoteConfigPath`** — nullable string column; persisted to the `BattlegroupProfiles` table via an `AddColumnIfMissingAsync` migration
+
 - **`battlegroup update` integration (#M29)** — `IBattlegroupControlService.UpdateBattlegroupAsync` runs `battlegroup update` inside the VM over SSH; the command handles SteamCMD, pod teardown, and restart internally; output lines are streamed back to the Dashboard's update log panel in real time; the Update action now goes through the standard confirmation overlay before executing
 - **`battlegroup enable-experimental-swap` toggle (#M29)** — `IBattlegroupControlService.EnableExperimentalSwapAsync` issues the command inside the VM and returns a typed `(bool Success, string? Error)` result; exposed on the Dashboard under the collapsible Advanced Operations section; only available when the battlegroup is stopped
 - **Dashboard hero-status redesign** — complete visual overhaul of the Dashboard: status as a full-width hero card with a 3 px left accent stripe that changes colour by runtime state (green = Running, amber = Starting/Stopping, red = Error, neutral = Offline); server name at display scale in AccentSandstone; live uptime counter (`1d 2h 14m uptime`) derived from `ServerStarted` event; CPU and RAM resource badges shown only when the server is Running; contextual action buttons change based on server state (Start only when stopped; Stop / Restart / Update when running); three equal-width shortcut tiles for Control Interface, File Browser, and VM Shell, each with a 2 px top accent bar in a distinct palette colour; networking info row (live VM IP, port range, RabbitMQ port); collapsible Advanced Operations section; Discord announcement section
@@ -21,6 +28,11 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - *Diagnostics*: "Run Diagnostics" button migrated from inline style to project-standard `PrimaryButtonStyle`
 
 ### Changed
+
+- **`BackupRecord`** — new `VmArchivePath` (nullable string) column tracks where `battlegroup backup` placed its archive inside the VM; restore logic in `BackupsViewModel.ConfirmActionAsync` branches on this field: non-null routes to `battlegroup import`, null uses the existing local file restore path
+- **`SettingsViewModel`** — injects `IRemoteConfigService`; adds `RemoteConfigPath` observable property and `IsRemoteConfigAvailable` computed property; `LoadConfigAsync` / `ReloadRawAsync` / `SaveRawAsync` all route through SFTP when the remote transport is live; `LoadVmConnectionSettings` and `SaveVmConnectionAsync` include `RemoteConfigPath`
+- **`BackupsViewModel`** — injects `IBattlegroupControlService`; adds `IsVmBackupBusy` and `VmBackupLog` observables; adds `VmBackupCommand`; restore path detects `VmArchivePath` and routes accordingly
+- **`DatabaseInitializerService`** — M30 migrations: `BackupRecords.VmArchivePath TEXT NULL` and `BattlegroupProfiles.RemoteConfigPath TEXT NULL`
 
 - **Dashboard**: removed stale `IsUpdateAvailable` / `HasUpdateAvailable` / `UpdateBannerText` properties; live VM IP (`VmIpText`, `HasVmIp`) and uptime (`UptimeText`, `_serverStartedAt`) added as computed properties; `IsAdvancedExpanded` / `ToggleAdvancedCommand` added for the collapsible Advanced Operations section; `ExecuteUpdateAsync` now calls `IBattlegroupControlService.UpdateBattlegroupAsync` instead of managing SteamCMD directly on the host; `RequestUpdateCommand` now shows the standard confirmation overlay before running
 

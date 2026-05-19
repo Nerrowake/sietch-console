@@ -69,6 +69,16 @@ public class BattlegroupProfile
     /// <summary>Kubernetes namespace the battlegroup pods run in (default: "dune").</summary>
     public string BattlegroupNamespace { get; set; } = "dune";
 
+    // ── M30: Remote config editing (#201) ────────────────────────────────────
+
+    /// <summary>
+    /// Absolute path inside the Hyper-V VM to the directory that contains
+    /// battlegroup configuration files (e.g. <c>/home/dune/.config/battlegroup</c>).
+    /// When set, the Settings view reads/writes files via SFTP instead of the
+    /// local host filesystem.
+    /// </summary>
+    public string? RemoteConfigPath { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

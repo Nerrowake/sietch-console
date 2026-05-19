@@ -1083,6 +1083,42 @@
                                     Content="Browse…" />
                         </Grid>
 
+                        <!-- Remote Config Path (#201) -->
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Style="{StaticResource BodyTextStyle}" Text="Remote Config Path" />
+                                <TextBlock Style="{StaticResource MutedTextStyle}" Text="e.g. /home/dune/.config/battlegroup" />
+                            </StackPanel>
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding RemoteConfigPath, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="{StaticResource FieldBackground}"
+                                     Foreground="{StaticResource TextPrimary}"
+                                     BorderBrush="{StaticResource BorderDefault}"
+                                     BorderThickness="1"
+                                     FontFamily="{StaticResource FontMono}"
+                                     FontSize="11"
+                                     Padding="8,6"
+                                     CaretBrush="{StaticResource AccentPrimary}" />
+                        </Grid>
+
+                        <!-- Remote config availability hint -->
+                        <Border Background="{StaticResource StatusSuccessBg}"
+                                BorderBrush="{StaticResource StatusSuccessBorder}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource CornerSmall}"
+                                Padding="10,6"
+                                Margin="180,0,0,12"
+                                Visibility="{Binding IsRemoteConfigAvailable, Converter={StaticResource BoolToVisibleConverter}}">
+                            <TextBlock Foreground="{StaticResource StatusSuccess}"
+                                       FontFamily="{StaticResource FontUI}"
+                                       FontSize="{StaticResource FontSizeSmall}"
+                                       Text="SFTP active — Raw Editor will read and write files from the VM" />
+                        </Border>
+
                         <!-- Effective key path hint -->
                         <StackPanel Orientation="Horizontal" Margin="180,0,0,16">
                             <TextBlock Style="{StaticResource MutedTextStyle}"

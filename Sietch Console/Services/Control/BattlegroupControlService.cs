@@ -267,6 +267,79 @@ public class BattlegroupControlService : IBattlegroupControlService
         return (true, null);
     }
 
+    // ── Battlegroup backup ────────────────────────────────────────────────────
+
+    public async Task<string> BackupBattlegroupAsync(BattlegroupProfile profile,
+                                                     Action<string>? onOutput = null,
+                                                     CancellationToken ct = default)
+    {
+        if (!_sshService.IsConnected)
+            throw new InvalidOperationException(
+                "SSH is not connected. The battlegroup must be running before creating a VM backup.");
+
+        onOutput?.Invoke("[backup] Issuing battlegroup backup — please wait…");
+
+        var result = await _sshService.ExecuteAsync($"{BattlegroupBin} backup", ct);
+
+        foreach (var line in result.Output.Split('\n',
+                     StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            onOutput?.Invoke(line);
+
+        if (!result.Success)
+        {
+            var detail = result.Error.Trim();
+            throw new InvalidOperationException(
+                $"battlegroup backup failed (exit {result.ExitCode})" +
+                (string.IsNullOrEmpty(detail) ? "." : $": {detail}"));
+        }
+
+        // Parse the archive path from the command output.
+        // Funcom's CLI is expected to emit a line that contains the archive path.
+        // We look for the last non-empty line as the most likely candidate.
+        var lines = result.Output.Split('\n',
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var archivePath = lines.LastOrDefault(l => l.StartsWith('/')) ?? string.Empty;
+
+        onOutput?.Invoke(string.IsNullOrEmpty(archivePath)
+            ? "[backup] Backup completed (archive path not detected in output)."
+            : $"[backup] Backup completed: {archivePath}");
+
+        return archivePath;
+    }
+
+    // ── Battlegroup import ────────────────────────────────────────────────────
+
+    public async Task ImportBattlegroupAsync(BattlegroupProfile profile,
+                                             string vmArchivePath,
+                                             Action<string>? onOutput = null,
+                                             CancellationToken ct = default)
+    {
+        if (!_sshService.IsConnected)
+            throw new InvalidOperationException(
+                "SSH is not connected. The battlegroup must be running before importing a backup.");
+
+        if (string.IsNullOrWhiteSpace(vmArchivePath))
+            throw new ArgumentException("VM archive path must not be empty.", nameof(vmArchivePath));
+
+        onOutput?.Invoke($"[import] Issuing battlegroup import {vmArchivePath}…");
+
+        var result = await _sshService.ExecuteAsync($"{BattlegroupBin} import {vmArchivePath}", ct);
+
+        foreach (var line in result.Output.Split('\n',
+                     StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            onOutput?.Invoke(line);
+
+        if (!result.Success)
+        {
+            var detail = result.Error.Trim();
+            throw new InvalidOperationException(
+                $"battlegroup import failed (exit {result.ExitCode})" +
+                (string.IsNullOrEmpty(detail) ? "." : $": {detail}"));
+        }
+
+        onOutput?.Invoke("[import] Import completed successfully.");
+    }
+
     // ── UI shortcuts ──────────────────────────────────────────────────────────
 
     public void OpenControlInterface(BattlegroupProfile profile)

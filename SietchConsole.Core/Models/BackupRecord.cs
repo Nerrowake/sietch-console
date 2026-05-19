@@ -26,4 +26,13 @@ public class BackupRecord
 
     /// <summary>Provider-specific remote file identifier assigned after upload.</summary>
     public string? CloudRemoteId { get; set; }
+
+    // ── M30: VM-native backup (#199, #200) ────────────────────────────────────
+
+    /// <summary>
+    /// Path inside the Hyper-V VM where <c>battlegroup backup</c> placed the archive.
+    /// Null for host-side backups.  When set, restore routes to <c>battlegroup import</c>
+    /// rather than the local file restore path.
+    /// </summary>
+    public string? VmArchivePath { get; set; }
 }

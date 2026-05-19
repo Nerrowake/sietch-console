@@ -80,6 +80,9 @@ public partial class App : Application
         services.AddSingleton<IBattlegroupControlService, BattlegroupControlService>();
         services.AddSingleton<IIniParserService, IniParserService>();
         services.AddSingleton<IConfigurationService, ConfigurationService>();
+
+        // ── M30: VM backup + remote config (#199, #200, #201) ────────────────────
+        services.AddSingleton<IRemoteConfigService, RemoteConfigService>();
         services.AddSingleton<ILogFileService, LogFileService>();
         services.AddSingleton<ILogAnalysisService, LogAnalysisService>();
         services.AddSingleton<IBackupService, BackupService>();
