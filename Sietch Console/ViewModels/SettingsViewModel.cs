@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using SietchConsole.Core.Interfaces;
 using SietchConsole.Core.Models;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
@@ -17,6 +18,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IActiveProfileService    _activeProfileService;
     private readonly IRemoteManagementService _remoteService;
     private readonly IDiscordWebhookService   _discordService;
+    private readonly ISshService              _sshService;
 
     private BattlegroupProfile? _profile;
     private bool _loaded;
@@ -67,6 +69,33 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string  _rawContent = string.Empty;
     [ObservableProperty] private bool    _rawHasUnsavedChanges;
 
+    // Raw sync warning: shown when both the structured form and raw editor have unsaved changes
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowRawSyncWarning))]
+    private bool _rawSyncWarningDismissed;
+
+    public bool ShowRawSyncWarning =>
+        HasUnsavedChanges && RawHasUnsavedChanges && !RawSyncWarningDismissed;
+
+    // ── VM Connection (#177, #178) ────────────────────────────────────
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SshKeyPathDisplay))]
+    private string _vmIpAddress = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SshKeyPathDisplay))]
+    private string _vmSshKeyPath = string.Empty;   // empty = use default
+
+    [ObservableProperty] private string _vmUsername    = "dune";
+    [ObservableProperty] private int    _vmSshPort     = 22;
+    [ObservableProperty] private string _vmSshStatusMessage = string.Empty;
+    [ObservableProperty] private bool   _vmSshIsBusy;
+
+    /// <summary>Displayed placeholder when the path field is empty (uses the known default).</summary>
+    public string SshKeyPathDisplay => string.IsNullOrWhiteSpace(VmSshKeyPath)
+        ? BattlegroupProfile.DefaultSshKeyPath
+        : VmSshKeyPath;
+
     // ── Remote management (#152, #151) ────────────────────────────────
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanSaveRemote))]
@@ -98,7 +127,8 @@ public partial class SettingsViewModel : ObservableObject
 
     public SettingsViewModel(IConfigurationService configService, IBackupService backupService,
                              IServiceScopeFactory scopeFactory, IActiveProfileService activeProfileService,
-                             IRemoteManagementService remoteService, IDiscordWebhookService discordService)
+                             IRemoteManagementService remoteService, IDiscordWebhookService discordService,
+                             ISshService sshService)
     {
         _configService        = configService;
         _backupService        = backupService;
@@ -106,12 +136,14 @@ public partial class SettingsViewModel : ObservableObject
         _activeProfileService = activeProfileService;
         _remoteService        = remoteService;
         _discordService       = discordService;
+        _sshService           = sshService;
 
         _activeProfileService.ProfileChanged += (_, profile) =>
         {
             _profile = profile;
             _loaded  = false;
             _ = LoadConfigAsync();
+            LoadVmConnectionSettings();
         };
 
         _remoteService.StatusChanged += (_, _) => SyncRemoteRunningState();
@@ -123,6 +155,7 @@ public partial class SettingsViewModel : ObservableObject
         await LoadConfigAsync();
         await LoadRemoteSettingsAsync();
         await LoadDiscordSettingsAsync();
+        LoadVmConnectionSettings();
     }
 
     private async Task LoadConfigAsync()
@@ -271,7 +304,21 @@ public partial class SettingsViewModel : ObservableObject
 
     partial void OnRawContentChanged(string value)
     {
-        if (SelectedFile is not null) RawHasUnsavedChanges = true;
+        if (SelectedFile is not null)
+        {
+            RawHasUnsavedChanges = true;
+            OnPropertyChanged(nameof(ShowRawSyncWarning));
+        }
+    }
+
+    partial void OnHasUnsavedChangesChanged(bool value) =>
+        OnPropertyChanged(nameof(ShowRawSyncWarning));
+
+    [RelayCommand]
+    private void DismissRawSyncWarning()
+    {
+        RawSyncWarningDismissed = true;
+        OnPropertyChanged(nameof(ShowRawSyncWarning));
     }
 
     // ── Remote management commands (#152, #151) ──────────────────────
@@ -418,6 +465,103 @@ public partial class SettingsViewModel : ObservableObject
         DiscordNotifyStart = settings.DiscordNotifyServerStart;
         DiscordNotifyStop  = settings.DiscordNotifyServerStop;
         DiscordNotifyCrash = settings.DiscordNotifyServerCrash;
+    }
+
+    // ── VM Connection commands (#177, #178) ──────────────────────────
+
+    [RelayCommand]
+    private async Task TestSshConnectionAsync()
+    {
+        if (string.IsNullOrWhiteSpace(VmIpAddress))
+        {
+            VmSshStatusMessage = "Enter a VM IP address before testing.";
+            return;
+        }
+
+        VmSshIsBusy        = true;
+        VmSshStatusMessage  = "Testing connection…";
+
+        try
+        {
+            var keyPath = string.IsNullOrWhiteSpace(VmSshKeyPath)
+                ? BattlegroupProfile.DefaultSshKeyPath
+                : VmSshKeyPath;
+
+            if (!File.Exists(keyPath))
+            {
+                VmSshStatusMessage = $"SSH key not found at: {keyPath}. Run the battlegroup initial-setup first.";
+                return;
+            }
+
+            var (success, error) = await _sshService.TestConnectionAsync(
+                VmIpAddress.Trim(), VmSshPort, VmUsername.Trim(), keyPath);
+
+            VmSshStatusMessage = success
+                ? "Connection successful — the VM is reachable."
+                : $"Connection failed: {error}";
+        }
+        catch (Exception ex)
+        {
+            VmSshStatusMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            VmSshIsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task SaveVmConnectionAsync()
+    {
+        if (_profile is null) return;
+
+        VmSshIsBusy        = true;
+        VmSshStatusMessage  = string.Empty;
+
+        try
+        {
+            _profile.VmIpAddress  = VmIpAddress.Trim();
+            _profile.VmSshKeyPath = string.IsNullOrWhiteSpace(VmSshKeyPath) ? null : VmSshKeyPath.Trim();
+            _profile.VmUsername   = string.IsNullOrWhiteSpace(VmUsername) ? "dune" : VmUsername.Trim();
+            _profile.VmSshPort    = VmSshPort;
+            _profile.UpdatedAt    = DateTime.UtcNow;
+
+            using var scope  = _scopeFactory.CreateScope();
+            var profileRepo  = scope.ServiceProvider.GetRequiredService<IBattlegroupProfileRepository>();
+            await profileRepo.UpdateAsync(_profile);
+
+            VmSshStatusMessage = "VM connection settings saved.";
+        }
+        catch (Exception ex)
+        {
+            VmSshStatusMessage = $"Save failed: {ex.Message}";
+        }
+        finally
+        {
+            VmSshIsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void BrowseSshKeyPath()
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Title  = "Select SSH Private Key",
+            Filter = "All Files (*)|*|OpenSSH Key (sshKey)|sshKey",
+        };
+        if (dlg.ShowDialog() == true)
+            VmSshKeyPath = dlg.FileName;
+    }
+
+    private void LoadVmConnectionSettings()
+    {
+        if (_profile is null) return;
+        VmIpAddress  = _profile.VmIpAddress  ?? string.Empty;
+        VmSshKeyPath = _profile.VmSshKeyPath ?? string.Empty;
+        VmUsername   = _profile.VmUsername;
+        VmSshPort    = _profile.VmSshPort;
+        VmSshStatusMessage = string.Empty;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────

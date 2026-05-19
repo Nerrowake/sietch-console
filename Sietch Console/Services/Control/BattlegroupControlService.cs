@@ -148,9 +148,14 @@ public class BattlegroupControlService : IBattlegroupControlService
         }
 
         // 2. Connect SSH to the VM (allow extra time for the guest to finish booting)
-        if (!string.IsNullOrWhiteSpace(profile.VmSshKeyPath) &&
-            !string.IsNullOrWhiteSpace(profile.VmIpAddress))
+        if (!string.IsNullOrWhiteSpace(profile.VmIpAddress))
         {
+            // Use the profile's key path if set; fall back to the default location that
+            // Funcom's initial-setup.ps1 always writes to (%LOCALAPPDATA%\DuneAwakeningServer\sshKey).
+            var keyPath = string.IsNullOrWhiteSpace(profile.VmSshKeyPath)
+                ? BattlegroupProfile.DefaultSshKeyPath
+                : profile.VmSshKeyPath;
+
             if (!_sshService.IsConnected)
             {
                 // Give the guest OS a moment to start sshd after the VM reaches Running
@@ -159,7 +164,7 @@ public class BattlegroupControlService : IBattlegroupControlService
                     profile.VmIpAddress,
                     profile.VmSshPort,
                     profile.VmUsername,
-                    profile.VmSshKeyPath);
+                    keyPath);
             }
         }
 
@@ -213,18 +218,46 @@ public class BattlegroupControlService : IBattlegroupControlService
 
     public void OpenControlInterface(BattlegroupProfile profile)
     {
-        // Opens the Battlegroup Director web interface inside the VM
-        var ip  = profile.VmIpAddress ?? profile.LocalIpAddress ?? "localhost";
-        var url = $"http://{ip}:8080";
+        // Opens the Battlegroup Director web UI.
+        // The Director listens on a dynamic NodePort (detected at runtime via kubectl).
+        // We open the file browser (port 18888) as a fallback when the dynamic port
+        // is not yet known — it is always available when the VM is running.
+        var ip = profile.VmIpAddress ?? profile.LocalIpAddress ?? "localhost";
+
+        // Attempt to resolve the Director's NodePort via SSH; fall back to file browser.
+        string url;
+        if (_sshService.IsConnected)
+        {
+            var result = _sshService.ExecuteAsync(
+                "sudo kubectl get svc -A -o jsonpath=" +
+                "'{.items[*].spec.ports[?(@.port==11717)].nodePort}'",
+                CancellationToken.None).GetAwaiter().GetResult();
+
+            if (result.Success &&
+                int.TryParse(result.Output.Trim().Trim('\''), out var directorPort) &&
+                directorPort > 0)
+            {
+                url = $"http://{ip}:{directorPort}/";
+            }
+            else
+            {
+                url = $"http://{ip}:18888/";
+            }
+        }
+        else
+        {
+            url = $"http://{ip}:18888/";
+        }
+
         Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
     }
 
     public void OpenFileBrowser(BattlegroupProfile profile)
     {
-        var path = System.IO.Directory.Exists(profile.InstallPath)
-            ? profile.InstallPath
-            : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        Process.Start("explorer.exe", path);
+        // Opens the in-VM file browser served by the battlegroup at port 18888.
+        var ip  = profile.VmIpAddress ?? profile.LocalIpAddress ?? "localhost";
+        var url = $"http://{ip}:18888/";
+        Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
     }
 
     public void OpenVmShell(BattlegroupProfile profile)

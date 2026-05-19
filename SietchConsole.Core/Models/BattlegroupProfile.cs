@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace SietchConsole.Core.Models;
 
 public class BattlegroupProfile
@@ -8,7 +10,11 @@ public class BattlegroupProfile
 
     public string InstallPath { get; set; } = string.Empty;
 
-    public string? VmName { get; set; }
+    /// <summary>
+    /// Name of the Hyper-V VM.  Funcom's tooling always uses <c>dune-awakening</c>;
+    /// this default matches the value hardcoded in their <c>battlegroup.ps1</c>.
+    /// </summary>
+    public string? VmName { get; set; } = "dune-awakening";
 
     public string? ServerPackagePath { get; set; }
 
@@ -38,7 +44,20 @@ public class BattlegroupProfile
 
     // ── M28: SSH + battlegroup connection (#177, #178) ────────────────────────
 
-    /// <summary>Path to the SSH private key generated during battlegroup initial-setup.</summary>
+    /// <summary>
+    /// Default SSH private key path written by Funcom's <c>initial-setup.ps1</c>.
+    /// Equivalent to <c>%LOCALAPPDATA%\DuneAwakeningServer\sshKey</c>.
+    /// </summary>
+    public static string DefaultSshKeyPath =>
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "DuneAwakeningServer",
+            "sshKey");
+
+    /// <summary>
+    /// Path to the SSH private key generated during battlegroup initial-setup.
+    /// Leave null to use <see cref="DefaultSshKeyPath"/> (the key Funcom's tooling generates).
+    /// </summary>
     public string? VmSshKeyPath { get; set; }
 
     /// <summary>SSH username inside the Hyper-V VM (default: "dune").</summary>
