@@ -20,10 +20,15 @@ public partial class DashboardViewModel : ObservableObject
     private readonly IDiscordWebhookService     _discordService;
     private readonly DispatcherTimer            _refreshTimer;
 
+    private DateTime? _serverStartedAt;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasProfile))]
     [NotifyPropertyChangedFor(nameof(ProfileName))]
     [NotifyPropertyChangedFor(nameof(VmName))]
+    [NotifyPropertyChangedFor(nameof(VmIpText))]
+    [NotifyPropertyChangedFor(nameof(HasVmIp))]
+    [NotifyPropertyChangedFor(nameof(UptimeText))]
     private BattlegroupProfile? _activeProfile;
 
     [ObservableProperty]
@@ -82,6 +87,28 @@ public partial class DashboardViewModel : ObservableObject
         ? $"{MemoryMb / 1024.0:F1} GB"
         : $"{MemoryMb} MB";
 
+    public string UptimeText
+    {
+        get
+        {
+            if (_serverStartedAt is null || !IsRunning) return string.Empty;
+            var uptime = DateTime.UtcNow - _serverStartedAt.Value;
+            if (uptime.TotalDays >= 1)
+                return $"{(int)uptime.TotalDays}d {uptime.Hours}h {uptime.Minutes}m uptime";
+            if (uptime.TotalHours >= 1)
+                return $"{(int)uptime.TotalHours}h {uptime.Minutes}m uptime";
+            return $"{(int)uptime.TotalMinutes}m uptime";
+        }
+    }
+
+    public string VmIpText => ActiveProfile?.VmIpAddress is { Length: > 0 } ip ? ip : "—";
+    public bool   HasVmIp   => ActiveProfile?.VmIpAddress is { Length: > 0 };
+
+    [ObservableProperty] private bool _isAdvancedExpanded;
+
+    [RelayCommand]
+    private void ToggleAdvanced() => IsAdvancedExpanded = !IsAdvancedExpanded;
+
     public string StatusText => Status switch
     {
         BattlegroupRuntimeStatus.Running  => "Running",
@@ -129,6 +156,11 @@ public partial class DashboardViewModel : ObservableObject
 
         // Subscribe to process exit so unexpected crashes surface immediately (#131)
         processService.ProcessExited += OnServerProcessExited;
+        processService.ServerStarted += (_, _) =>
+        {
+            _serverStartedAt = DateTime.UtcNow;
+            Application.Current.Dispatcher.InvokeAsync(() => OnPropertyChanged(nameof(UptimeText)));
+        };
 
         // Refresh when the user switches profiles (#139)
         _activeProfileService.ProfileChanged += (_, profile) =>
@@ -147,6 +179,7 @@ public partial class DashboardViewModel : ObservableObject
     {
         if (e.WasExpected) return;   // intentional stop — handled by RefreshStatusAsync
 
+        _serverStartedAt = null;
         Application.Current.Dispatcher.InvokeAsync(() =>
         {
             Status    = e.ExitCode == 0
@@ -170,6 +203,10 @@ public partial class DashboardViewModel : ObservableObject
         {
             Status    = await _controlService.GetStatusAsync(ActiveProfile);
             LastError = null;
+            if (Status is BattlegroupRuntimeStatus.Offline or BattlegroupRuntimeStatus.Unknown or BattlegroupRuntimeStatus.Error)
+                _serverStartedAt = null;
+            OnPropertyChanged(nameof(UptimeText));
+            OnPropertyChanged(nameof(VmIpText));
         }
         catch (HyperVException ex)
         {

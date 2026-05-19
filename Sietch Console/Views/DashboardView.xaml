@@ -6,33 +6,27 @@
 
     <Grid>
 
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- Main scrollable content                         -->
-        <!-- ═══════════════════════════════════════════════ -->
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="28,24,28,28">
 
-                <!-- Page Header -->
+                <!-- ── Page Header ── -->
                 <TextBlock Style="{StaticResource PageTitleStyle}"
                            Text="Dashboard"
                            Margin="0,0,0,4" />
                 <TextBlock Style="{StaticResource PageSubtitleStyle}"
-                           Text="Overview of your battlegroup, system health, and recent activity."
-                           Margin="0,0,0,16" />
+                           Text="Monitor and control your battlegroup server."
+                           Margin="0,0,0,20" />
 
-                <!-- #94 — Loading bar while transitioning -->
+                <!-- ── Transition loading strip ── -->
                 <ProgressBar Style="{StaticResource LoadingBarStyle}"
                              Visibility="{Binding IsTransitioning, Converter={StaticResource BoolToVisibleConverter}}"
                              Margin="0,0,0,16" />
 
-
-                <!-- Error banner — shown when a Hyper-V operation fails -->
-                <Border Background="{StaticResource AccentAmber}"
-                        CornerRadius="{StaticResource CornerSmall}"
-                        Visibility="{Binding HasError, Converter={StaticResource BoolToVisibleConverter}}"
-                        Padding="16,10"
-                        Margin="0,0,0,16">
+                <!-- ── Error banner ── -->
+                <Border Style="{StaticResource ErrorBannerStyle}"
+                        Margin="0,0,0,16"
+                        Visibility="{Binding HasError, Converter={StaticResource BoolToVisibleConverter}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -40,7 +34,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
                                    Text="{Binding LastError}"
-                                   Foreground="#0B0F14"
+                                   Foreground="{StaticResource StatusError}"
                                    FontFamily="{StaticResource FontUI}"
                                    FontSize="{StaticResource FontSizeBody}"
                                    FontWeight="SemiBold"
@@ -51,163 +45,471 @@
                                 Style="{StaticResource CancelButtonStyle}"
                                 Padding="10,4"
                                 Margin="12,0,0,0"
-                                ToolTip="Dismiss this error"
-                                AutomationProperties.Name="Dismiss error">
-                            <TextBlock Text="Dismiss" />
-                        </Button>
+                                Content="Dismiss" />
                     </Grid>
                 </Border>
 
-                <!-- ══════════════════════════════════════════ -->
-                <!-- Battlegroup Status + Controls Card         -->
-                <!-- ══════════════════════════════════════════ -->
-                <Border Style="{StaticResource CardStyle}"
-                        Padding="20,16"
-                        Margin="0,0,0,16">
+                <!-- ═══════════════════════════════════════════════════ -->
+                <!-- HERO: Battlegroup Status + Controls                 -->
+                <!-- ═══════════════════════════════════════════════════ -->
+                <Border Margin="0,0,0,12"
+                        ClipToBounds="True"
+                        CornerRadius="{StaticResource CornerLarge}">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background"      Value="{StaticResource CardBackground}" />
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Setter Property="BorderBrush"     Value="{StaticResource BorderSubtle}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Running}">
+                                    <Setter Property="BorderBrush" Value="{StaticResource StatusSuccessBorder}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Starting}">
+                                    <Setter Property="BorderBrush" Value="{StaticResource StatusWarningBorder}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Stopping}">
+                                    <Setter Property="BorderBrush" Value="{StaticResource StatusWarningBorder}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Error}">
+                                    <Setter Property="BorderBrush" Value="{StaticResource StatusErrorBorder}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                        <!-- Status accent stripe (left edge, 3 px wide) -->
+                        <Border Width="3" HorizontalAlignment="Left" VerticalAlignment="Stretch">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="{StaticResource BorderDefault}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Running}">
+                                            <Setter Property="Background" Value="{StaticResource StatusSuccess}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Starting}">
+                                            <Setter Property="Background" Value="{StaticResource AccentAmber}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Stopping}">
+                                            <Setter Property="Background" Value="{StaticResource AccentAmber}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Error}">
+                                            <Setter Property="Background" Value="{StaticResource StatusError}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                        </Border>
 
-                        <!-- Left: Identity + Status -->
-                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource SectionLabelStyle}"
-                                       Text="BATTLEGROUP"
-                                       Margin="0,0,0,8" />
+                        <!-- Hero content -->
+                        <Grid Margin="24,22,22,22">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                            <TextBlock Foreground="{StaticResource TextPrimary}"
-                                       FontFamily="{StaticResource FontUI}"
-                                       FontSize="{StaticResource FontSizeHeading}"
-                                       FontWeight="SemiBold"
-                                       Text="{Binding ProfileName}"
-                                       Margin="0,0,0,6" />
+                            <!-- Left: Identity + Status + Resources -->
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
 
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <TextBlock Style="{StaticResource MutedTextStyle}"
-                                           Text="VM: "
-                                           Margin="0,0,4,0" />
-                                <TextBlock Style="{StaticResource MutedTextStyle}"
-                                           Text="{Binding VmName}" />
+                                <!-- Section label -->
+                                <TextBlock Text="BATTLEGROUP"
+                                           Style="{StaticResource SectionLabelStyle}"
+                                           Margin="0,0,0,8" />
+
+                                <!-- Server name -->
+                                <TextBlock Text="{Binding ProfileName}"
+                                           Foreground="{StaticResource AccentSandstone}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeDisplay}"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,4" />
+
+                                <!-- VM name -->
+                                <TextBlock Text="{Binding VmName, StringFormat={}vm: {0}}"
+                                           Foreground="{StaticResource TextMuted}"
+                                           FontFamily="{StaticResource FontMono}"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           Margin="0,0,0,12" />
+
+                                <!-- Status dot + text -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4" VerticalAlignment="Center">
+                                    <Ellipse Width="8" Height="8"
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,8,0">
+                                        <Ellipse.Style>
+                                            <Style TargetType="Ellipse">
+                                                <Setter Property="Fill" Value="{StaticResource StatusOffline}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Running}">
+                                                        <Setter Property="Fill" Value="{StaticResource StatusSuccess}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Starting}">
+                                                        <Setter Property="Fill" Value="{StaticResource AccentAmber}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Stopping}">
+                                                        <Setter Property="Fill" Value="{StaticResource AccentAmber}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Error}">
+                                                        <Setter Property="Fill" Value="{StaticResource StatusError}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Ellipse.Style>
+                                    </Ellipse>
+                                    <TextBlock Text="{Binding StatusText}"
+                                               Foreground="{StaticResource TextSecondary}"
+                                               FontFamily="{StaticResource FontUI}"
+                                               FontSize="{StaticResource FontSizeBody}"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center" />
+                                    <!-- Uptime (only when running) -->
+                                    <TextBlock Text="{Binding UptimeText, StringFormat={} — {0}}"
+                                               Foreground="{StaticResource TextMuted}"
+                                               FontFamily="{StaticResource FontUI}"
+                                               FontSize="{StaticResource FontSizeBody}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,0,0"
+                                               Visibility="{Binding UptimeText, Converter={StaticResource NullToCollapsedConverter}}" />
+                                </StackPanel>
+
+                                <!-- Resource meters (Running + data available) -->
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,8,0,0"
+                                            Visibility="{Binding HasResourceData, Converter={StaticResource BoolToVisibleConverter}}">
+                                    <Border Background="{StaticResource FieldBackground}"
+                                            BorderBrush="{StaticResource BorderDefault}"
+                                            BorderThickness="1"
+                                            CornerRadius="{StaticResource CornerSmall}"
+                                            Padding="8,4"
+                                            Margin="0,0,8,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="CPU"
+                                                       Style="{StaticResource SectionLabelStyle}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,6,0" />
+                                            <TextBlock Text="{Binding CpuPercent, StringFormat={}{0}%}"
+                                                       Foreground="{StaticResource TextPrimary}"
+                                                       FontFamily="{StaticResource FontMono}"
+                                                       FontSize="{StaticResource FontSizeSmall}"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="{StaticResource FieldBackground}"
+                                            BorderBrush="{StaticResource BorderDefault}"
+                                            BorderThickness="1"
+                                            CornerRadius="{StaticResource CornerSmall}"
+                                            Padding="8,4">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="RAM"
+                                                       Style="{StaticResource SectionLabelStyle}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,6,0" />
+                                            <TextBlock Text="{Binding MemoryGbText}"
+                                                       Foreground="{StaticResource TextPrimary}"
+                                                       FontFamily="{StaticResource FontMono}"
+                                                       FontSize="{StaticResource FontSizeSmall}"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
                             </StackPanel>
 
-                            <!-- Live status dot + text -->
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <Ellipse Width="10" Height="10"
-                                         VerticalAlignment="Center"
-                                         Margin="0,0,8,0">
-                                    <Ellipse.Style>
-                                        <Style TargetType="Ellipse">
-                                            <Setter Property="Fill" Value="{StaticResource StatusOffline}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Running}">
-                                                    <Setter Property="Fill" Value="{StaticResource StatusSuccess}" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Starting}">
-                                                    <Setter Property="Fill" Value="{StaticResource StatusRunning}" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Stopping}">
-                                                    <Setter Property="Fill" Value="{StaticResource StatusWarning}" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:BattlegroupRuntimeStatus.Error}">
-                                                    <Setter Property="Fill" Value="{StaticResource StatusError}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Ellipse.Style>
-                                </Ellipse>
-                                <TextBlock Foreground="{StaticResource TextSecondary}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="{StaticResource FontSizeBody}"
-                                           Text="{Binding StatusText}"
-                                           VerticalAlignment="Center" />
+                            <!-- Right: Contextual action buttons -->
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Margin="24,0,0,0"
+                                        MinWidth="120">
+
+                                <!-- Start (offline / error) -->
+                                <Button Command="{Binding StartCommand}"
+                                        Style="{StaticResource SuccessButtonStyle}"
+                                        Padding="20,10"
+                                        HorizontalAlignment="Stretch"
+                                        Visibility="{Binding IsStopped, Converter={StaticResource BoolToVisibleConverter}}"
+                                        Content="Start" />
+
+                                <!-- Stop / Restart / Update (running) -->
+                                <StackPanel Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibleConverter}}">
+                                    <Button Command="{Binding RequestStopCommand}"
+                                            Style="{StaticResource DangerButtonStyle}"
+                                            Padding="20,10"
+                                            HorizontalAlignment="Stretch"
+                                            Margin="0,0,0,8"
+                                            Content="Stop" />
+                                    <Button Command="{Binding RequestRestartCommand}"
+                                            Style="{StaticResource InfoButtonStyle}"
+                                            Padding="20,10"
+                                            HorizontalAlignment="Stretch"
+                                            Margin="0,0,0,8"
+                                            Content="Restart" />
+                                    <Button Command="{Binding RequestUpdateCommand}"
+                                            Style="{StaticResource GhostButtonStyle}"
+                                            Padding="20,9"
+                                            HorizontalAlignment="Stretch"
+                                            Content="Update" />
+                                </StackPanel>
+
+                                <!-- No profile state -->
+                                <TextBlock Text="No battlegroup configured."
+                                           Style="{StaticResource MutedTextStyle}"
+                                           TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           MaxWidth="140"
+                                           Visibility="{Binding HasProfile, Converter={StaticResource BoolToCollapsedConverter}}" />
                             </StackPanel>
-
-                            <!-- Resource utilization — visible only while Running with data -->
-                            <StackPanel Orientation="Horizontal"
-                                        Visibility="{Binding HasResourceData, Converter={StaticResource BoolToVisibleConverter}}">
-                                <TextBlock Style="{StaticResource MutedTextStyle}"
-                                           Text="CPU"
-                                           Margin="0,0,4,0" />
-                                <TextBlock Foreground="{StaticResource TextSecondary}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="{StaticResource FontSizeBody}"
-                                           Text="{Binding CpuPercent, StringFormat={}{0}%}"
-                                           Margin="0,0,16,0" />
-                                <TextBlock Style="{StaticResource MutedTextStyle}"
-                                           Text="RAM"
-                                           Margin="0,0,4,0" />
-                                <TextBlock Foreground="{StaticResource TextSecondary}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="{StaticResource FontSizeBody}"
-                                           Text="{Binding MemoryGbText}" />
-                            </StackPanel>
-                        </StackPanel>
-
-                        <!-- #92 — Action buttons using theme styles -->
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center"
-                                    Margin="16,0,0,0">
-
-                            <Button Command="{Binding StartCommand}"
-                                    Style="{StaticResource SuccessButtonStyle}"
-                                    Padding="16,8"
-                                    Margin="0,0,8,0"
-                                    ToolTip="Start the battlegroup server"
-                                    AutomationProperties.Name="Start battlegroup">
-                                <TextBlock Text="Start" />
-                            </Button>
-
-                            <Button Command="{Binding RequestStopCommand}"
-                                    Style="{StaticResource DangerButtonStyle}"
-                                    Padding="16,8"
-                                    Margin="0,0,8,0"
-                                    ToolTip="Stop the battlegroup server and disconnect all players"
-                                    AutomationProperties.Name="Stop battlegroup">
-                                <TextBlock Text="Stop" />
-                            </Button>
-
-                            <Button Command="{Binding RequestRestartCommand}"
-                                    Style="{StaticResource InfoButtonStyle}"
-                                    Padding="16,8"
-                                    Margin="0,0,8,0"
-                                    ToolTip="Restart the battlegroup — briefly disconnects all players"
-                                    AutomationProperties.Name="Restart battlegroup">
-                                <TextBlock Text="Restart" />
-                            </Button>
-
-                            <Button Command="{Binding RequestUpdateCommand}"
-                                    Style="{StaticResource GhostButtonStyle}"
-                                    Padding="12,8"
-                                    ToolTip="Run 'battlegroup update' inside the VM to pull the latest server build"
-                                    AutomationProperties.Name="Update battlegroup">
-                                <TextBlock Text="Update" />
-                            </Button>
-
-                        </StackPanel>
+                        </Grid>
                     </Grid>
                 </Border>
 
-                <!-- Update-in-progress panel -->
+                <!-- ═══════════════════════════════════════════════════ -->
+                <!-- QUICK ACTION TILES (3-up)                           -->
+                <!-- ═══════════════════════════════════════════════════ -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Control Interface tile -->
+                    <Button Grid.Column="0"
+                            Command="{Binding OpenControlInterfaceCommand}"
+                            HorizontalAlignment="Stretch"
+                            Cursor="Hand"
+                            ToolTip="Open the Battlegroup Director web UI"
+                            AutomationProperties.Name="Open control interface">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="TileBd"
+                                        Background="{StaticResource CardBackground}"
+                                        BorderBrush="{StaticResource BorderSubtle}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource CornerLarge}"
+                                        Padding="16,14">
+                                    <StackPanel>
+                                        <Border Height="2" Background="{StaticResource AccentPrimary}"
+                                                CornerRadius="1" Margin="0,0,0,10" HorizontalAlignment="Left" Width="28" />
+                                        <TextBlock Text="Control Interface"
+                                                   Foreground="{StaticResource TextPrimary}"
+                                                   FontFamily="{StaticResource FontUI}"
+                                                   FontSize="{StaticResource FontSizeBody}"
+                                                   FontWeight="SemiBold"
+                                                   Margin="0,0,0,3" />
+                                        <TextBlock Text="Battlegroup Director"
+                                                   Foreground="{StaticResource TextMuted}"
+                                                   FontFamily="{StaticResource FontUI}"
+                                                   FontSize="{StaticResource FontSizeSmall}" />
+                                    </StackPanel>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="TileBd" Property="Background" Value="{StaticResource OverlayBackground}" />
+                                        <Setter TargetName="TileBd" Property="BorderBrush" Value="{StaticResource BorderWarm}" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Opacity" Value="0.4" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <!-- File Browser tile -->
+                    <Button Grid.Column="2"
+                            Command="{Binding OpenFileBrowserCommand}"
+                            HorizontalAlignment="Stretch"
+                            Cursor="Hand"
+                            ToolTip="Open the in-VM file browser at port 18888"
+                            AutomationProperties.Name="Open file browser">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="TileBd"
+                                        Background="{StaticResource CardBackground}"
+                                        BorderBrush="{StaticResource BorderSubtle}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource CornerLarge}"
+                                        Padding="16,14">
+                                    <StackPanel>
+                                        <Border Height="2" Background="{StaticResource AccentCyan}"
+                                                CornerRadius="1" Margin="0,0,0,10" HorizontalAlignment="Left" Width="28" />
+                                        <TextBlock Text="File Browser"
+                                                   Foreground="{StaticResource TextPrimary}"
+                                                   FontFamily="{StaticResource FontUI}"
+                                                   FontSize="{StaticResource FontSizeBody}"
+                                                   FontWeight="SemiBold"
+                                                   Margin="0,0,0,3" />
+                                        <TextBlock Text="In-VM file manager"
+                                                   Foreground="{StaticResource TextMuted}"
+                                                   FontFamily="{StaticResource FontUI}"
+                                                   FontSize="{StaticResource FontSizeSmall}" />
+                                    </StackPanel>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="TileBd" Property="Background" Value="{StaticResource OverlayBackground}" />
+                                        <Setter TargetName="TileBd" Property="BorderBrush" Value="{StaticResource BorderWarm}" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Opacity" Value="0.4" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <!-- VM Shell tile -->
+                    <Button Grid.Column="4"
+                            Command="{Binding OpenVmShellCommand}"
+                            HorizontalAlignment="Stretch"
+                            Cursor="Hand"
+                            ToolTip="Open a Hyper-V console session to the VM"
+                            AutomationProperties.Name="Open VM shell">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="TileBd"
+                                        Background="{StaticResource CardBackground}"
+                                        BorderBrush="{StaticResource BorderSubtle}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource CornerLarge}"
+                                        Padding="16,14">
+                                    <StackPanel>
+                                        <Border Height="2" Background="{StaticResource AccentViolet}"
+                                                CornerRadius="1" Margin="0,0,0,10" HorizontalAlignment="Left" Width="28" />
+                                        <TextBlock Text="VM Shell"
+                                                   Foreground="{StaticResource TextPrimary}"
+                                                   FontFamily="{StaticResource FontUI}"
+                                                   FontSize="{StaticResource FontSizeBody}"
+                                                   FontWeight="SemiBold"
+                                                   Margin="0,0,0,3" />
+                                        <TextBlock Text="Hyper-V console"
+                                                   Foreground="{StaticResource TextMuted}"
+                                                   FontFamily="{StaticResource FontUI}"
+                                                   FontSize="{StaticResource FontSizeSmall}" />
+                                    </StackPanel>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="TileBd" Property="Background" Value="{StaticResource OverlayBackground}" />
+                                        <Setter TargetName="TileBd" Property="BorderBrush" Value="{StaticResource BorderWarm}" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Opacity" Value="0.4" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+
+                <!-- ═══════════════════════════════════════════════════ -->
+                <!-- INFO ROW: Networking + Last Backup                  -->
+                <!-- ═══════════════════════════════════════════════════ -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Networking -->
+                    <Border Grid.Column="0" Style="{StaticResource CardStyle}" Padding="20,16">
+                        <StackPanel>
+                            <TextBlock Text="Networking"
+                                       Style="{StaticResource CardTitleStyle}"
+                                       Margin="0,0,0,14" />
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="VM IP"
+                                           Style="{StaticResource SectionLabelStyle}"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding VmIpText}"
+                                           Foreground="{StaticResource TextSecondary}"
+                                           FontFamily="{StaticResource FontMono}"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Game Ports"
+                                           Style="{StaticResource SectionLabelStyle}"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="7777–7810 UDP"
+                                           Foreground="{StaticResource TextSecondary}"
+                                           FontFamily="{StaticResource FontMono}"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="RabbitMQ"
+                                           Style="{StaticResource SectionLabelStyle}"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="31982 TCP"
+                                           Foreground="{StaticResource TextSecondary}"
+                                           FontFamily="{StaticResource FontMono}"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Last Backup -->
+                    <Border Grid.Column="2" Style="{StaticResource CardStyle}" Padding="20,16">
+                        <StackPanel>
+                            <TextBlock Text="Last Backup"
+                                       Style="{StaticResource CardTitleStyle}"
+                                       Margin="0,0,0,14" />
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <Ellipse Width="7" Height="7"
+                                         Fill="{StaticResource StatusOffline}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0" />
+                                <TextBlock Text="No backups on record"
+                                           Foreground="{StaticResource TextSecondary}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}" />
+                            </StackPanel>
+
+                            <TextBlock Text="Create a backup before making configuration changes."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- ═══════════════════════════════════════════════════ -->
+                <!-- Update in-progress panel                            -->
+                <!-- ═══════════════════════════════════════════════════ -->
                 <Border Style="{StaticResource CardStyle}"
                         Padding="20,16"
                         Margin="0,0,0,16"
                         Visibility="{Binding IsUpdating, Converter={StaticResource BoolToVisibleConverter}}">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource CardTitleStyle}"
-                                   Text="Updating Server"
+                        <TextBlock Text="Updating Battlegroup"
+                                   Style="{StaticResource CardTitleStyle}"
+                                   Margin="0,0,0,4" />
+                        <TextBlock Text="SteamCMD is running inside the VM. Do not close the application."
+                                   Style="{StaticResource MutedTextStyle}"
                                    Margin="0,0,0,12" />
-                        <ProgressBar Minimum="0" Maximum="100"
-                                     Value="{Binding UpdateProgress}"
-                                     Height="6"
-                                     Margin="0,0,0,12">
-                            <ProgressBar.Style>
-                                <Style TargetType="ProgressBar" BasedOn="{StaticResource LoadingBarStyle}">
-                                    <Setter Property="IsIndeterminate" Value="False" />
-                                </Style>
-                            </ProgressBar.Style>
-                        </ProgressBar>
+                        <ProgressBar Style="{StaticResource LoadingBarStyle}"
+                                     Margin="0,0,0,12" />
                         <ScrollViewer MaxHeight="120"
                                       VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
@@ -220,267 +522,118 @@
                     </StackPanel>
                 </Border>
 
-                <!-- ══════════════════════════════════════════ -->
-                <!-- Middle Row: Access Shortcuts + Diagnostics -->
-                <!-- ══════════════════════════════════════════ -->
-                <Grid Margin="0,0,0,16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <!-- #92, #96 — Access Shortcuts with tooltips -->
-                    <Border Grid.Column="0"
-                            Style="{StaticResource CardStyle}"
-                            Padding="20,16">
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource CardTitleStyle}"
-                                       Text="Access Shortcuts"
-                                       Margin="0,0,0,16" />
-
-                            <Button Command="{Binding OpenControlInterfaceCommand}"
-                                    Style="{StaticResource GhostButtonStyle}"
-                                    Margin="0,0,0,8"
-                                    HorizontalAlignment="Stretch"
-                                    Padding="12,9"
-                                    ToolTip="Open the Hyper-V VM web admin panel in your browser"
-                                    AutomationProperties.Name="Open control interface">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Control Interface"
-                                               Foreground="{StaticResource AccentPrimary}"
-                                               FontWeight="SemiBold"
-                                               Margin="0,0,8,0" />
-                                    <TextBlock Text="— Web admin panel"
-                                               Foreground="{StaticResource TextMuted}" />
-                                </StackPanel>
-                            </Button>
-
-                            <Button Command="{Binding OpenFileBrowserCommand}"
-                                    Style="{StaticResource GhostButtonStyle}"
-                                    Margin="0,0,0,8"
-                                    HorizontalAlignment="Stretch"
-                                    Padding="12,9"
-                                    ToolTip="Open the in-VM file browser at port 18888 in your browser"
-                                    AutomationProperties.Name="Open file browser">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="File Browser"
-                                               Foreground="{StaticResource AccentCyan}"
-                                               FontWeight="SemiBold"
-                                               Margin="0,0,8,0" />
-                                    <TextBlock Text="— In-VM file browser"
-                                               Foreground="{StaticResource TextMuted}" />
-                                </StackPanel>
-                            </Button>
-
-                            <Button Command="{Binding OpenVmShellCommand}"
-                                    Style="{StaticResource GhostButtonStyle}"
-                                    HorizontalAlignment="Stretch"
-                                    Padding="12,9"
-                                    ToolTip="Open a shell session in the Hyper-V virtual machine"
-                                    AutomationProperties.Name="Open VM shell">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="VM Shell"
-                                               Foreground="{StaticResource AccentViolet}"
-                                               FontWeight="SemiBold"
-                                               Margin="0,0,8,0" />
-                                    <TextBlock Text="— Hyper-V console"
-                                               Foreground="{StaticResource TextMuted}" />
-                                </StackPanel>
-                            </Button>
-
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Recent Diagnostics — #93 standardised empty state -->
-                    <Border Grid.Column="2"
-                            Style="{StaticResource CardStyle}"
-                            Padding="20,16">
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource CardTitleStyle}"
-                                       Text="Recent Diagnostics"
-                                       Margin="0,0,0,16" />
-                            <Border Style="{StaticResource EmptyStateBorderStyle}">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Style="{StaticResource EmptyStateHeadingStyle}"
-                                               Text="No diagnostics have been run."
-                                               Margin="0,0,0,6" />
-                                    <TextBlock Style="{StaticResource EmptyStateSubtextStyle}"
-                                               Text="Use the Diagnostics section to check system readiness." />
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <!-- ══════════════════════════════════════════ -->
-                <!-- Bottom Row: Last Backup + Networking       -->
-                <!-- ══════════════════════════════════════════ -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Last Backup — #93 standardised empty state -->
-                    <Border Grid.Column="0"
-                            Style="{StaticResource CardStyle}"
-                            Padding="20,16">
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource CardTitleStyle}"
-                                       Text="Last Backup"
-                                       Margin="0,0,0,16" />
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                <Ellipse Width="8" Height="8"
-                                         Fill="{StaticResource StatusOffline}"
-                                         VerticalAlignment="Center"
-                                         Margin="0,0,8,0" />
-                                <TextBlock Text="No backups found"
-                                           Foreground="{StaticResource TextSecondary}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="{StaticResource FontSizeBody}" />
-                            </StackPanel>
-                            <TextBlock Style="{StaticResource MutedTextStyle}"
-                                       Text="Create a backup from the Backups section before making configuration changes."
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Networking summary -->
-                    <Border Grid.Column="2"
-                            Style="{StaticResource CardStyle}"
-                            Padding="20,16">
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource CardTitleStyle}"
-                                       Text="Networking"
-                                       Margin="0,0,0,16" />
-
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"
-                                           Text="Host LAN IP"
-                                           Foreground="{StaticResource TextMuted}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="12"
-                                           Margin="0,0,16,0" />
-                                <TextBlock Grid.Column="1"
-                                           Text="—"
-                                           Foreground="{StaticResource TextSecondary}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="12" />
-                            </Grid>
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"
-                                           Text="VM IP"
-                                           Foreground="{StaticResource TextMuted}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="12"
-                                           Margin="0,0,16,0" />
-                                <TextBlock Grid.Column="1"
-                                           Text="—"
-                                           Foreground="{StaticResource TextSecondary}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="12" />
-                            </Grid>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"
-                                           Text="Required Ports"
-                                           Foreground="{StaticResource TextMuted}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="12"
-                                           Margin="0,0,16,0" />
-                                <TextBlock Grid.Column="1"
-                                           Text="7777–7810 UDP, 31982 TCP"
-                                           Foreground="{StaticResource TextSecondary}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="12" />
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <!-- ══════════════════════════════════════════ -->
-                <!-- Advanced Operations (M29)                 -->
-                <!-- ══════════════════════════════════════════ -->
+                <!-- ═══════════════════════════════════════════════════ -->
+                <!-- ADVANCED OPERATIONS (collapsible)                   -->
+                <!-- ═══════════════════════════════════════════════════ -->
                 <Border Style="{StaticResource CardStyle}"
-                        Padding="20,16"
+                        Padding="0"
                         Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource CardTitleStyle}"
-                                   Text="Advanced Operations"
-                                   Margin="0,0,0,4" />
-                        <TextBlock Style="{StaticResource MutedTextStyle}"
-                                   TextWrapping="Wrap"
-                                   Text="Low-level battlegroup controls. These operations run commands directly inside the VM."
-                                   Margin="0,0,0,16" />
+                        <!-- Toggle header -->
+                        <Button Command="{Binding ToggleAdvancedCommand}"
+                                HorizontalAlignment="Stretch"
+                                Cursor="Hand"
+                                Padding="20,14">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="AdvHdr"
+                                            Background="Transparent"
+                                            Padding="{TemplateBinding Padding}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Text="Advanced Operations"
+                                                       Foreground="{StaticResource TextSecondary}"
+                                                       FontFamily="{StaticResource FontUI}"
+                                                       FontSize="{StaticResource FontSizeBody}"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1"
+                                                       Foreground="{StaticResource TextMuted}"
+                                                       FontFamily="{StaticResource FontUI}"
+                                                       FontSize="{StaticResource FontSizeSmall}"
+                                                       VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="▶  Show" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsAdvancedExpanded}" Value="True">
+                                                                <Setter Property="Text" Value="▼  Hide" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="AdvHdr" Property="Background" Value="{StaticResource OverlayBackground}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
 
-                        <!-- Experimental Swap -->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
+                        <!-- Expandable content -->
+                        <StackPanel Visibility="{Binding IsAdvancedExpanded, Converter={StaticResource BoolToVisibleConverter}}">
+                            <!-- Divider -->
+                            <Border Height="1" Background="{StaticResource BorderSubtle}" Margin="20,0" />
 
-                            <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                                <TextBlock Foreground="{StaticResource TextPrimary}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="{StaticResource FontSizeBody}"
-                                           FontWeight="SemiBold"
-                                           Text="Enable Experimental Swap Memory"
-                                           Margin="0,0,0,4" />
-                                <TextBlock Style="{StaticResource MutedTextStyle}"
-                                           TextWrapping="Wrap"
-                                           Text="Allows the VM to use disk swap when RAM is insufficient. Recommended for hosts with less than 20 GB of RAM. The battlegroup must be stopped. Start it again after enabling." />
-                                <TextBlock Text="{Binding SwapStatusMessage}"
-                                           Foreground="{StaticResource AccentCyan}"
-                                           FontFamily="{StaticResource FontUI}"
-                                           FontSize="{StaticResource FontSizeBody}"
-                                           TextWrapping="Wrap"
-                                           Margin="0,6,0,0"
-                                           Visibility="{Binding SwapStatusMessage, Converter={StaticResource NullToCollapsedConverter}}" />
-                            </StackPanel>
+                            <!-- Enable Experimental Swap -->
+                            <Grid Margin="20,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                            <Button Grid.Column="1"
-                                    Command="{Binding EnableExperimentalSwapCommand}"
-                                    Style="{StaticResource TealButtonStyle}"
-                                    Padding="14,8"
-                                    VerticalAlignment="Top"
-                                    ToolTip="Runs 'battlegroup enable-experimental-swap' inside the VM"
-                                    AutomationProperties.Name="Enable experimental swap memory"
-                                    Content="Enable Swap" />
-                        </Grid>
+                                <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                    <TextBlock Text="Enable Experimental Swap Memory"
+                                               Foreground="{StaticResource TextPrimary}"
+                                               FontFamily="{StaticResource FontUI}"
+                                               FontSize="{StaticResource FontSizeBody}"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,4" />
+                                    <TextBlock Text="Allows the VM to use disk swap when physical RAM is under 20 GB. The battlegroup must be stopped before enabling. Start it again to apply."
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,6" />
+                                    <TextBlock Text="{Binding SwapStatusMessage}"
+                                               Foreground="{StaticResource AccentCyan}"
+                                               FontFamily="{StaticResource FontUI}"
+                                               FontSize="{StaticResource FontSizeSmall}"
+                                               TextWrapping="Wrap"
+                                               Visibility="{Binding SwapStatusMessage, Converter={StaticResource NullToCollapsedConverter}}" />
+                                    <ProgressBar Style="{StaticResource LoadingBarStyle}"
+                                                 Margin="0,6,0,0"
+                                                 Visibility="{Binding IsEnablingSwap, Converter={StaticResource BoolToVisibleConverter}}" />
+                                </StackPanel>
 
-                        <!-- Loading bar while swap command runs -->
-                        <ProgressBar Style="{StaticResource LoadingBarStyle}"
-                                     Visibility="{Binding IsEnablingSwap, Converter={StaticResource BoolToVisibleConverter}}"
-                                     Margin="0,12,0,0" />
+                                <Button Grid.Column="1"
+                                        Command="{Binding EnableExperimentalSwapCommand}"
+                                        Style="{StaticResource TealButtonStyle}"
+                                        Padding="14,8"
+                                        VerticalAlignment="Top"
+                                        ToolTip="Runs 'battlegroup enable-experimental-swap' inside the VM"
+                                        Content="Enable Swap" />
+                            </Grid>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
-                <!-- ══════════════════════════════════════════ -->
-                <!-- Discord Announcement (#171)               -->
-                <!-- ══════════════════════════════════════════ -->
-                <Border Style="{StaticResource CardStyle}"
-                        Padding="20,16"
-                        Margin="0,0,0,16">
+                <!-- ═══════════════════════════════════════════════════ -->
+                <!-- Discord Announcement                                 -->
+                <!-- ═══════════════════════════════════════════════════ -->
+                <Border Style="{StaticResource CardStyle}" Padding="20,16">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource CardTitleStyle}"
-                                   Text="Discord Announcement"
+                        <TextBlock Text="Discord Announcement"
+                                   Style="{StaticResource CardTitleStyle}"
                                    Margin="0,0,0,4" />
-                        <TextBlock Style="{StaticResource MutedTextStyle}"
-                                   Text="Send a message to your Discord channel via the configured webhook."
+                        <TextBlock Text="Send a message to your Discord channel via the configured webhook."
+                                   Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
                                    Margin="0,0,0,12" />
 
@@ -494,21 +647,13 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBox Grid.Column="0"
+                                     Style="{StaticResource FieldBoxStyle}"
                                      Text="{Binding AnnouncementText, UpdateSourceTrigger=PropertyChanged}"
-                                     Background="{StaticResource FieldBackground}"
-                                     Foreground="{StaticResource TextPrimary}"
-                                     BorderBrush="{StaticResource BorderDefault}"
-                                     BorderThickness="1"
-                                     FontFamily="{StaticResource FontUI}"
-                                     FontSize="{StaticResource FontSizeBody}"
-                                     Padding="8,6"
-                                     Margin="0,0,8,0"
-                                     CaretBrush="{StaticResource AccentPrimary}" />
+                                     Margin="0,0,8,0" />
                             <Button Grid.Column="1"
                                     Command="{Binding SendAnnouncementCommand}"
                                     Style="{StaticResource PrimaryButtonStyle}"
                                     Padding="14,6"
-                                    Cursor="Hand"
                                     Content="Send" />
                         </Grid>
 
@@ -522,22 +667,22 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- Confirmation overlay — #92, #95 refined styling -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <Grid Background="#BB0B0F14"
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- Confirmation overlay                                     -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <Grid Background="#CC0B0F14"
               Visibility="{Binding ShowConfirmation, Converter={StaticResource BoolToVisibleConverter}}">
-            <Border Background="{StaticResource PanelBackground}"
+            <Border Background="{StaticResource CardBackground}"
                     BorderBrush="{StaticResource BorderDefault}"
                     BorderThickness="1"
                     CornerRadius="{StaticResource CornerLarge}"
-                    Padding="28,24"
-                    MaxWidth="420"
+                    Padding="32,28"
+                    MaxWidth="400"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
                 <StackPanel>
                     <TextBlock Text="{Binding ConfirmationTitle}"
-                               Foreground="{StaticResource TextPrimary}"
+                               Foreground="{StaticResource AccentSandstone}"
                                FontFamily="{StaticResource FontUI}"
                                FontSize="{StaticResource FontSizeSubheading}"
                                FontWeight="SemiBold"
@@ -547,23 +692,17 @@
                                FontFamily="{StaticResource FontUI}"
                                FontSize="{StaticResource FontSizeBody}"
                                TextWrapping="Wrap"
-                               Margin="0,0,0,20" />
+                               Margin="0,0,0,24" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Command="{Binding CancelActionCommand}"
                                 Style="{StaticResource CancelButtonStyle}"
                                 Padding="16,8"
                                 Margin="0,0,8,0"
-                                ToolTip="Cancel and return to Dashboard"
-                                AutomationProperties.Name="Cancel action">
-                            <TextBlock Text="Cancel" />
-                        </Button>
+                                Content="Cancel" />
                         <Button Command="{Binding ConfirmActionCommand}"
                                 Style="{StaticResource DangerButtonStyle}"
                                 Padding="16,8"
-                                ToolTip="Confirm this action"
-                                AutomationProperties.Name="Confirm action">
-                            <TextBlock Text="Confirm" />
-                        </Button>
+                                Content="Confirm" />
                     </StackPanel>
                 </StackPanel>
             </Border>
