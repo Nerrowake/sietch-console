@@ -15,7 +15,6 @@ public enum PendingDashboardAction { None, Stop, Restart, Update }
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly IBattlegroupControlService _controlService;
-    private readonly IServerPackageInstaller    _installer;
     private readonly IServiceScopeFactory       _scopeFactory;
     private readonly IActiveProfileService      _activeProfileService;
     private readonly IDiscordWebhookService     _discordService;
@@ -51,15 +50,19 @@ public partial class DashboardViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(MemoryGbText))]
     private long _memoryMb;
 
-    // Update-check state
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasUpdateAvailable))]
-    [NotifyPropertyChangedFor(nameof(UpdateBannerText))]
-    private bool? _isUpdateAvailable;   // null = not yet checked / inconclusive
-
+    // Update state
     [ObservableProperty] private bool   _isUpdating;
     [ObservableProperty] private double _updateProgress;
     [ObservableProperty] private string _updateLog = string.Empty;
+
+    // ── Experimental swap (#M29) ──────────────────────────────────────────────
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SwapStatusMessage))]
+    private bool _isEnablingSwap;
+
+    [ObservableProperty] private string _swapResult = string.Empty;
+
+    public string SwapStatusMessage => IsEnablingSwap ? "Enabling swap memory…" : SwapResult;
 
     // ── Discord announcement (#171) ───────────────────────────────────────────
     [ObservableProperty] private string _announcementText          = string.Empty;
@@ -74,14 +77,6 @@ public partial class DashboardViewModel : ObservableObject
     public bool ShowConfirmation => PendingAction != PendingDashboardAction.None;
     public bool HasError         => LastError is not null;
     public bool HasResourceData  => IsRunning && (CpuPercent > 0 || MemoryMb > 0);
-    public bool HasUpdateAvailable => IsUpdateAvailable == true;
-
-    public string UpdateBannerText => IsUpdateAvailable switch
-    {
-        true  => "A server update is available. Stop the server and update now.",
-        false => "Server is up to date.",
-        null  => string.Empty,
-    };
 
     public string MemoryGbText => MemoryMb >= 1024
         ? $"{MemoryMb / 1024.0:F1} GB"
@@ -122,14 +117,12 @@ public partial class DashboardViewModel : ObservableObject
 
     public DashboardViewModel(
         IBattlegroupControlService controlService,
-        IServerPackageInstaller    installer,
         IServiceScopeFactory       scopeFactory,
         IServerProcessService      processService,
         IActiveProfileService      activeProfileService,
         IDiscordWebhookService     discordService)
     {
         _controlService       = controlService;
-        _installer            = installer;
         _scopeFactory         = scopeFactory;
         _activeProfileService = activeProfileService;
         _discordService       = discordService;
@@ -166,12 +159,7 @@ public partial class DashboardViewModel : ObservableObject
     public async Task InitializeAsync()
     {
         ActiveProfile = _activeProfileService.Current;
-
         await RefreshStatusAsync();
-
-        // Check for updates in the background after the UI is ready
-        if (ActiveProfile is not null)
-            _ = Task.Run(() => CheckForUpdatesAsync());
     }
 
     private async Task RefreshStatusAsync()
@@ -245,7 +233,7 @@ public partial class DashboardViewModel : ObservableObject
         OnPropertyChanged(nameof(ConfirmationBody));
     }
 
-    // Update – request with confirmation overlay
+    // Update via 'battlegroup update' — request with confirmation overlay
     [RelayCommand(CanExecute = nameof(CanRequestUpdate))]
     private void RequestUpdate()
     {
@@ -256,13 +244,31 @@ public partial class DashboardViewModel : ObservableObject
     }
     private bool CanRequestUpdate() => HasProfile && !IsTransitioning && !IsUpdating;
 
-    // Check for updates without installing
-    [RelayCommand(CanExecute = nameof(CanRequestUpdate))]
-    private async Task CheckForUpdatesAsync()
+    // Enable experimental swap memory
+    [RelayCommand(CanExecute = nameof(CanEnableSwap))]
+    private async Task EnableExperimentalSwapAsync()
     {
         if (ActiveProfile is null) return;
-        IsUpdateAvailable = await _installer.CheckForUpdateAsync(ActiveProfile.InstallPath);
+        IsEnablingSwap = true;
+        SwapResult     = string.Empty;
+        try
+        {
+            var (success, error) = await _controlService.EnableExperimentalSwapAsync(ActiveProfile);
+            SwapResult = success
+                ? "Swap memory enabled. Start the battlegroup to apply."
+                : $"Failed: {error}";
+        }
+        catch (Exception ex)
+        {
+            SwapResult = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            IsEnablingSwap = false;
+            OnPropertyChanged(nameof(SwapStatusMessage));
+        }
     }
+    private bool CanEnableSwap() => HasProfile && IsStopped && !IsTransitioning && !IsUpdating && !IsEnablingSwap;
 
     // #57 – Confirm / Cancel
     [RelayCommand]
@@ -333,59 +339,25 @@ public partial class DashboardViewModel : ObservableObject
     {
         if (ActiveProfile is null) return;
 
-        IsUpdating      = true;
-        UpdateLog       = string.Empty;
-        UpdateProgress  = 0;
-        LastError       = null;
-
-        var wasRunning = IsRunning;
+        IsUpdating     = true;
+        UpdateLog      = string.Empty;
+        UpdateProgress = 0;
+        LastError      = null;
 
         try
         {
-            // Stop the server if it's running
-            if (wasRunning)
-            {
-                AppendUpdateLog("Stopping server before update…");
-                IsTransitioning = true;
-                Status          = BattlegroupRuntimeStatus.Stopping;
-                await _controlService.StopAsync(ActiveProfile);
-                IsTransitioning = false;
-                await RefreshStatusAsync();
-            }
+            // 'battlegroup update' handles everything inside the VM (SteamCMD, pod restart).
+            // It requires SSH to be connected, which means the VM must be running.
+            // If the server pods are running, the update will stop and restart them automatically.
+            AppendUpdateLog("Starting battlegroup update — SteamCMD will run inside the VM…");
+            AppendUpdateLog("This may take several minutes. Do not close the application.");
 
-            // Run the update via SteamCMD
-            AppendUpdateLog("Starting update…");
-
-            var progress = new Progress<double>(p => UpdateProgress = p);
-
-            await _installer.UpdateAsync(
-                ActiveProfile.InstallPath,
-                progress,
+            await _controlService.UpdateBattlegroupAsync(
+                ActiveProfile,
                 line => AppendUpdateLog(line));
 
-            // Record the new build ID
-            var buildId = _installer.GetInstalledBuildId(ActiveProfile.InstallPath);
-            if (buildId is not null)
-            {
-                using var scope  = _scopeFactory.CreateScope();
-                var settingsRepo = scope.ServiceProvider.GetRequiredService<IApplicationSettingsRepository>();
-                var settings     = await settingsRepo.GetAsync();
-                settings.InstalledBuildId = buildId;
-                await settingsRepo.SaveAsync(settings);
-            }
-
-            IsUpdateAvailable = false;
+            UpdateProgress = 100;
             AppendUpdateLog("Update complete.");
-
-            // Restart if the server was running before the update
-            if (wasRunning)
-            {
-                AppendUpdateLog("Restarting server…");
-                IsTransitioning = true;
-                Status          = BattlegroupRuntimeStatus.Starting;
-                await _controlService.StartAsync(ActiveProfile);
-                IsTransitioning = false;
-            }
         }
         catch (HyperVException ex)
         {

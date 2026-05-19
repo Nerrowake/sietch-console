@@ -12,6 +12,8 @@ public class BattlegroupControlService : IBattlegroupControlService
     private readonly IServerProcessService _processService;
     private readonly ISshService           _sshService;
 
+    private const string BattlegroupBin = "/home/dune/.dune/bin/battlegroup";
+
     public BattlegroupControlService(IServerProcessService processService,
                                      ISshService           sshService)
     {
@@ -212,6 +214,57 @@ public class BattlegroupControlService : IBattlegroupControlService
         await StopAsync(profile);
         await Task.Delay(2_000);
         await StartAsync(profile);
+    }
+
+    // ── Battlegroup update ────────────────────────────────────────────────────
+
+    public async Task UpdateBattlegroupAsync(BattlegroupProfile profile, Action<string> onOutput,
+                                             CancellationToken ct = default)
+    {
+        if (!_sshService.IsConnected)
+            throw new InvalidOperationException(
+                "SSH is not connected. The battlegroup must be running before updating.");
+
+        onOutput("[update] Issuing battlegroup update — this may take several minutes while SteamCMD runs inside the VM…");
+
+        // ExecuteAsync waits for the command to exit and returns combined output.
+        // battlegroup update runs SteamCMD internally, so it can take a few minutes.
+        var result = await _sshService.ExecuteAsync($"{BattlegroupBin} update", ct);
+
+        // Relay any output lines the binary produced
+        foreach (var line in result.Output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            onOutput(line);
+
+        if (!result.Success)
+        {
+            var detail = result.Error.Trim();
+            throw new InvalidOperationException(
+                $"battlegroup update failed (exit {result.ExitCode})" +
+                (string.IsNullOrEmpty(detail) ? "." : $": {detail}"));
+        }
+
+        onOutput("[update] battlegroup update completed successfully.");
+    }
+
+    // ── Experimental swap memory ──────────────────────────────────────────────
+
+    public async Task<(bool Success, string? Error)> EnableExperimentalSwapAsync(
+        BattlegroupProfile profile, CancellationToken ct = default)
+    {
+        if (!_sshService.IsConnected)
+            return (false, "SSH is not connected. Start the VM before enabling swap.");
+
+        var result = await _sshService.ExecuteAsync($"{BattlegroupBin} enable-experimental-swap", ct);
+
+        if (!result.Success)
+        {
+            var detail = result.Error.Trim();
+            return (false, string.IsNullOrEmpty(detail)
+                ? $"Command exited with code {result.ExitCode}."
+                : detail);
+        }
+
+        return (true, null);
     }
 
     // ── UI shortcuts ──────────────────────────────────────────────────────────

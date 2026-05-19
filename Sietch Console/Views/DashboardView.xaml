@@ -26,44 +26,6 @@
                              Visibility="{Binding IsTransitioning, Converter={StaticResource BoolToVisibleConverter}}"
                              Margin="0,0,0,16" />
 
-                <!-- Update available banner -->
-                <Border Background="{StaticResource AccentCyan}"
-                        CornerRadius="{StaticResource CornerSmall}"
-                        Visibility="{Binding HasUpdateAvailable, Converter={StaticResource BoolToVisibleConverter}}"
-                        Padding="16,10"
-                        Margin="0,0,0,16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                   Text="{Binding UpdateBannerText}"
-                                   Foreground="#0B0F14"
-                                   FontFamily="{StaticResource FontUI}"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   FontWeight="SemiBold"
-                                   TextWrapping="Wrap"
-                                   VerticalAlignment="Center" />
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="12,0,0,0">
-                            <Button Command="{Binding CheckForUpdatesCommand}"
-                                    Style="{StaticResource CancelButtonStyle}"
-                                    Padding="10,4"
-                                    Margin="0,0,8,0"
-                                    ToolTip="Re-check Steam for a newer server version"
-                                    AutomationProperties.Name="Re-check for updates">
-                                <TextBlock Text="Re-check" />
-                            </Button>
-                            <Button Command="{Binding RequestUpdateCommand}"
-                                    Style="{StaticResource TealButtonStyle}"
-                                    Padding="10,4"
-                                    ToolTip="Stop the server, apply the update, and restart"
-                                    AutomationProperties.Name="Update server">
-                                <TextBlock Text="Update Now" />
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-                </Border>
 
                 <!-- Error banner — shown when a Hyper-V operation fails -->
                 <Border Background="{StaticResource AccentAmber}"
@@ -215,13 +177,12 @@
                                 <TextBlock Text="Restart" />
                             </Button>
 
-                            <Button Command="{Binding CheckForUpdatesCommand}"
+                            <Button Command="{Binding RequestUpdateCommand}"
                                     Style="{StaticResource GhostButtonStyle}"
                                     Padding="12,8"
-                                    Margin="0,0,8,0"
-                                    ToolTip="Check Steam for a newer server version"
-                                    AutomationProperties.Name="Check for updates">
-                                <TextBlock Text="Check for Updates" />
+                                    ToolTip="Run 'battlegroup update' inside the VM to pull the latest server build"
+                                    AutomationProperties.Name="Update battlegroup">
+                                <TextBlock Text="Update" />
                             </Button>
 
                         </StackPanel>
@@ -300,14 +261,14 @@
                                     Margin="0,0,0,8"
                                     HorizontalAlignment="Stretch"
                                     Padding="12,9"
-                                    ToolTip="Open the battlegroup install directory in Windows Explorer"
+                                    ToolTip="Open the in-VM file browser at port 18888 in your browser"
                                     AutomationProperties.Name="Open file browser">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="File Browser"
                                                Foreground="{StaticResource AccentCyan}"
                                                FontWeight="SemiBold"
                                                Margin="0,0,8,0" />
-                                    <TextBlock Text="— Open install directory"
+                                    <TextBlock Text="— In-VM file browser"
                                                Foreground="{StaticResource TextMuted}" />
                                 </StackPanel>
                             </Button>
@@ -441,7 +402,7 @@
                                            FontSize="12"
                                            Margin="0,0,16,0" />
                                 <TextBlock Grid.Column="1"
-                                           Text="7777–7778 UDP, 27015–27016 UDP"
+                                           Text="7777–7810 UDP, 31982 TCP"
                                            Foreground="{StaticResource TextSecondary}"
                                            FontFamily="{StaticResource FontUI}"
                                            FontSize="12" />
@@ -449,6 +410,64 @@
                         </StackPanel>
                     </Border>
                 </Grid>
+
+                <!-- ══════════════════════════════════════════ -->
+                <!-- Advanced Operations (M29)                 -->
+                <!-- ══════════════════════════════════════════ -->
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="20,16"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource CardTitleStyle}"
+                                   Text="Advanced Operations"
+                                   Margin="0,0,0,4" />
+                        <TextBlock Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"
+                                   Text="Low-level battlegroup controls. These operations run commands directly inside the VM."
+                                   Margin="0,0,0,16" />
+
+                        <!-- Experimental Swap -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                                <TextBlock Foreground="{StaticResource TextPrimary}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           FontWeight="SemiBold"
+                                           Text="Enable Experimental Swap Memory"
+                                           Margin="0,0,0,4" />
+                                <TextBlock Style="{StaticResource MutedTextStyle}"
+                                           TextWrapping="Wrap"
+                                           Text="Allows the VM to use disk swap when RAM is insufficient. Recommended for hosts with less than 20 GB of RAM. The battlegroup must be stopped. Start it again after enabling." />
+                                <TextBlock Text="{Binding SwapStatusMessage}"
+                                           Foreground="{StaticResource AccentCyan}"
+                                           FontFamily="{StaticResource FontUI}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,6,0,0"
+                                           Visibility="{Binding SwapStatusMessage, Converter={StaticResource NullToCollapsedConverter}}" />
+                            </StackPanel>
+
+                            <Button Grid.Column="1"
+                                    Command="{Binding EnableExperimentalSwapCommand}"
+                                    Style="{StaticResource TealButtonStyle}"
+                                    Padding="14,8"
+                                    VerticalAlignment="Top"
+                                    ToolTip="Runs 'battlegroup enable-experimental-swap' inside the VM"
+                                    AutomationProperties.Name="Enable experimental swap memory"
+                                    Content="Enable Swap" />
+                        </Grid>
+
+                        <!-- Loading bar while swap command runs -->
+                        <ProgressBar Style="{StaticResource LoadingBarStyle}"
+                                     Visibility="{Binding IsEnablingSwap, Converter={StaticResource BoolToVisibleConverter}}"
+                                     Margin="0,12,0,0" />
+                    </StackPanel>
+                </Border>
 
                 <!-- ══════════════════════════════════════════ -->
                 <!-- Discord Announcement (#171)               -->
