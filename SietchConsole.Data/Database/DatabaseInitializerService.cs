@@ -88,6 +88,12 @@ public class DatabaseInitializerService
         await AddColumnIfMissingAsync("ApplicationSettings", "DiscordNotifyServerStop",   "INTEGER NOT NULL DEFAULT 1");
         await AddColumnIfMissingAsync("ApplicationSettings", "DiscordNotifyServerCrash",  "INTEGER NOT NULL DEFAULT 1");
 
+        // ── M28: SSH + battlegroup connection (#178) ─────────────────────────────
+        await AddColumnIfMissingAsync("BattlegroupProfiles", "VmSshKeyPath",         "TEXT NULL");
+        await AddColumnIfMissingAsync("BattlegroupProfiles", "VmUsername",           "TEXT NOT NULL DEFAULT 'dune'");
+        await AddColumnIfMissingAsync("BattlegroupProfiles", "VmSshPort",            "INTEGER NOT NULL DEFAULT 22");
+        await AddColumnIfMissingAsync("BattlegroupProfiles", "BattlegroupNamespace", "TEXT NOT NULL DEFAULT 'dune'");
+
         // ── M24: Server metrics (#163, #164) ─────────────────────────────────────
         await CreateTableIfMissingAsync("MetricSnapshots", """
             CREATE TABLE IF NOT EXISTS MetricSnapshots (

@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.IO;
 using System.Management;
 using System.Text;
 using SietchConsole.Core.Exceptions;
@@ -11,15 +10,14 @@ namespace Sietch_Console.Services.Control;
 public class BattlegroupControlService : IBattlegroupControlService
 {
     private readonly IServerProcessService _processService;
+    private readonly ISshService           _sshService;
 
-    public BattlegroupControlService(IServerProcessService processService)
+    public BattlegroupControlService(IServerProcessService processService,
+                                     ISshService           sshService)
     {
         _processService = processService;
+        _sshService     = sshService;
     }
-
-    // Known server process names used as a fallback when no VM name is configured
-    private static readonly string[] ServerProcessNames =
-        ["DedicatedServer", "DuneServer", "BattlegroupServer"];
 
     // Hyper-V Msvm_ComputerSystem EnabledState codes
     private const int VmStateRunning  = 2;
@@ -35,13 +33,13 @@ public class BattlegroupControlService : IBattlegroupControlService
     {
         return Task.Run(() =>
         {
-            // Live process state takes priority over VM/host checks.
-            // IsServerReady becomes true once a "listening on port" line is detected.
+            // Pod monitor state is always most authoritative
             if (_processService.IsRunning)
                 return _processService.IsServerReady
                     ? BattlegroupRuntimeStatus.Running
                     : BattlegroupRuntimeStatus.Starting;
 
+            // Fall back to VM WMI state when pods are not being monitored
             try
             {
                 if (!string.IsNullOrWhiteSpace(profile.VmName))
@@ -50,13 +48,6 @@ public class BattlegroupControlService : IBattlegroupControlService
                     if (vmStatus != BattlegroupRuntimeStatus.Unknown)
                         return vmStatus;
                 }
-
-                // Fallback: look for known server process names on the host
-                bool serverRunning = ServerProcessNames
-                    .Any(n => Process.GetProcessesByName(n).Length > 0);
-                return serverRunning
-                    ? BattlegroupRuntimeStatus.Running
-                    : BattlegroupRuntimeStatus.Offline;
             }
             catch (ManagementException ex) when (ex.ErrorCode == ManagementStatus.AccessDenied)
             {
@@ -68,6 +59,8 @@ public class BattlegroupControlService : IBattlegroupControlService
                 throw new HyperVException(HyperVErrorCode.WmiQueryFailed,
                     $"WMI error: {ex.Message}", ex);
             }
+
+            return BattlegroupRuntimeStatus.Offline;
         });
     }
 
@@ -79,23 +72,18 @@ public class BattlegroupControlService : IBattlegroupControlService
         {
             if (string.IsNullOrWhiteSpace(profile.VmName))
                 return null;
-
             try
             {
-                // Msvm_SummaryInformation exposes ProcessorLoad (0-100 %) and MemoryUsage (MB)
                 using var searcher = new ManagementObjectSearcher(
                     @"root\virtualization\v2",
                     "SELECT ProcessorLoad, MemoryUsage FROM Msvm_SummaryInformation " +
                     $"WHERE ElementName = '{EscapeWql(profile.VmName)}'");
-
                 foreach (ManagementObject obj in searcher.Get())
-                {
-                    var cpu = Convert.ToInt32(obj["ProcessorLoad"]);
-                    var mem = Convert.ToInt64(obj["MemoryUsage"]);
-                    return new VmResourceSnapshot(cpu, mem);
-                }
+                    return new VmResourceSnapshot(
+                        Convert.ToInt32(obj["ProcessorLoad"]),
+                        Convert.ToInt64(obj["MemoryUsage"]));
             }
-            catch { /* VM may be off or Hyper-V not available — return null */ }
+            catch { }
             return null;
         });
     }
@@ -106,15 +94,13 @@ public class BattlegroupControlService : IBattlegroupControlService
     {
         if (string.IsNullOrWhiteSpace(profile.VmName))
             throw new HyperVException(HyperVErrorCode.VmNotFound,
-                "No VM name is configured in the battlegroup profile.");
+                "No VM name is configured in the battleground profile.");
 
-        // VM already exists — nothing to provision
         if (QueryVmState(profile.VmName) != BattlegroupRuntimeStatus.Unknown)
             return;
 
         var vSwitch  = string.IsNullOrWhiteSpace(profile.VirtualSwitchName)
-            ? "Default Switch"
-            : profile.VirtualSwitchName;
+            ? "Default Switch" : profile.VirtualSwitchName;
         var memBytes = profile.MemoryMb * 1024L * 1024L;
         var cpu      = Math.Max(1, profile.CpuCount);
 
@@ -132,10 +118,8 @@ public class BattlegroupControlService : IBattlegroupControlService
         if (exit != 0)
         {
             var code = stderr.Contains("access", StringComparison.OrdinalIgnoreCase)
-                ? HyperVErrorCode.AccessDenied
-                : HyperVErrorCode.ProvisioningFailed;
-            throw new HyperVException(code,
-                $"Failed to create VM '{profile.VmName}': {stderr.Trim()}");
+                ? HyperVErrorCode.AccessDenied : HyperVErrorCode.ProvisioningFailed;
+            throw new HyperVException(code, $"Failed to create VM '{profile.VmName}': {stderr.Trim()}");
         }
     }
 
@@ -143,7 +127,7 @@ public class BattlegroupControlService : IBattlegroupControlService
 
     public Task StartAsync(BattlegroupProfile profile) => Task.Run(async () =>
     {
-        // Start the Hyper-V VM if one is configured.
+        // 1. Ensure the Hyper-V VM is running
         if (!string.IsNullOrWhiteSpace(profile.VmName))
         {
             ProvisionVmIfNeeded(profile);
@@ -152,22 +136,34 @@ public class BattlegroupControlService : IBattlegroupControlService
             {
                 var (exit, _, stderr) = RunPs($"Start-VM -Name '{EscapePs(profile.VmName)}'");
                 if (exit != 0)
-                {
-                    var code = stderr.Contains("access", StringComparison.OrdinalIgnoreCase)
-                        ? HyperVErrorCode.AccessDenied
-                        : HyperVErrorCode.WmiQueryFailed;
-                    throw new HyperVException(code, $"Start-VM failed: {stderr.Trim()}");
-                }
+                    throw new HyperVException(
+                        stderr.Contains("access", StringComparison.OrdinalIgnoreCase)
+                            ? HyperVErrorCode.AccessDenied
+                            : HyperVErrorCode.WmiQueryFailed,
+                        $"Start-VM failed: {stderr.Trim()}");
 
-                // Poll until Running or timeout (90 s)
                 await WaitForVmStateAsync(profile.VmName,
                     BattlegroupRuntimeStatus.Running, TimeSpan.FromSeconds(90));
             }
         }
 
-        // Start the server process on the host from InstallPath.
-        // NOTE: In a future milestone this will use PowerShell Direct to spawn
-        // the process inside the Hyper-V guest when VmName is configured.
+        // 2. Connect SSH to the VM (allow extra time for the guest to finish booting)
+        if (!string.IsNullOrWhiteSpace(profile.VmSshKeyPath) &&
+            !string.IsNullOrWhiteSpace(profile.VmIpAddress))
+        {
+            if (!_sshService.IsConnected)
+            {
+                // Give the guest OS a moment to start sshd after the VM reaches Running
+                await Task.Delay(5_000);
+                await _sshService.ConnectAsync(
+                    profile.VmIpAddress,
+                    profile.VmSshPort,
+                    profile.VmUsername,
+                    profile.VmSshKeyPath);
+            }
+        }
+
+        // 3. Tell the pod monitor to begin tracking pods
         await _processService.StartAsync(profile);
     });
 
@@ -175,28 +171,28 @@ public class BattlegroupControlService : IBattlegroupControlService
 
     public Task StopAsync(BattlegroupProfile profile) => Task.Run(async () =>
     {
-        // Stop the server process first (10 s graceful window, then force-kill).
+        // Stop pod monitoring (and scale down pods via kubectl)
         if (_processService.IsRunning)
-            await _processService.StopAsync(TimeSpan.FromSeconds(10));
+            await _processService.StopAsync(TimeSpan.FromSeconds(30));
 
-        // If there is no VM to shut down, we are done.
-        if (string.IsNullOrWhiteSpace(profile.VmName))
-            return;
+        // Disconnect SSH
+        if (_sshService.IsConnected)
+            await _sshService.DisconnectAsync();
+
+        // Stop the Hyper-V VM
+        if (string.IsNullOrWhiteSpace(profile.VmName)) return;
 
         var current = QueryVmState(profile.VmName);
         if (current is BattlegroupRuntimeStatus.Offline or BattlegroupRuntimeStatus.Unknown)
             return;
 
-        // Request graceful ACPI shutdown (requires Hyper-V integration services in guest)
         RunPs($"Stop-VM -Name '{EscapePs(profile.VmName)}'");
 
-        // Wait up to 30 s for the guest to shut down cleanly
         var stopped = await TryWaitForVmStateAsync(
             profile.VmName, BattlegroupRuntimeStatus.Offline, TimeSpan.FromSeconds(30));
 
         if (!stopped)
         {
-            // Graceful timed out — hard stop
             var (exit, _, stderr) = RunPs($"Stop-VM -Name '{EscapePs(profile.VmName)}' -Force");
             if (exit != 0)
                 throw new HyperVException(HyperVErrorCode.WmiQueryFailed,
@@ -217,15 +213,15 @@ public class BattlegroupControlService : IBattlegroupControlService
 
     public void OpenControlInterface(BattlegroupProfile profile)
     {
-        var url = string.IsNullOrWhiteSpace(profile.LocalIpAddress)
-            ? "http://localhost:8080"
-            : $"http://{profile.LocalIpAddress}:8080";
+        // Opens the Battlegroup Director web interface inside the VM
+        var ip  = profile.VmIpAddress ?? profile.LocalIpAddress ?? "localhost";
+        var url = $"http://{ip}:8080";
         Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
     }
 
     public void OpenFileBrowser(BattlegroupProfile profile)
     {
-        var path = Directory.Exists(profile.InstallPath)
+        var path = System.IO.Directory.Exists(profile.InstallPath)
             ? profile.InstallPath
             : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         Process.Start("explorer.exe", path);
@@ -246,10 +242,8 @@ public class BattlegroupControlService : IBattlegroupControlService
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName         = "powershell.exe",
-                WorkingDirectory = Directory.Exists(profile.InstallPath)
-                    ? profile.InstallPath : null,
-                UseShellExecute  = false,
+                FileName        = "powershell.exe",
+                UseShellExecute = false,
             });
         }
     }
@@ -264,7 +258,6 @@ public class BattlegroupControlService : IBattlegroupControlService
                 @"root\virtualization\v2",
                 "SELECT EnabledState FROM Msvm_ComputerSystem " +
                 $"WHERE Caption = 'Virtual Machine' AND ElementName = '{EscapeWql(vmName)}'");
-
             foreach (ManagementObject obj in searcher.Get())
             {
                 return Convert.ToInt32(obj["EnabledState"]) switch
@@ -280,7 +273,7 @@ public class BattlegroupControlService : IBattlegroupControlService
             }
         }
         catch { }
-        return BattlegroupRuntimeStatus.Unknown; // VM not found or Hyper-V unavailable
+        return BattlegroupRuntimeStatus.Unknown;
     }
 
     private static async Task WaitForVmStateAsync(
@@ -298,14 +291,11 @@ public class BattlegroupControlService : IBattlegroupControlService
         while (DateTime.UtcNow < deadline)
         {
             await Task.Delay(2_000);
-            if (QueryVmState(vmName) == target)
-                return true;
+            if (QueryVmState(vmName) == target) return true;
         }
         return false;
     }
 
-    // Encodes the script as Base64 UTF-16 and passes it via -EncodedCommand,
-    // avoiding all shell-quoting issues with VM names, paths, and passwords.
     private static (int exitCode, string stdout, string stderr) RunPs(string script)
     {
         var encoded = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));

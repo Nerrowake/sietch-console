@@ -10,13 +10,17 @@ namespace Sietch_Console.Services.Networking;
 
 public class NetworkingService : INetworkingService
 {
-    // #83 – Static port list derived from game port
+    // #183 – Port list matching Funcom's official self-hosted server documentation.
+    // The gamePort parameter is retained for API compatibility but Funcom's architecture
+    // uses a fixed range (7777–7810) rather than a single configurable port.
     public IReadOnlyList<BattlegroupPort> GetRequiredPorts(int gamePort = 7777) =>
     [
-        new("Game Traffic",  gamePort,     "UDP", "Primary port players use to connect to the battlegroup."),
-        new("Server Beacon", gamePort + 1, "UDP", "Used by Steam and the server browser to advertise the server."),
-        new("Steam Query",   27015,        "UDP", "Allows the Steam server browser to discover and display the server."),
-        new("Steam Relay",   27016,        "UDP", "Used by Steam networking for relay and lobby services."),
+        new("Game Servers", 7777, "UDP",
+            "Port range used by all game server pods in the battlegroup. " +
+            "Forward the full range 7777–7810 UDP in your router.",
+            EndPort: 7810),
+        new("RabbitMQ", 31982, "TCP",
+            "Message queue port used by the Battlegroup Director and server pods for internal communication."),
     ];
 
     // #84, #85 – Detect host LAN IP and Hyper-V VM IP

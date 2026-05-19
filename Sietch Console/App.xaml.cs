@@ -74,7 +74,9 @@ public partial class App : Application
         services.AddSingleton<ISteamCmdService, SteamCmdService>();
         services.AddSingleton<IServerPackageInstaller, ServerPackageInstaller>();
         services.AddSingleton<InstallationOrchestrator>();
-        services.AddSingleton<IServerProcessService, ServerProcessService>();
+        // ── M28: SSH transport + pod-based management (#177, #179, #180) ────────
+        services.AddSingleton<ISshService, SshService>();
+        services.AddSingleton<IServerProcessService, PodMonitorService>();
         services.AddSingleton<IBattlegroupControlService, BattlegroupControlService>();
         services.AddSingleton<IIniParserService, IniParserService>();
         services.AddSingleton<IConfigurationService, ConfigurationService>();

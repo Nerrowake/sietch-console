@@ -13,7 +13,8 @@ public class SystemReadinessService : ISystemReadinessService
             WindowsVersionCheck.Run(),
             HyperVCheck.Run(),
             VirtualizationCheck.Run(),
-            MemoryCheck.Run(),
+            Avx2Check.Run(),          // #182 — required by Dune: Awakening dedicated server
+            MemoryCheck.Run(),        // #182 — updated to 20 GB minimum
             DiskSpaceCheck.Run(),
             NetworkCheck.Run(),
             FirewallCheck.Run(),
