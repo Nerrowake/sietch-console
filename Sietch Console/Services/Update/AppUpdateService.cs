@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -17,7 +18,7 @@ namespace Sietch_Console.Services.Update;
 public class AppUpdateService : IAppUpdateService, IDisposable
 {
     private const string ReleasesApiUrl =
-        "https://api.github.com/repos/michaelstoffer/sietch-console/releases/latest";
+        "https://api.github.com/repos/Nerrowake/sietch-console/releases";
 
     private const string InstallerAssetSuffix = "Setup.exe";
 
@@ -37,10 +38,15 @@ public class AppUpdateService : IAppUpdateService, IDisposable
     {
         try
         {
-            var release = await _http.GetFromJsonAsync<GitHubRelease>(ReleasesApiUrl, ct);
-            if (release is null) return null;
+            var releases = await _http.GetFromJsonAsync<List<GitHubRelease>>(ReleasesApiUrl, ct);
+            if (releases is null) return null;
 
-            if (!IsNewerVersion(release.TagName)) return null;
+            var release = releases
+                .Where(r => !r.Draft)
+                .Where(r => IsNewerVersion(r.TagName))
+                .FirstOrDefault();
+
+            if (release is null) return null;
 
             var installerAsset = release.Assets
                 .FirstOrDefault(a => a.Name.EndsWith(InstallerAssetSuffix,
@@ -130,38 +136,68 @@ public class AppUpdateService : IAppUpdateService, IDisposable
 
         if (string.IsNullOrEmpty(current)) return false;
 
-        // Strip "v" prefix and pre-release suffix for numeric comparison
-        var latestCore  = StripPreRelease(tagName.TrimStart('v'));
-        var currentCore = StripPreRelease(current.TrimStart('v'));
+        var latestSemantic = ParseSemanticVersion(tagName.TrimStart('v'));
+        var runningSemantic = ParseSemanticVersion(current.TrimStart('v'));
 
-        if (!Version.TryParse(latestCore,  out var latest))  return false;
-        if (!Version.TryParse(currentCore, out var running)) return false;
+        return latestSemantic is not null
+            && runningSemantic is not null
+            && CompareSemanticVersions(latestSemantic, runningSemantic) > 0;
 
-        if (latest > running) return true;
+    }
 
-        // Same numeric part — compare pre-release labels as strings (null/empty = stable > alpha/beta)
-        if (latest == running)
+    private sealed record SemanticVersion(Version Core, IReadOnlyList<string> PreReleaseParts);
+
+    private static SemanticVersion? ParseSemanticVersion(string value)
+    {
+        var buildStart = value.IndexOf('+');
+        if (buildStart >= 0)
+            value = value[..buildStart];
+
+        var dash = value.IndexOf('-');
+        var coreText = dash < 0 ? value : value[..dash];
+        var preReleaseText = dash < 0 ? string.Empty : value[(dash + 1)..];
+
+        if (!Version.TryParse(coreText, out var core))
+            return null;
+
+        var preReleaseParts = string.IsNullOrWhiteSpace(preReleaseText)
+            ? []
+            : preReleaseText.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        return new SemanticVersion(core, preReleaseParts);
+    }
+
+    private static int CompareSemanticVersions(SemanticVersion left, SemanticVersion right)
+    {
+        var coreComparison = left.Core.CompareTo(right.Core);
+        if (coreComparison != 0)
+            return coreComparison;
+
+        if (left.PreReleaseParts.Count == 0 && right.PreReleaseParts.Count == 0) return 0;
+        if (left.PreReleaseParts.Count == 0) return 1;
+        if (right.PreReleaseParts.Count == 0) return -1;
+
+        var sharedLength = Math.Min(left.PreReleaseParts.Count, right.PreReleaseParts.Count);
+        for (var i = 0; i < sharedLength; i++)
         {
-            var latestPre  = PreReleasePart(tagName.TrimStart('v'));
-            var currentPre = PreReleasePart(current.TrimStart('v'));
+            var leftPart = left.PreReleaseParts[i];
+            var rightPart = right.PreReleaseParts[i];
+            var leftIsNumber = int.TryParse(leftPart, NumberStyles.None, CultureInfo.InvariantCulture, out var leftNumber);
+            var rightIsNumber = int.TryParse(rightPart, NumberStyles.None, CultureInfo.InvariantCulture, out var rightNumber);
 
-            // If the latest has no pre-release tag and current does, latest is newer (stable > pre-release)
-            if (string.IsNullOrEmpty(latestPre) && !string.IsNullOrEmpty(currentPre)) return true;
+            var partComparison = (leftIsNumber, rightIsNumber) switch
+            {
+                (true, true) => leftNumber.CompareTo(rightNumber),
+                (true, false) => -1,
+                (false, true) => 1,
+                _ => string.Compare(leftPart, rightPart, StringComparison.OrdinalIgnoreCase),
+            };
+
+            if (partComparison != 0)
+                return partComparison;
         }
 
-        return false;
-    }
-
-    private static string StripPreRelease(string version)
-    {
-        var dash = version.IndexOf('-');
-        return dash < 0 ? version : version[..dash];
-    }
-
-    private static string PreReleasePart(string version)
-    {
-        var dash = version.IndexOf('-');
-        return dash < 0 ? string.Empty : version[(dash + 1)..];
+        return left.PreReleaseParts.Count.CompareTo(right.PreReleaseParts.Count);
     }
 
     // ── GitHub API DTOs ───────────────────────────────────────────────────────
@@ -172,6 +208,7 @@ public class AppUpdateService : IAppUpdateService, IDisposable
         [JsonPropertyName("name")]     public string  Name     { get; set; } = string.Empty;
         [JsonPropertyName("html_url")] public string  HtmlUrl  { get; set; } = string.Empty;
         [JsonPropertyName("body")]     public string? Body     { get; set; }
+        [JsonPropertyName("draft")]    public bool    Draft    { get; set; }
         [JsonPropertyName("assets")]   public List<GitHubAsset> Assets { get; set; } = [];
     }
 

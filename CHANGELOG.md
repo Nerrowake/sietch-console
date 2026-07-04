@@ -9,6 +9,18 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.0-alpha.3] - 2026-07-04
+
+### Added
+
+- Added a manual **Check Updates** action in the application header that reports whether Sietch Console is up to date or has an available installer update.
+
+### Fixed
+
+- Fixed in-app update detection for alpha releases by checking all GitHub Releases, including prereleases, instead of only GitHub's latest stable release endpoint.
+- Fixed update version comparison so prerelease increments such as `0.6.0-alpha.2` to `0.6.0-alpha.3` are detected correctly.
+- Pointed the updater at the active `Nerrowake/sietch-console` release feed and ignored draft releases.
+
 ## [0.6.0-alpha.2] - 2026-07-04
 
 ### Fixed

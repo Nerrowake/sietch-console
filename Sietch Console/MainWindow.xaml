@@ -43,12 +43,29 @@
                                 VerticalAlignment="Center"
                                 AutomationProperties.Name="Sietch Console" />
 
-                <TextBlock Grid.Column="2"
-                           Text="{Binding AppVersion}"
-                           Foreground="{StaticResource TextMuted}"
-                           FontFamily="{StaticResource FontUI}"
-                           FontSize="{StaticResource FontSizeSmall}"
-                           VerticalAlignment="Center" />
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="{Binding UpdateStatusMessage}"
+                               Foreground="{StaticResource TextMuted}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeSmall}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"
+                               Visibility="{Binding UpdateStatusMessage, Converter={StaticResource NullToCollapsedConverter}}" />
+                    <Button Command="{Binding CheckForUpdatesCommand}"
+                            Style="{StaticResource InfoButtonStyle}"
+                            Padding="10,4"
+                            Margin="0,0,10,0"
+                            IsEnabled="{Binding IsCheckingForUpdate, Converter={StaticResource BoolInverseConverter}}">
+                        <TextBlock Text="Check Updates" />
+                    </Button>
+                    <TextBlock Text="{Binding AppVersion}"
+                               Foreground="{StaticResource TextMuted}"
+                               FontFamily="{StaticResource FontUI}"
+                               FontSize="{StaticResource FontSizeSmall}"
+                               VerticalAlignment="Center" />
+                </StackPanel>
             </Grid>
         </Border>
 

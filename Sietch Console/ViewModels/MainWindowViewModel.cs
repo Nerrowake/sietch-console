@@ -71,9 +71,15 @@ public partial class MainWindowViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowUpdateBanner))]
     private AppUpdateInfo? _pendingUpdate;
 
-    [ObservableProperty] private bool   _isDownloadingUpdate;
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CheckForUpdatesCommand))]
+    private bool _isCheckingForUpdate;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CheckForUpdatesCommand))]
+    private bool   _isDownloadingUpdate;
     [ObservableProperty] private double _updateDownloadProgress;
-    [ObservableProperty] private string _updateStatusMessage = string.Empty;
+    [ObservableProperty] private string? _updateStatusMessage;
 
     public bool ShowUpdateBanner => PendingUpdate is not null;
 
@@ -122,21 +128,47 @@ public partial class MainWindowViewModel : ObservableObject
         _activeProfileService.ProfileChanged += OnActiveProfileChanged;
 
         // #145 – Check for updates in the background after startup
-        _ = Task.Run(CheckForAppUpdateAsync);
+        _ = CheckForAppUpdateAsync(showUpToDateMessage: false);
     }
 
     // ── App update methods (#145–#148) ────────────────────────────────────────
 
-    private async Task CheckForAppUpdateAsync()
+    [RelayCommand(CanExecute = nameof(CanCheckForUpdates))]
+    private async Task CheckForUpdatesAsync()
     {
-        var info = await _appUpdateService.CheckForUpdateAsync();
-        if (info is not null)
+        await CheckForAppUpdateAsync(showUpToDateMessage: true);
+    }
+
+    private bool CanCheckForUpdates() => !IsCheckingForUpdate && !IsDownloadingUpdate;
+
+    private async Task CheckForAppUpdateAsync(bool showUpToDateMessage)
+    {
+        IsCheckingForUpdate = true;
+        if (showUpToDateMessage)
+            UpdateStatusMessage = "Checking for updates...";
+
+        try
         {
-            _ = Application.Current.Dispatcher.InvokeAsync(() =>
+            var info = await _appUpdateService.CheckForUpdateAsync();
+            if (info is not null)
             {
                 PendingUpdate       = info;
                 UpdateStatusMessage = $"{info.TagName} is available.";
-            });
+            }
+            else if (showUpToDateMessage)
+            {
+                PendingUpdate       = null;
+                UpdateStatusMessage = "Sietch Console is up to date.";
+            }
+        }
+        catch (Exception ex)
+        {
+            if (showUpToDateMessage)
+                UpdateStatusMessage = $"Update check failed: {ex.Message}";
+        }
+        finally
+        {
+            IsCheckingForUpdate = false;
         }
     }
 
@@ -170,7 +202,7 @@ public partial class MainWindowViewModel : ObservableObject
     private void DismissUpdate()
     {
         PendingUpdate       = null;
-        UpdateStatusMessage = string.Empty;
+        UpdateStatusMessage = null;
     }
 
     partial void OnSelectedNavigationItemChanged(NavigationItem? value)
