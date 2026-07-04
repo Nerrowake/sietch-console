@@ -16,7 +16,6 @@ public partial class SetupWizardViewModel : ObservableObject
     private readonly InstallationOrchestrator _orchestrator;
     private readonly List<ObservableObject> _steps;
     private SetupWizardState _state = new();
-    private CancellationTokenSource? _installCts;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentStep))]
@@ -124,7 +123,7 @@ public partial class SetupWizardViewModel : ObservableObject
         SyncStateFromCurrentStep();
         _state.CurrentStepIndex = CurrentStepIndex + 1;
 
-        if (IsLastStep)
+        if (CurrentStep is BattlegroupConfigStepViewModel)
             PopulateReviewStep();
 
         using var scope = _scopeFactory.CreateScope();
@@ -137,8 +136,8 @@ public partial class SetupWizardViewModel : ObservableObject
         // Fire off installation when entering the Progress step
         if (IsOnProgressStep && _steps[^1] is ProgressStepViewModel progressVm)
         {
-            _installCts = new CancellationTokenSource();
-            _ = _orchestrator.RunAsync(_state, progressVm, _installCts.Token);
+            var installToken = progressVm.Begin();
+            _ = _orchestrator.RunAsync(_state, progressVm, installToken);
         }
     }
 

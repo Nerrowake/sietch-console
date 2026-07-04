@@ -264,6 +264,14 @@
                                      FontSize="{StaticResource FontSizeBody}" />
                         </Border>
 
+                        <TextBlock Text="{Binding ProfileStatusMessage}"
+                                   Foreground="{StaticResource AccentAmber}"
+                                   FontFamily="{StaticResource FontUI}"
+                                   FontSize="{StaticResource FontSizeSmall}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,14"
+                                   Visibility="{Binding ProfileStatusMessage, Converter={StaticResource NullToCollapsedConverter}}" />
+
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Command="{Binding CloseNewProfileOverlayCommand}"
                                     Style="{StaticResource CancelButtonStyle}"
@@ -273,7 +281,8 @@
                             </Button>
                             <Button Command="{Binding CreateProfileCommand}"
                                     Style="{StaticResource TealButtonStyle}"
-                                    Padding="16,8">
+                                    Padding="16,8"
+                                    IsEnabled="{Binding CanCreateProfile}">
                                 <TextBlock Text="Create" />
                             </Button>
                         </StackPanel>

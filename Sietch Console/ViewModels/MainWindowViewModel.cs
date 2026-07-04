@@ -45,14 +45,17 @@ public partial class MainWindowViewModel : ObservableObject
     // New-profile creation overlay
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCreateProfile))]
+    [NotifyCanExecuteChangedFor(nameof(CreateProfileCommand))]
     private bool _showNewProfileOverlay;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCreateProfile))]
+    [NotifyCanExecuteChangedFor(nameof(CreateProfileCommand))]
     private string _newProfileName = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCreateProfile))]
+    [NotifyCanExecuteChangedFor(nameof(CreateProfileCommand))]
     private string _newProfileInstallPath = string.Empty;
 
     [ObservableProperty] private bool   _isProfileSwitching;

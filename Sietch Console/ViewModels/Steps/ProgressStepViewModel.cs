@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace Sietch_Console.ViewModels.Steps;
 
@@ -13,7 +14,9 @@ public partial class ProgressStepViewModel : ObservableObject
 
     [ObservableProperty] private double _progressPercent;
     [ObservableProperty] private string _currentOperation = "Waiting to start…";
-    [ObservableProperty] private bool   _isRunning;
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CancelCommand))]
+    private bool   _isRunning;
     [ObservableProperty] private bool   _isComplete;
     [ObservableProperty] private bool   _hasFailed;
 
@@ -57,6 +60,13 @@ public partial class ProgressStepViewModel : ObservableObject
 
     public void AppendLog(string line)
     {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is not null && !dispatcher.CheckAccess())
+        {
+            _ = dispatcher.InvokeAsync(() => AppendLog(line));
+            return;
+        }
+
         LogLines.Add(line);
         OnPropertyChanged(nameof(CanProceed));
     }

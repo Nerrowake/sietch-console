@@ -52,18 +52,12 @@
                         <TextBlock Text="Cancel" />
                     </Button>
                 </Grid>
-                <Border Background="{StaticResource DeepBackground}"
-                        CornerRadius="{StaticResource CornerSmall}"
-                        Height="8">
-                    <Border Background="{StaticResource AccentPrimary}"
-                            CornerRadius="{StaticResource CornerSmall}"
-                            HorizontalAlignment="Left">
-                        <Border.Width>
-                            <Binding Path="ProgressPercent"
-                                     Converter="{StaticResource BoolToVisibleConverter}" />
-                        </Border.Width>
-                    </Border>
-                </Border>
+                <ProgressBar Value="{Binding ProgressPercent}"
+                             Minimum="0"
+                             Maximum="100"
+                             Height="8"
+                             Background="{StaticResource DeepBackground}"
+                             Foreground="{StaticResource AccentPrimary}" />
             </StackPanel>
         </Border>
 

@@ -37,6 +37,8 @@ public class InstallationOrchestrator
         progress.IsRunning    = true;
         progress.IsComplete   = false;
         progress.HasFailed    = false;
+        progress.IsCancelled  = false;
+        progress.IsTimedOut   = false;
         progress.ProgressPercent = 0;
 
         try
@@ -109,8 +111,16 @@ public class InstallationOrchestrator
         }
         catch (OperationCanceledException)
         {
-            progress.CurrentOperation = "Setup cancelled.";
-            progress.AppendLog("[cancelled] The installation was cancelled.");
+            if (progress.IsCancelled)
+            {
+                progress.CurrentOperation = "Setup cancelled.";
+                progress.AppendLog("[cancelled] The installation was cancelled.");
+            }
+            else
+            {
+                progress.MarkTimedOut();
+            }
+
             progress.HasFailed = true;
         }
         catch (Exception ex)

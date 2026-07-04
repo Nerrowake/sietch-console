@@ -9,6 +9,13 @@ Sietch Console uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.0-alpha.2] - 2026-07-04
+
+### Fixed
+
+- Fixed the setup wizard's final installation step so it starts through the progress-step lifecycle, updates install logs safely on the WPF UI thread, and shows progress with a real progress bar.
+- Fixed new battlegroup creation from the sidebar so the Create action enables as profile name and install path fields are filled in, with creation errors visible in the overlay.
+
 ### Added
 
 - **`battlegroup backup` command (#199)** — `IBattlegroupControlService.BackupBattlegroupAsync` runs `battlegroup backup` inside the VM over SSH; output lines are streamed back to the Backups view log panel; the resulting VM-side archive path is parsed from the command output and stored in a new `BackupRecord.VmArchivePath` column; the backup appears in the history list with a **VM** badge
